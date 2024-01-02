@@ -136,7 +136,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     PF11     ------> ADC1_INP2
     PF12     ------> ADC1_INP6
     */
-    GPIO_InitStruct.Pin = ADC_16BIT_Pin|GPIO_PIN_4|GPIO_PIN_5;
+    GPIO_InitStruct.Pin = ADC_16BIT_Pin| GPIO_PIN_1|GPIO_PIN_4|GPIO_PIN_5;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);

@@ -71,10 +71,10 @@ unordered_map<FDCAN_HandleTypeDef*, FDCAN::Instance*> FDCAN::handle_to_fdcan = {
 
 SPI::Instance SPI::instance3 = { .SCK = &PC10, .MOSI = &PC12, .MISO = &PC11, .SS = &PD0,
                                  .hspi = &hspi3, .instance = SPI3,
-								 /*.hdma_tx = DMA::Stream::DMA1Stream5,
+								 .hdma_tx = DMA::Stream::DMA1Stream5,
 								 .hdma_rx = DMA::Stream::DMA1Stream6,
 								 .baud_rate_prescaler = SPI_BAUDRATEPRESCALER_256,
-								 .mode = SPI_MODE_SLAVE,*/
+								 .mode = SPI_MODE_SLAVE,
                                };
 
 SPI::Peripheral SPI::spi3 = SPI::Peripheral::peripheral3;
@@ -136,6 +136,7 @@ TimerPeripheral timer1(&htim1, {ADVANCED}, "TIM 1");
 TimerPeripheral timer2(&htim2, {BASE}, "TIM 2");
 TimerPeripheral timer3(&htim3, {ADVANCED}, "TIM 3");
 TimerPeripheral timer4(&htim4, {ADVANCED}, "TIM 4");
+TimerPeripheral timer8(&htim8, {ADVANCED}, "TIM 8");
 TimerPeripheral timer12(&htim12, {ADVANCED}, "TIM 12");
 TimerPeripheral timer16(&htim16, {BASE}, "TIM 16");
 TimerPeripheral timer17(&htim17, {BASE}, "TIM 17");
@@ -166,21 +167,34 @@ vector<reference_wrapper<TimerPeripheral>> TimerPeripheral::timers = {
 #define PHASED TimerPeripheral::PWM_MODE::PHASED
 
 PWMmap TimerPeripheral::available_pwm  = {
+	{PB4, {timer3, {TIM_CHANNEL_1, NORMAL}}},
+	{PB5, {timer3, {TIM_CHANNEL_2, NORMAL}}},
+	{PB10, {timer2, {TIM_CHANNEL_3, NORMAL}}},
+	{PB11, {timer2, {TIM_CHANNEL_4, NORMAL}}},
 	{PB14, {timer12, {TIM_CHANNEL_1, NORMAL}}},
 	{PB15, {timer12, {TIM_CHANNEL_2, NORMAL}}},
-	{PB4, {timer3, {TIM_CHANNEL_1, PHASED}}},
-	{PB5, {timer3, {TIM_CHANNEL_2, NORMAL}}},
+
+	{PC6, {timer8, {TIM_CHANNEL_1, NORMAL}}},
+	{PC7, {timer8, {TIM_CHANNEL_2, NORMAL}}},
 	{PC8, {timer3, {TIM_CHANNEL_3, NORMAL}}},
+	{PC9, {timer3, {TIM_CHANNEL_4, NORMAL}}},
+
 	{PD12, {timer4, {TIM_CHANNEL_1, NORMAL}}},
 	{PD13, {timer4, {TIM_CHANNEL_2, NORMAL}}},
+	{PD14, {timer4, {TIM_CHANNEL_3, NORMAL}}},
 	{PD15, {timer4, {TIM_CHANNEL_4, NORMAL}}},
-	{PE14, {timer1, {TIM_CHANNEL_4, PHASED}}},
+
+	{PE5, {timer15, {TIM_CHANNEL_1, NORMAL}}},
 	{PE6, {timer15, {TIM_CHANNEL_2, NORMAL}}},
+	{PE9, {timer1, {TIM_CHANNEL_1, NORMAL}}},
+	{PE11, {timer1, {TIM_CHANNEL_2, NORMAL}}},
+	{PE13, {timer1, {TIM_CHANNEL_3, NORMAL}}},
+	{PE14, {timer1, {TIM_CHANNEL_4, NORMAL}}},
+
 	{PF1, {timer23, {TIM_CHANNEL_2, NORMAL}}},
 	{PF2, {timer23, {TIM_CHANNEL_3, NORMAL}}},
 	{PF3, {timer23, {TIM_CHANNEL_4, NORMAL}}},
-	{PE5, {timer15, {TIM_CHANNEL_1, NORMAL}}},
-	{PE11, {timer1, {TIM_CHANNEL_2, NORMAL}}},
+
 };
 
 DualPWMmap TimerPeripheral::available_dual_pwms = {
@@ -235,27 +249,37 @@ ADC::Peripheral ADC::peripherals[3] = {
 };
 
 map<Pin, ADC::Instance> ADC::available_instances = {
-		{PF11, Instance(&peripherals[0], ADC_CHANNEL_2)},
-		{PF12, Instance(&peripherals[0], ADC_CHANNEL_6)},
-		{PF13, Instance(&peripherals[1], ADC_CHANNEL_2)},
-		{PF14, Instance(&peripherals[1], ADC_CHANNEL_6)},
+		{PA0, Instance(&peripherals[0], ADC_CHANNEL_16)},
+		{PA1, Instance(&peripherals[0], ADC_CHANNEL_17)},
+		{PA2, Instance(&peripherals[0], ADC_CHANNEL_14)},
+		{PA3, Instance(&peripherals[0], ADC_CHANNEL_15)},
+		{PA4, Instance(&peripherals[0], ADC_CHANNEL_18)},
+		{PA5, Instance(&peripherals[0], ADC_CHANNEL_19)},
+		{PA6, Instance(&peripherals[0], ADC_CHANNEL_3)},
+		{PA7, Instance(&peripherals[0], ADC_CHANNEL_7)},
+
+		{PB0, Instance(&peripherals[0], ADC_CHANNEL_9)},
+		{PB1, Instance(&peripherals[0], ADC_CHANNEL_5)},
+
+		{PC0, Instance(&peripherals[0], ADC_CHANNEL_10)},
+		{PC1, Instance(&peripherals[0], ADC_CHANNEL_11)},
+		{PC2, Instance(&peripherals[2], ADC_CHANNEL_0)},
+		{PC3, Instance(&peripherals[2], ADC_CHANNEL_1)},
+		{PC4, Instance(&peripherals[0], ADC_CHANNEL_4)},
+		{PC5, Instance(&peripherals[0], ADC_CHANNEL_8)},
+
+		{PF3, Instance(&peripherals[2], ADC_CHANNEL_5)},
+		{PF4, Instance(&peripherals[2], ADC_CHANNEL_9)},
 		{PF5, Instance(&peripherals[2], ADC_CHANNEL_4)},
 		{PF6, Instance(&peripherals[2], ADC_CHANNEL_8)},
 		{PF7, Instance(&peripherals[2], ADC_CHANNEL_3)},
 		{PF8, Instance(&peripherals[2], ADC_CHANNEL_7)},
 		{PF9, Instance(&peripherals[2], ADC_CHANNEL_2)},
 		{PF10, Instance(&peripherals[2], ADC_CHANNEL_6)},
-		{PC2, Instance(&peripherals[2], ADC_CHANNEL_0)},
-		{PC3, Instance(&peripherals[2], ADC_CHANNEL_1)},
-		{PF10, Instance(&peripherals[2], ADC_CHANNEL_6)},
-		{PC0, Instance(&peripherals[0], ADC_CHANNEL_10)},
-		{PA0, Instance(&peripherals[0], ADC_CHANNEL_16)},
-		{PA3, Instance(&peripherals[0], ADC_CHANNEL_15)},
-		{PA4, Instance(&peripherals[0], ADC_CHANNEL_18)},
-		{PA5, Instance(&peripherals[0], ADC_CHANNEL_19)},
-		{PA6, Instance(&peripherals[0], ADC_CHANNEL_3)},
-		{PB0, Instance(&peripherals[0], ADC_CHANNEL_9)},
-		{PB1, Instance(&peripherals[0], ADC_CHANNEL_5)}
+		{PF11, Instance(&peripherals[0], ADC_CHANNEL_2)},
+		{PF12, Instance(&peripherals[0], ADC_CHANNEL_6)},
+		{PF13, Instance(&peripherals[1], ADC_CHANNEL_2)},
+		{PF14, Instance(&peripherals[1], ADC_CHANNEL_6)},
 };
 
 uint32_t ADC::ranks[16] = {
@@ -319,4 +343,3 @@ MultiplierAccelerator::FMACInstance MultiplierAccelerator::Instance = {
 	.hfmac = &hfmac, 
 	.dma_preload = DMA::Stream::DMA2Stream0, .dma_read = DMA::Stream::DMA2Stream1, .dma_write = DMA::Stream::DMA2Stream2,};
 #endif
-
