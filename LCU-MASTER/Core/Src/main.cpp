@@ -4,12 +4,14 @@
 #include "ST-LIB.hpp"
 #include "Runes/Runes.hpp"
 
+#include "LCU_MASTER.hpp"
+
 int main(void)
 {
-	STLIB::start();
+	LCU lcu_master;
 
 	while(1) {
-		STLIB::update();
+		lcu_master.update();
 	}
 }
 
