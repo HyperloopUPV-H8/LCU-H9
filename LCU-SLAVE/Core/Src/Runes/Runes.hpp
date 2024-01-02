@@ -132,7 +132,7 @@ map<pair<Pin, Pin>, TimerPeripheral*> Encoder::pin_timer_map = {
 #define BASE TimerPeripheral::TIM_TYPE::BASE
 #define ADVANCED TimerPeripheral::TIM_TYPE::ADVANCED
 
-TimerPeripheral timer1(&htim1, {ADVANCED}, "TIM 1");
+TimerPeripheral TimerPeripheral timer1(&htim1, {ADVANCED}, "TIM 1");
 TimerPeripheral timer2(&htim2, {BASE}, "TIM 2");
 TimerPeripheral timer3(&htim3, {ADVANCED}, "TIM 3");
 TimerPeripheral timer4(&htim4, {ADVANCED}, "TIM 4");
@@ -142,12 +142,12 @@ TimerPeripheral timer16(&htim16, {BASE}, "TIM 16");
 TimerPeripheral timer17(&htim17, {BASE}, "TIM 17");
 TimerPeripheral timer15(&htim15, {ADVANCED}, "TIM 15");
 TimerPeripheral timer23(&htim23, {BASE, 275, UINT32_MAX - 1}, "TIM 23");
-
 vector<reference_wrapper<TimerPeripheral>> TimerPeripheral::timers = {
 		timer1,
 		timer2,
 		timer3,
 		timer4,
+		timer8,
 		timer12,
 		timer15,
 		timer16,
@@ -190,10 +190,6 @@ PWMmap TimerPeripheral::available_pwm  = {
 	{PE11, {timer1, {TIM_CHANNEL_2, NORMAL}}},
 	{PE13, {timer1, {TIM_CHANNEL_3, NORMAL}}},
 	{PE14, {timer1, {TIM_CHANNEL_4, NORMAL}}},
-
-	{PF1, {timer23, {TIM_CHANNEL_2, NORMAL}}},
-	{PF2, {timer23, {TIM_CHANNEL_3, NORMAL}}},
-	{PF3, {timer23, {TIM_CHANNEL_4, NORMAL}}},
 
 };
 

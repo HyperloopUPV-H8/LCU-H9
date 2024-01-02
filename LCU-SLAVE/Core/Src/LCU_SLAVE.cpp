@@ -15,7 +15,9 @@ LCU::LCU(){
 	STLIB::start();
 
 	communication.start();
-	ldu_array[0].start();
+	for(uint8_t i = 0; i < LDU_COUNT; i++){
+		ldu_array[i].start();
+	}
 }
 
 void LCU::update(){
@@ -38,11 +40,6 @@ void LCU::update(){
 		ldu_array[i].change_pwm2_freq(* ((uint32_t*) &packet_pointer->master_data[TEST_PWM_PACKET_FREQ_BYTE]));
 
 		uint16_t value = ldu_array[i].get_vbat_value();
-		if(value > 8000){
-			SPIPacket::SPIPacketsByID[TEST_PWM_1_PACKET_ID+i*2]->slave_data[2]++;
-		}else{
-			SPIPacket::SPIPacketsByID[TEST_PWM_1_PACKET_ID+i*2]->slave_data[2]--;
-		}
 		ldu_array[i].get_shunt_value();
 	}
 }
