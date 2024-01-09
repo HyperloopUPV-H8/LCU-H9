@@ -15,7 +15,7 @@ LCU::LCU(){
 	STLIB::start();
 
 	communication.start();
-	for(uint8_t i = 0; i < LDU_COUNT; i++){
+	for(uint8_t i = 0; i < CommonData::LDU_COUNT; i++){
 		ldu_array[i].start();
 	}
 }
@@ -27,17 +27,14 @@ void LCU::update(){
 
 
 	SPIPacket  *packet_pointer;
-	for(uint8_t i = 0; i < LDU_COUNT; i++){
-		packet_pointer = SPIPacket::SPIPacketsByID[TEST_PWM_1_PACKET_ID+i*2];
+	for(uint8_t i = 0; i < CommonData::LDU_COUNT; i++){
+		packet_pointer = SPIPacket::SPIPacketsByID[CommonData::TEST_PWM_1_PACKET_ID+i*2];
 
-		ldu_array[i].change_pwm1_duty(std::bit_cast<float>(* ((uint32_t*) &packet_pointer->master_data[TEST_PWM_PACKET_DUTY_BYTE])));
-		ldu_array[i].change_pwm1_freq(* ((uint32_t*) &packet_pointer->master_data[TEST_PWM_PACKET_FREQ_BYTE]));
+		ldu_array[i].change_pwm1_duty(std::bit_cast<float>(* ((uint32_t*) &packet_pointer->master_data[CommonData::TEST_PWM_PACKET_DUTY_BYTE])));
 
+		packet_pointer = SPIPacket::SPIPacketsByID[CommonData::TEST_PWM_1_PACKET_ID+1+i*2];
 
-		packet_pointer = SPIPacket::SPIPacketsByID[TEST_PWM_1_PACKET_ID+1+i*2];
-
-		ldu_array[i].change_pwm2_duty(std::bit_cast<float>(* ((uint32_t*) &packet_pointer->master_data[TEST_PWM_PACKET_DUTY_BYTE])));
-		ldu_array[i].change_pwm2_freq(* ((uint32_t*) &packet_pointer->master_data[TEST_PWM_PACKET_FREQ_BYTE]));
+		ldu_array[i].change_pwm2_duty(std::bit_cast<float>(* ((uint32_t*) &packet_pointer->master_data[CommonData::TEST_PWM_PACKET_DUTY_BYTE])));
 
 		uint16_t value = ldu_array[i].get_vbat_value();
 		ldu_array[i].get_shunt_value();

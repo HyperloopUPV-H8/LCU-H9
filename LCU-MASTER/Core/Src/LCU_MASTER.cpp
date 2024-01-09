@@ -7,4 +7,5 @@ LCU::LCU(){
 
 void LCU::update(){
 	STLIB::update();
+	SPI::packet_update();
 }

@@ -12,6 +12,7 @@ int main(void)
 
 	while(1) {
 		lcu_master.update();
+		lcu_master.communication.send_pwm_data(0, 50);
 	}
 }
 
