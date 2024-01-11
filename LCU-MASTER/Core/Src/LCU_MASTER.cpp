@@ -1,8 +1,9 @@
 #include "LCU_MASTER.hpp"
 
 LCU::LCU(){
+	Communication::init();
 	STLIB::start(MASTER_IP.string_address);
-	communication.start();
+	Communication::start();
 }
 
 void LCU::update(){
