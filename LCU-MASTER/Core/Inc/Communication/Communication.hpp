@@ -9,10 +9,12 @@ public:
 	static SPIPacket* test_pwm_packets[TEST_PWM_PACKET_AMOUNT];
 	static ServerSocket *gui_connection;
 	static DatagramSocket *udp_connection;
-
-	static uint8_t pwm_to_change;
+	static DigitalOutput* test_order_received;
+	static uint16_t pwm_to_change;
 	static float duty_to_change;
 
+	Communication():pwmOrder(TEST_PWM_TCP_PACKET_ID, send_pwm_data, &pwm_to_change, &duty_to_change){}
+	HeapOrder pwmOrder;
 
 	static void init(){
 		for(uint8_t i = 0; i < TEST_PWM_PACKET_AMOUNT; i++){
@@ -24,11 +26,14 @@ public:
 	static void start(){
 		gui_connection = new ServerSocket(MASTER_IP, TCP_SERVER_PORT);
 		udp_connection = new DatagramSocket(MASTER_IP, UDP_PORT, BACKEND, UDP_PORT);
-		StackOrder<5, uint8_t, float> pwmOrder(TEST_PWM_TCP_PACKET_ID, send_pwm_data, &pwm_to_change, &duty_to_change);
 
 	}
 
 	static void send_pwm_data(){
+		Communication::test_order_received->turn_on();
+			Time::set_timeout(3000,[&](){
+				Communication::test_order_received->turn_off();
+			});
 			SPIPacket* packet_to_send = test_pwm_packets[pwm_to_change];
 
 
