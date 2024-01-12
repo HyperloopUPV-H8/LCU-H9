@@ -8,7 +8,13 @@
 
 int main(void)
 {
+	static_assert(HSE_VALUE==25'000'000);
+	DigitalOutput buffer_enable{PB2};
 	LCU lcu_slave;
+	buffer_enable.turn_on();
+	Time::set_timeout(1000,[&buffer_enable](){
+		buffer_enable.turn_off();
+	});
 
 	/*for(uint8_t i = 0; i < CommonData::TEST_PWM_PACKET_AMOUNT; i++){
 		float duty_cycle = 50.0;
