@@ -25,7 +25,6 @@ void LCU::update(){
 		ErrorHandlerModel::ErrorHandlerUpdate();
 	}
 
-
 	SPIPacket  *packet_pointer;
 	for(uint8_t i = 0; i < CommonData::LDU_COUNT; i++){
 		packet_pointer = SPIPacket::SPIPacketsByID[CommonData::TEST_PWM_1_PACKET_ID+i*2];

@@ -5,7 +5,7 @@
 class CommonData{
 public:
 	static constexpr uint8_t LDU_COUNT = 10;
-	static constexpr uint32_t PWM_FREQ_HZ = 1000000;
+	static constexpr uint32_t PWM_FREQ_HZ = 1000;
 
 	static constexpr uint16_t TEST_PWM_1_PACKET_ID = 1001;
 	static constexpr uint16_t TEST_PWM_PACKET_AMOUNT = LDU_COUNT*2;
