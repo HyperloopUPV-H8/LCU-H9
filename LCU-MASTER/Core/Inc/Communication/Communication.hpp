@@ -31,7 +31,7 @@ public:
 
 	static void send_pwm_data(){
 		Communication::test_order_received->turn_on();
-			Time::set_timeout(3000,[&](){
+			Time::set_timeout(2000,[&](){
 				Communication::test_order_received->turn_off();
 			});
 			SPIPacket* packet_to_send = test_pwm_packets[pwm_to_change];

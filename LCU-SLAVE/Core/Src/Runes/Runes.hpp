@@ -69,7 +69,7 @@ unordered_map<FDCAN_HandleTypeDef*, FDCAN::Instance*> FDCAN::handle_to_fdcan = {
  ***********************************************/
 #ifdef HAL_SPI_MODULE_ENABLED
 
-SPI::Instance SPI::instance3 = { .SCK = &PC10, .MOSI = &PC12, .MISO = &PC11, .SS = &PD0,
+SPI::Instance SPI::instance3 = { .SCK = &PC10, .MOSI = &PC12, .MISO = &PC11, .SS = &PD3,
                                  .hspi = &hspi3, .instance = SPI3,
 								 .hdma_tx = DMA::Stream::DMA1Stream5,
 								 .hdma_rx = DMA::Stream::DMA1Stream6,
