@@ -11,8 +11,3 @@ template-project
 template-project.bin
 template-project.hex
 template-project.map
-
-#vscode 
-.vscode
-.cache
-template-project.code-workspace

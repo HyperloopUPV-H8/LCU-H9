@@ -25,7 +25,6 @@ public:
 		gui_connection = new ServerSocket(MASTER_IP, TCP_SERVER_PORT);
 		udp_connection = new DatagramSocket(MASTER_IP, UDP_PORT, BACKEND, UDP_PORT);
 		StackOrder<5, uint8_t, float> pwmOrder(TEST_PWM_TCP_PACKET_ID, send_pwm_data, &pwm_to_change, &duty_to_change);
-
 	}
 
 	static void send_pwm_data(){
@@ -43,7 +42,6 @@ public:
 
 			SPI::master_transmit_packet(spi_id, *packet_to_send);
 		}
-
 
 	/*static void send_pwm_data(uint8_t PWM_ID, float duty){
 		SPIPacket* packet_to_send = test_pwm_packets[PWM_ID];
