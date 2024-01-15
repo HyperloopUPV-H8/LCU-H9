@@ -12,8 +12,8 @@ void LDU::start(){
 	pwm2->turn_on();
 	ADC::turn_on(vbat_id);
 	ADC::turn_on(shunt_id);
-	change_pwm1_freq(CommonData::PWM_FREQ_HZ);
-	change_pwm2_freq(CommonData::PWM_FREQ_HZ);
+	change_pwm1_freq(PWM_FREQ_HZ);
+	change_pwm2_freq(PWM_FREQ_HZ);
 }
 
 void LDU::change_pwm1_duty(float duty){
