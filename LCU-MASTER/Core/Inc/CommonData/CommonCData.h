@@ -3,6 +3,7 @@
  * This document is connected to LWIP (on lwip.h) and may be connected to Runes, Pins, or any other configuration document
  * This document should not import any other document
  */
+#pragma once
 
 #define MASTER_IP_B0 192
 #define MASTER_IP_B1 168

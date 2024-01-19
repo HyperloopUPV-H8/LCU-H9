@@ -7,7 +7,7 @@ static constexpr uint32_t PWM_FREQ_HZ = 20000;
 
 static constexpr uint16_t TEST_PWM_1_PACKET_ID = 1001;
 static constexpr uint16_t TEST_PWM_PACKET_AMOUNT = LDU_COUNT*2;
-static constexpr uint8_t TEST_PWM_PACKET_DUTY_BYTE = 2;
+static constexpr uint8_t TEST_PWM_PACKET_DUTY_BYTE = 0;
 static constexpr uint8_t TEST_PWM_PACKET_MASTER_SIZE = 4;
 static constexpr uint8_t TEST_PWM_PACKET_SLAVE_SIZE = 4;
 

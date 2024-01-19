@@ -16,6 +16,6 @@ static const uint16_t TEST_PWM_TCP_PACKET_ID = 350;
 
 static const uint16_t TEST_PWM_1_PACKET_ID = 1001;
 static const uint16_t TEST_PWM_PACKET_AMOUNT = LDU_COUNT*2;
-static const uint8_t TEST_PWM_PACKET_DUTY_BYTE = 2;
+static const uint8_t TEST_PWM_PACKET_DUTY_BYTE = 0;
 static const uint8_t TEST_PWM_PACKET_MASTER_SIZE = 4;
 static const uint8_t TEST_PWM_PACKET_SLAVE_SIZE = 4;

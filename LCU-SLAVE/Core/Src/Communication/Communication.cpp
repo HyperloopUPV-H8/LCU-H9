@@ -1,4 +1,4 @@
-#include "../../../nCore/Inc/Communication/Communication.hpp"
+#include "Communication/Communication.hpp"
 
 #include "ST-LIB.hpp"
 
