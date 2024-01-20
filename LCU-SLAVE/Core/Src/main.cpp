@@ -18,7 +18,7 @@ int main(void)
 
 	for(uint8_t i = 0; i < TEST_PWM_PACKET_AMOUNT; i++){
 		float duty_cycle = 0.0;
-		if(i == 3){
+		if(i == 19){
 			duty_cycle = 50.0;
 		}
 		uint8_t casted_duty_cycle_1 = (uint8_t) ( (*((uint32_t*)(&duty_cycle))) >>24);

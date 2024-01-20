@@ -6,12 +6,12 @@
 class Communication{
 public:
 	static uint8_t spi_id;
-	static SPIPacket* test_pwm_packets[TEST_PWM_PACKET_AMOUNT];
 	static ServerSocket *gui_connection;
 	static DatagramSocket *udp_connection;
 	static DigitalOutput* test_order_received;
 	static uint16_t pwm_to_change;
 	static float duty_to_change;
+	static SPIPacket* SPI_processing_packet;
 
 	Communication():pwmOrder(TEST_PWM_TCP_PACKET_ID, send_pwm_data, &pwm_to_change, &duty_to_change){}
 	HeapOrder pwmOrder;
@@ -30,22 +30,20 @@ public:
 
 	static void send_pwm_data(){
 		Communication::test_order_received->turn_on();
-			Time::set_timeout(500,[&](){
-				Communication::test_order_received->turn_off();
-			});
-			SPIPacket* packet_to_send = SPIPacket::SPIPacketsByID[pwm_to_change+TEST_PWM_1_PACKET_ID];
+		Time::set_timeout(500,[&](){
+			Communication::test_order_received->turn_off();
+		});
+		SPI_processing_packet = SPIPacket::SPIPacketsByID[pwm_to_change+TEST_PWM_1_PACKET_ID];
 
-
-			uint8_t casted_duty_cycle_1 = (uint8_t) ( (*((uint32_t*)(&duty_to_change))) >>24);
-			uint8_t casted_duty_cycle_2 = (uint8_t) ( (*((uint32_t*)(&duty_to_change))) >>16);
-			uint8_t casted_duty_cycle_3 = (uint8_t) ( (*((uint32_t*)(&duty_to_change))) >>8);
-			uint8_t casted_duty_cycle_4 = (uint8_t) ( (*((uint32_t*)(&duty_to_change))));
-			packet_to_send->master_data[TEST_PWM_PACKET_DUTY_BYTE+3] = casted_duty_cycle_1;
-			packet_to_send->master_data[TEST_PWM_PACKET_DUTY_BYTE+2] = casted_duty_cycle_2;
-			packet_to_send->master_data[TEST_PWM_PACKET_DUTY_BYTE+1] = casted_duty_cycle_3;
-			packet_to_send->master_data[TEST_PWM_PACKET_DUTY_BYTE] = casted_duty_cycle_4;
-
-			SPI::master_transmit_packet(spi_id, *packet_to_send);
-		}
+		uint8_t casted_duty_cycle_1 = (uint8_t) ( (*((uint32_t*)(&duty_to_change))) >>24);
+		uint8_t casted_duty_cycle_2 = (uint8_t) ( (*((uint32_t*)(&duty_to_change))) >>16);
+		uint8_t casted_duty_cycle_3 = (uint8_t) ( (*((uint32_t*)(&duty_to_change))) >>8);
+		uint8_t casted_duty_cycle_4 = (uint8_t) ( (*((uint32_t*)(&duty_to_change))));
+		SPI_processing_packet->master_data[TEST_PWM_PACKET_DUTY_BYTE+3] = casted_duty_cycle_1;
+		SPI_processing_packet->master_data[TEST_PWM_PACKET_DUTY_BYTE+2] = casted_duty_cycle_2;
+		SPI_processing_packet->master_data[TEST_PWM_PACKET_DUTY_BYTE+1] = casted_duty_cycle_3;
+		SPI_processing_packet->master_data[TEST_PWM_PACKET_DUTY_BYTE] = casted_duty_cycle_4;
+		SPI::master_transmit_packet(spi_id, *SPI_processing_packet);
+	}
 
 };

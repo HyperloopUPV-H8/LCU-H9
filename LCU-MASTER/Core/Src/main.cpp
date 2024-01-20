@@ -26,7 +26,6 @@ int main(void)
 
 	Time::register_low_precision_alarm(1000, [&](){Communication::duty_to_change = 50.0; Communication::pwm_to_change = 0;Communication::send_pwm_data();});
 
-
 	while(1) {
 		if(DigitalInput::read_pin_state(ready_10) == PinState::ON && DigitalInput::read_pin_state(fault_10) == PinState::ON){
 			reset_5.turn_on();
@@ -47,10 +46,10 @@ int main(void)
 #endif
     SPI::instance3.SS = &PD3; //<para la LCU, que tiene el chip select cambiado
     uint8_t spi_server = SPI::inscribe(SPI::spi3);
-    SPIPacket hello(1000,4,4);
+    SPIPacket hello(1001,4,4);
     STLIB::start();
 #ifdef MASTER
-    Time::register_low_precision_alarm(1000, [&](){
+    Time::register_low_precision_alarm(1, [&](){
             SPI::master_transmit_packet(spi_server, hello);
     		compass_led.toggle();});
     running_led.turn_on();
@@ -75,7 +74,8 @@ int main(void)
         }
 #endif
         STLIB::update();
-    }*/
+    }
+    */
 }
 
 void Error_Handler(void)
