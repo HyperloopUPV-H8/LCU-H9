@@ -1,5 +1,8 @@
 #include "LDU/LDU.hpp"
 
+
+LDU LDU::ldu_array[LDU_COUNT];
+
 LDU::LDU(Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin){
 	pwm1 = new PWM(pwm1_pin);
 	pwm2 = new PWM(pwm2_pin);

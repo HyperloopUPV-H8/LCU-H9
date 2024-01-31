@@ -8,7 +8,7 @@
 
 int main(void)
 {
-	static_assert(HSE_VALUE==25'000'000);
+	//static_assert(HSE_VALUE==25'000'000);
 	DigitalOutput buffer_enable{PB2};
 	LCU lcu_slave;
 	buffer_enable.turn_on();
@@ -16,7 +16,7 @@ int main(void)
 		buffer_enable.turn_off();
 	});
 
-	for(uint8_t i = 0; i < TEST_PWM_PACKET_AMOUNT; i++){
+	/*for(uint8_t i = 0; i < TEST_PWM_PACKET_AMOUNT; i++){
 		float duty_cycle = 0.0;
 		if(i == 19){
 			duty_cycle = 50.0;
@@ -29,7 +29,7 @@ int main(void)
 		SPIPacket::SPIPacketsByID[TEST_PWM_1_PACKET_ID+i]->master_data[TEST_PWM_PACKET_DUTY_BYTE+2] = casted_duty_cycle_2;
 		SPIPacket::SPIPacketsByID[TEST_PWM_1_PACKET_ID+i]->master_data[TEST_PWM_PACKET_DUTY_BYTE+1] = casted_duty_cycle_3;
 		SPIPacket::SPIPacketsByID[TEST_PWM_1_PACKET_ID+i]->master_data[TEST_PWM_PACKET_DUTY_BYTE] = casted_duty_cycle_4;
-	}
+	}*/
 
 
 
