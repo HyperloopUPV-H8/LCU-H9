@@ -3,16 +3,35 @@
 #include "ST-LIB.hpp"
 
 static constexpr uint8_t LDU_COUNT = 10;
+static const uint8_t AIRGAP_COUNT = 8;
 static constexpr uint32_t PWM_FREQ_HZ = 20000;
 
-static constexpr uint32_t ORDER_COUNT = 1;
+
+static struct control_data{
+	uint8_t master_status = 0;
+	uint8_t slave_status = 0;
+
+	uint16_t fixed_coil_temperature[LDU_COUNT]{0};
+	uint16_t fixed_lpu_temperature[LDU_COUNT]{0};
+	uint16_t fixed_coil_current[LDU_COUNT]{0};
+	uint16_t fixed_battery_voltage[LDU_COUNT]{0};
+	uint16_t fixed_airgap_distance[AIRGAP_COUNT]{0};
+
+
+	float coil_temperature[LDU_COUNT]{0.0};
+	float lpu_temperature[LDU_COUNT]{0.0};
+	float coil_current[LDU_COUNT]{0.0};
+	float battery_voltage[LDU_COUNT]{0.0};
+	float airgap_distance[AIRGAP_COUNT]{0.0};
+}slave_control_data;
+
+
+static constexpr uint32_t ORDER_COUNT = 2;
 
 static constexpr uint16_t TEST_PWM_PACKET_ID = 1001;
 static constexpr uint16_t TEST_PWM_ORDER_INDEX = 0;
-static constexpr uint16_t TEST_PWM_PACKET_AMOUNT = LDU_COUNT*2;
-static constexpr uint8_t TEST_PWM_PACKET_DUTY_BYTE = 0;
-static constexpr uint8_t TEST_PWM_PACKET_MASTER_SIZE = 4;
-static constexpr uint8_t TEST_PWM_PACKET_SLAVE_SIZE = 4;
+static const uint16_t MASTER_SLAVE_DATA_ORDER_ID = 27;
+static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_INDEX = 1;
 
 
 #define PWM_PIN_1_1 	PE5

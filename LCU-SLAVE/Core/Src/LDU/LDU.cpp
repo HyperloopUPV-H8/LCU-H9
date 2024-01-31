@@ -23,7 +23,6 @@ void LDU::change_pwm1_duty(float duty){
 	pwm1->set_duty_cycle(duty);
 }
 
-
 void LDU::change_pwm2_duty(float duty){
 	pwm2->set_duty_cycle(duty);
 }
