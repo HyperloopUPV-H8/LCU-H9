@@ -1,6 +1,7 @@
 #include <CommonData/CommonData.hpp>
 #include <Communication/Communication.hpp>
 #include <LDU/LDU.hpp>
+#include <Airgaps/Airgaps.hpp>
 
 class LCU{
 public:

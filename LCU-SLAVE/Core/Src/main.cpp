@@ -16,6 +16,8 @@ int main(void)
 		buffer_enable.turn_off();
 	});
 
+	LDU::change_ldu_duty_cycle(9, 50);
+
 	while(1) {
 		lcu_slave.update();
 	}

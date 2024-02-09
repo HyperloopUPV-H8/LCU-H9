@@ -83,3 +83,12 @@ static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_INDEX = 1;
 #define PWM_PIN_10_2	PE11
 #define VBAT_PIN_10 	PC2
 #define SHUNT_PIN_10 	PF11
+
+#define AIRGAP_PIN_1 	PA7
+#define AIRGAP_PIN_2 	PA6
+#define AIRGAP_PIN_3 	PA5
+#define AIRGAP_PIN_4 	PA4
+#define AIRGAP_PIN_5 	PB1
+#define AIRGAP_PIN_6 	PB0
+#define AIRGAP_PIN_7 	PC5
+#define AIRGAP_PIN_8 	PC4

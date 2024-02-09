@@ -5,6 +5,7 @@
 class LDU{
 public:
 	static LDU ldu_array[LDU_COUNT];
+	uint8_t index = 0; /**< this index is the software index, and is one less than the hardware index, as this one starts with 0 and the hardware one starts in one */
 	PWM *pwm1 = nullptr;
 	PWM *pwm2 = nullptr;
 	uint8_t vbat_id = 0;
@@ -15,7 +16,7 @@ public:
 
 
 	LDU() = default;
-	LDU(Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin);
+	LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin);
 	void start();
 	void change_pwm1_duty(float duty);
 	void change_pwm2_duty(float duty);

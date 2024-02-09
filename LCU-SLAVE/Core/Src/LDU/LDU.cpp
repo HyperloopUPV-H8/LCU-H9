@@ -3,7 +3,7 @@
 
 LDU LDU::ldu_array[LDU_COUNT];
 
-LDU::LDU(Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin){
+LDU::LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin) : index(index){
 	pwm1 = new PWM(pwm1_pin);
 	pwm2 = new PWM(pwm2_pin);
 	vbat_id = ADC::inscribe(vbat_pin);

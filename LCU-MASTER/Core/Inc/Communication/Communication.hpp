@@ -22,7 +22,8 @@ public:
 	SPIStackOrder* SPIOrders[SPI_ORDER_COUNT];
 	SPIBasePacket* SPIPackets[SPI_ORDER_COUNT*2];
 
-	static uint16_t ldu_to_change;
+	static uint16_t ldu_number_to_change;
+	static uint16_t ldu_index_to_change;
 	static float duty_to_change;
 	static bool new_slave_data;
 
@@ -31,7 +32,7 @@ public:
 	}
 
 	Communication(){
-		SPIPackets[TEST_PWM_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_to_change, &duty_to_change);
+		SPIPackets[TEST_PWM_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &duty_to_change);
 		SPIPackets[TEST_PWM_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[TEST_PWM_ORDER_INDEX] = new SPIStackOrder(TEST_PWM_PACKET_ID, *SPIPackets[TEST_PWM_ORDER_INDEX*2], *SPIPackets[TEST_PWM_ORDER_INDEX*2+1]);
 
@@ -58,7 +59,7 @@ public:
 	static void start_ethernet(){
 		gui_connection = new ServerSocket(MASTER_IP, TCP_SERVER_PORT);
 		udp_connection = new DatagramSocket(MASTER_IP, UDP_PORT, BACKEND, UDP_PORT);
-		EthernetOrders[TEST_PWM_TCP_ORDER_INDEX] = new StackOrder(TEST_PWM_TCP_ORDER_ID, send_pwm_data, &ldu_to_change, &duty_to_change);
+		EthernetOrders[TEST_PWM_TCP_ORDER_INDEX] = new StackOrder(TEST_PWM_TCP_ORDER_ID, send_pwm_data_from_backend, &ldu_number_to_change, &duty_to_change);
 		EthernetOrders[SEND_LPU_TEMPERATURES_TCP_ORDER_INDEX] = new StackOrder(SEND_LPU_TEMPERATURES_TCP_ORDER_ID, &master_control_data.lpu_temperature[0],&master_control_data.lpu_temperature[1],&master_control_data.lpu_temperature[2],&master_control_data.lpu_temperature[3],&master_control_data.lpu_temperature[4],&master_control_data.lpu_temperature[5],&master_control_data.lpu_temperature[6],&master_control_data.lpu_temperature[7],&master_control_data.lpu_temperature[8],&master_control_data.lpu_temperature[9]);
 	}
 
@@ -87,7 +88,8 @@ public:
 		return airgap_distance / MAX_16BIT * ADC_MAX_VOLTAGE; //TODO: calculate in correct units
 	}
 
-	static void send_pwm_data(){
+	static void send_pwm_data_from_backend(){
+		ldu_index_to_change = ldu_number_to_change - 1;
 		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[TEST_PWM_PACKET_ID]);
 	}
 
