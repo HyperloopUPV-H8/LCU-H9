@@ -23,8 +23,6 @@ int main(void)
 		Communication::test_order_received->turn_off();
 	});
 
-	unused_variable = Time::register_low_precision_alarm(1000, [&](){Communication::ldu_number_to_change = 10; Communication::duty_to_change = 50;Communication::send_pwm_data_from_backend();});
-
 	while(1) {
 		if(DigitalInput::read_pin_state(ready_10) == PinState::ON && DigitalInput::read_pin_state(fault_10) == PinState::ON){
 			reset_5.turn_on();
