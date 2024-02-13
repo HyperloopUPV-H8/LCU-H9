@@ -1,7 +1,6 @@
 #pragma once
 
 #include <CommonData/CommonData.hpp>
-#include <LDU/LDU.hpp>
 #include "SPI/SPI.hpp"
 
 #define coil_t slave_control_data.fixed_coil_temperature
@@ -11,6 +10,7 @@
 #define airgap slave_control_data.fixed_airgap_distance
 #define ldu_array_deduction uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t
 #define airgap_array_deduction uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t
+
 
 class Communication{
 public:
@@ -58,7 +58,13 @@ public:
 	 */
 
 	static void test_pwm_order_callback(){
-		LDU::change_ldu_duty_cycle(ldu_to_change, duty_to_change);
+		if(duty_to_change > 0){
+			slave_periph_pointers.ldu_pwms[ldu_to_change][1]->set_duty_cycle(0);
+			slave_periph_pointers.ldu_pwms[ldu_to_change][0]->set_duty_cycle(duty_to_change);
+		}else{
+			slave_periph_pointers.ldu_pwms[ldu_to_change][0]->set_duty_cycle(0);
+			slave_periph_pointers.ldu_pwms[ldu_to_change][1]->set_duty_cycle(-duty_to_change);
+		}
 	}
 };
 

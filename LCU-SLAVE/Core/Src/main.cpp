@@ -10,13 +10,14 @@ int main(void)
 {
 	//static_assert(HSE_VALUE==25'000'000);
 	DigitalOutput buffer_enable{PB2};
-	LCU lcu_slave;
+	LCU <GUI_CONTROL, double>lcu_slave;
+
 	buffer_enable.turn_on();
 	uint8_t unused_variable = Time::set_timeout(1000,[&buffer_enable](){
 		buffer_enable.turn_off();
 	});
 
-	LDU::change_ldu_duty_cycle(9, 50);
+	lcu_slave.change_ldu_duty_cycle(9, 50);
 
 	while(1) {
 		lcu_slave.update();
@@ -28,3 +29,7 @@ void Error_Handler(void)
 	ErrorHandler("HAL error handler triggered");
 	while (1){}
 }
+
+
+
+

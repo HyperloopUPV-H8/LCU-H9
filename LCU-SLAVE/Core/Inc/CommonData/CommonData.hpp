@@ -6,6 +6,16 @@ static constexpr uint8_t LDU_COUNT = 10;
 static const uint8_t AIRGAP_COUNT = 8;
 static constexpr uint32_t PWM_FREQ_HZ = 20000;
 
+enum LCU_running_modes{
+	GUI_CONTROL,
+	DOF1,
+};
+
+enum LCU_states{
+	INITIAL = 0,
+	OPERATIONAL,
+	FAULT,
+};
 
 static struct control_data{
 	uint8_t master_status = 0;
@@ -25,6 +35,13 @@ static struct control_data{
 	float airgap_distance[AIRGAP_COUNT]{0.0};
 }slave_control_data;
 
+static struct periph_pointers{
+	PWM* ldu_pwms[LDU_COUNT][2];
+
+}slave_periph_pointers;
+
+static constexpr uint32_t CURRENT_PI_FREQ_HZ = 1000;
+static constexpr double CURRENT_PI_PERIOD_SECONDS = 1.0 / (double)CURRENT_PI_FREQ_HZ;
 
 static constexpr uint32_t ORDER_COUNT = 2;
 
@@ -33,6 +50,12 @@ static constexpr uint16_t TEST_PWM_ORDER_INDEX = 0;
 static const uint16_t MASTER_SLAVE_DATA_ORDER_ID = 27;
 static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_INDEX = 1;
 
+
+
+/* #################################################################################
+ * #############################  PINOUT DISTRIBUTION  ############################
+ * #################################################################################
+ */
 
 #define PWM_PIN_1_1 	PE5
 #define PWM_PIN_1_2 	PE6
