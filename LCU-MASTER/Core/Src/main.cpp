@@ -8,7 +8,7 @@
 
 int main(void)
 {
-	//static_assert(HSE_VALUE==25'000'000,"INVALID HSE value for BOARD");
+	static_assert(HSE_VALUE==25'000'000,"INVALID HSE value for BOARD");
 	Communication::test_order_received = new DigitalOutput(PG4);
 	DigitalOutput reset_5{PB14};
 	uint8_t fault_10 = DigitalInput::inscribe(PE11);
@@ -19,11 +19,9 @@ int main(void)
 
 	reset_5.turn_off();
 	Communication::test_order_received->turn_on();
-	uint8_t unused_variable = Time::set_timeout(1000,[&](){
+	uint8_t unused_variable = Time::set_timeout(3000,[&](){
 		Communication::test_order_received->turn_off();
 	});
-	Communication comms;
-
 
 	while(1) {
 		if(DigitalInput::read_pin_state(ready_10) == PinState::ON && DigitalInput::read_pin_state(fault_10) == PinState::ON){
@@ -33,7 +31,6 @@ int main(void)
 		}
 
 		lcu_master.update();
-		//Communication.send_pwm_data(0, 50);
 	}
 }
 
