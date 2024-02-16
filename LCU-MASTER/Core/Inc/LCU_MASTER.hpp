@@ -1,17 +1,11 @@
 #pragma once
 
 #include "Communication/Communication.hpp"
+#include "LDU_Buffer/LDU_Buffer.hpp"
 #include "CommonData/CommonData.hpp"
 
 class LCU{
 public:
-
-	enum generalStates{
-		Initial = 0,
-		Operational,
-		Fault,
-	};
-
 	uint8_t coil_temperature_adc_id[LDU_COUNT]{0};
 	uint8_t lpu_temperature_adc_id[LDU_COUNT]{0};
 	Communication communication;
@@ -32,8 +26,15 @@ public:
 		return lpu_coil_temperature / MAX_16BIT * ADC_MAX_VOLTAGE; //TODO: calculate in correct units
 	}
 
-
 	static bool initial_to_operational_transition(){
 		return Communication::gui_connection->is_connected();
+	}
+
+	static bool initial_to_fault_transition(){
+		return false;
+	}
+
+	static bool operational_to_fault_transition(){
+		return false;
 	}
 };

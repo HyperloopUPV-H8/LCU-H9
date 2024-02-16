@@ -19,12 +19,19 @@ public:
 	static DigitalOutput* test_order_received;
 
 	static Order* EthernetOrders[ETH_ORDER_COUNT];
+	static Packet* EthernetPackets[ETH_PACKET_COUNT];
 	SPIStackOrder* SPIOrders[SPI_ORDER_COUNT];
 	SPIBasePacket* SPIPackets[SPI_ORDER_COUNT*2];
+
+	static struct communication_flags{
+		bool SPIStart = false;
+	}flags;
 
 	static uint16_t ldu_number_to_change;
 	static uint16_t ldu_index_to_change;
 	static float duty_to_change;
+	static float data_from_backend;
+	static float data_to_change;
 	static bool new_slave_data;
 
 	static void init(){
@@ -32,10 +39,8 @@ public:
 	}
 
 	Communication(){
-		SPIPackets[TEST_PWM_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &duty_to_change);
-		SPIPackets[TEST_PWM_ORDER_INDEX*2+1] = new SPIPacket<0>;
-		SPIOrders[TEST_PWM_ORDER_INDEX] = new SPIStackOrder(TEST_PWM_PACKET_ID, *SPIPackets[TEST_PWM_ORDER_INDEX*2], *SPIPackets[TEST_PWM_ORDER_INDEX*2+1]);
 
+		//SPIOrders[MASTER_SLAVE_INITIAL_ORDER_INDEX] = new SPIBinaryOrder(MASTER_SLAVE_INITIAL_ORDER_ID,0,0);
 
 		SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2] = new SPIPacket<41, uint8_t, ldu_array_deduction, ldu_array_deduction>(
 				&master_control_data.master_status,
@@ -49,7 +54,16 @@ public:
 				&airgap[0], &airgap[1], &airgap[2], &airgap[3], &airgap[4], &airgap[5], &airgap[6], &airgap[7]
 		);
 		SPIOrders[MASTER_SLAVE_DATA_ORDER_INDEX] = new SPIStackOrder(MASTER_SLAVE_DATA_ORDER_ID, *SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2], *SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2+1]);
-		SPIOrders[MASTER_SLAVE_DATA_ORDER_INDEX]->set_callback(set_new_slave_data_ready);
+
+
+		SPIPackets[TEST_PWM_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &duty_to_change);
+		SPIPackets[TEST_PWM_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[TEST_PWM_ORDER_INDEX] = new SPIStackOrder(TEST_PWM_ORDER_ID, *SPIPackets[TEST_PWM_ORDER_INDEX*2], *SPIPackets[TEST_PWM_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[TEST_VBAT_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &data_to_change);
+		SPIPackets[TEST_VBAT_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[TEST_VBAT_ORDER_INDEX] = new SPIStackOrder(TEST_VBAT_ORDER_ID, *SPIPackets[TEST_VBAT_ORDER_INDEX*2], *SPIPackets[TEST_VBAT_ORDER_INDEX*2+1]);
 	}
 
 	static void start(){
@@ -59,8 +73,16 @@ public:
 	static void start_ethernet(){
 		gui_connection = new ServerSocket(MASTER_IP, TCP_SERVER_PORT);
 		udp_connection = new DatagramSocket(MASTER_IP, UDP_PORT, BACKEND, UDP_PORT);
+		EthernetPackets[SEND_LPU_TEMPERATURES_TCP_PACKET_INDEX] = new StackPacket(SEND_LPU_TEMPERATURES_TCP_PACKET_ID,
+				&master_control_data.lpu_temperature[0],&master_control_data.lpu_temperature[1],&master_control_data.lpu_temperature[2],
+				&master_control_data.lpu_temperature[3],&master_control_data.lpu_temperature[4],&master_control_data.lpu_temperature[5],
+				&master_control_data.lpu_temperature[6],&master_control_data.lpu_temperature[7],&master_control_data.lpu_temperature[8],
+				&master_control_data.lpu_temperature[9]);
+
 		EthernetOrders[TEST_PWM_TCP_ORDER_INDEX] = new StackOrder(TEST_PWM_TCP_ORDER_ID, send_pwm_data_from_backend, &ldu_number_to_change, &duty_to_change);
-		EthernetOrders[SEND_LPU_TEMPERATURES_TCP_ORDER_INDEX] = new StackOrder(SEND_LPU_TEMPERATURES_TCP_ORDER_ID, &master_control_data.lpu_temperature[0],&master_control_data.lpu_temperature[1],&master_control_data.lpu_temperature[2],&master_control_data.lpu_temperature[3],&master_control_data.lpu_temperature[4],&master_control_data.lpu_temperature[5],&master_control_data.lpu_temperature[6],&master_control_data.lpu_temperature[7],&master_control_data.lpu_temperature[8],&master_control_data.lpu_temperature[9]);
+		EthernetOrders[TEST_VBAT_TCP_ORDER_INDEX] = new StackOrder(TEST_VBAT_TCP_ORDER_ID, send_vbat_data_from_backend, &ldu_number_to_change, &data_from_backend);
+		EthernetOrders[TEST_START_RESET_TCP_ORDER_INDEX] = new StackOrder<2,uint16_t>(TEST_START_RESET_TCP_ORDER_ID, fix_buffer_reset_high, &ldu_number_to_change);
+		EthernetOrders[TEST_STOP_RESET_TCP_ORDER_INDEX] = new StackOrder<2,uint16_t>(TEST_STOP_RESET_TCP_ORDER_ID, fix_buffer_reset_low, &ldu_number_to_change);
 	}
 
 	static void update(){
@@ -76,6 +98,24 @@ public:
 		}
 	}
 
+	//###################  PERIODIC FUNCTIONS  #########################
+
+	static void send_lcu_data_to_backend(){
+		udp_connection->send(*EthernetPackets[SEND_LPU_TEMPERATURES_TCP_PACKET_INDEX]);
+	}
+
+	static void lcu_data_transaction(){
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[MASTER_SLAVE_DATA_ORDER_ID]);
+	}
+
+	//#####################  SPI ORDERS CALLBACKS #######################
+
+	static inline void end_first_spi_transaction(){
+		flags.SPIStart = true;
+	}
+
+
+
 	static inline float coil_current_calculation(uint16_t coil_current){
 		return coil_current / MAX_16BIT * ADC_MAX_VOLTAGE; //TODO: calculate in correct units
 	}
@@ -88,13 +128,24 @@ public:
 		return airgap_distance / MAX_16BIT * ADC_MAX_VOLTAGE; //TODO: calculate in correct units
 	}
 
+
+	//################# ETH TESTING ORDERS CALLBACKS ####################
+
 	static void send_pwm_data_from_backend(){
 		ldu_index_to_change = ldu_number_to_change - 1;
-		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[TEST_PWM_PACKET_ID]);
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[TEST_PWM_ORDER_ID]);
 	}
 
-	static void send_lcu_data_to_backend(){
-		gui_connection->send_order(*EthernetOrders[SEND_LPU_TEMPERATURES_TCP_ORDER_INDEX]);
+	static void send_vbat_data_from_backend(){
+		ldu_index_to_change = ldu_number_to_change - 1;
+		data_to_change = (float) data_from_backend;
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[TEST_VBAT_ORDER_ID]);
+	}
+
+	static void send_desired_current_data_from_backend(){
+		ldu_index_to_change = ldu_number_to_change - 1;
+		data_to_change = (float) data_from_backend;
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[TEST_DESIRED_CURRENT_ORDER_ID]);
 	}
 
 	static void set_new_slave_data_ready(){new_slave_data = true;}

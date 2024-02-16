@@ -2,14 +2,43 @@
 
 #include "ST-LIB.hpp"
 
+/** #############################################################
+ *  ###################  LCU_DESIGN_DATA  #######################
+ *  #############################################################
+ */
 static constexpr uint8_t LDU_COUNT = 10;
 static const uint8_t AIRGAP_COUNT = 8;
-static constexpr uint32_t PWM_FREQ_HZ = 20000;
+static constexpr uint32_t PWM_FREQ_HZ = 10000;
+
+static constexpr uint32_t CURRENT_PI_FREQ_HZ = 2000;
+static constexpr double CURRENT_PI_PERIOD_SECONDS = (double) (1.0 / CURRENT_PI_FREQ_HZ);
+
+static constexpr uint32_t CURRENT_UPDATE_DATA_HZ = 10000;
+static constexpr double CURRENT_UPDATE_PERIOD_SECONDS = (double) (1.0 / CURRENT_PI_FREQ_HZ);
+
+static constexpr uint32_t AIRGAP_UPDATE_DATA_HZ = 10000;
+static constexpr double AIRGAP_UPDATE_PERIOD_SECONDS = (double) (1.0 / CURRENT_PI_FREQ_HZ);
+
+static constexpr uint32_t VBAT_UPDATE_DATA_HZ = 10;
+static constexpr double VBAT_UPDATE_PERIOD_SECONDS = (double) (1.0 / CURRENT_PI_FREQ_HZ);
+
+/*  #############################################################
+ *  ################### LCU_RUNNING_MODE  #######################
+ *  #############################################################
+ */
 
 enum LCU_running_modes{
 	GUI_CONTROL,
 	DOF1,
 };
+
+#define RUNNING_MODE GUI_CONTROL
+#define ARITHMETIC_MODE double
+
+/*  ##############################################################
+ *  ###################  SHARED_CONTROL_DATA  ####################
+ *  ##############################################################
+ */
 
 enum LCU_states{
 	INITIAL = 0,
@@ -40,21 +69,53 @@ static struct periph_pointers{
 
 }slave_periph_pointers;
 
-static constexpr uint32_t CURRENT_PI_FREQ_HZ = 1000;
-static constexpr double CURRENT_PI_PERIOD_SECONDS = 1.0 / (double)CURRENT_PI_FREQ_HZ;
 
-static constexpr uint32_t ORDER_COUNT = 2;
 
-static constexpr uint16_t TEST_PWM_PACKET_ID = 1001;
-static constexpr uint16_t TEST_PWM_ORDER_INDEX = 0;
+
+/*  #################################################################
+ *  #######################  PACKET STRUCTURE  ######################
+ *  #################################################################
+ */
+
+static constexpr uint32_t ORDER_COUNT = 4;
+
 static const uint16_t MASTER_SLAVE_DATA_ORDER_ID = 27;
-static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_INDEX = 1;
+static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_INDEX = 0;
 
 
+static constexpr uint32_t FIRST_TESTING_ORDER_INDEX = 1;
 
-/* #################################################################################
- * #############################  PINOUT DISTRIBUTION  ############################
- * #################################################################################
+static constexpr uint16_t TEST_PWM_ORDER_ID = 1001;
+static constexpr uint16_t TEST_PWM_ORDER_INDEX = FIRST_TESTING_ORDER_INDEX;
+static constexpr uint16_t TEST_VBAT_ORDER_ID = 1002;
+static constexpr uint16_t TEST_VBAT_ORDER_INDEX = FIRST_TESTING_ORDER_INDEX+1;
+static constexpr uint16_t TEST_DESIRED_CURRENT_ORDER_ID = 1003;
+static constexpr uint16_t TEST_DESIRED_CURRENT_ORDER_INDEX = FIRST_TESTING_ORDER_INDEX+2;
+
+/*  #################################################################
+ *  ################  STATIC FUNCTIONS DECLARATION  #################
+ *  #################################################################
+ */
+
+static void update_airgap_data();
+static void update_shunt_data();
+static void update_vbat_data();
+
+void rise_current_PI_flag();
+static void rise_rise_housekeeping_tasks_flag();
+
+static void run_current_PI();
+
+static void set_vbat_on_LDU();
+static void set_desired_current_on_LDU();
+static void test_pwm_order_callback();
+
+void send_to_fault();
+void shut_down();
+
+/* #################################################################
+ * #####################  PINOUT DISTRIBUTION  #####################
+ * #################################################################
  */
 
 #define PWM_PIN_1_1 	PE5

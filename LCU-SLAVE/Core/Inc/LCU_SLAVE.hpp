@@ -1,38 +1,42 @@
+#pragma once
+
 #include <CommonData/CommonData.hpp>
 #include <Communication/Communication.hpp>
 #include <LDU/LDU.hpp>
 #include <Airgaps/Airgaps.hpp>
 
 template<LCU_running_modes running_mode, typename arithmetic_number_type>
+class LCU;
+
+static LCU<RUNNING_MODE, ARITHMETIC_MODE> *lcu_instance = nullptr;
+
+template<LCU_running_modes running_mode, typename arithmetic_number_type>
 class LCU{
 public:
 	Communication communication;
 	StateMachine generalStateMachine;
-	LDU<running_mode, arithmetic_number_type> ldu_array[LDU_COUNT];
+
+	uint8_t update_LDU_counter = 0; /**< Used to access one by one the LDUs on less urgent operations in the update*/
+
+	bool PendingCurrentPI = false;
+	bool PendingHousekeepingTasks = false;
+	bool FaultFlag = false;
 
 	LCU() : generalStateMachine(INITIAL){
+		if(lcu_instance == nullptr){
+			lcu_instance = this;
+		}else{
+			ErrorHandler("tried to set a second lcu");
+		}
 		setup_configuration();
 	}
 
 
 	void start();
 	void update(){
-		while(ErrorHandlerModel::error_triggered){
-			ErrorHandlerModel::ErrorHandlerUpdate();
-		}
-
-		for(uint8_t i = 0; i < LDU_COUNT; i++){
-
-			uint16_t vbat = ldu_array[i].get_vbat_value();
-			uint16_t shunt = ldu_array[i].get_shunt_value();
-
-			if(vbat > 32768){
-				vbat = 0;
-			}
-			if(shunt > 32768){
-				shunt = 0;
-			}
-		}
+		generalStateMachine.check_transitions();
+		ProtectionManager::check_protections();
+		if(PendingCurrentPI){run_current_PI();PendingCurrentPI = false;}
 	}
 
 
@@ -49,6 +53,8 @@ public:
 		ldu_array[8] = LDU<running_mode, arithmetic_number_type>(8, PWM_PIN_9_1, PWM_PIN_9_2, VBAT_PIN_9, SHUNT_PIN_9);
 		ldu_array[9] = LDU<running_mode, arithmetic_number_type>(9, PWM_PIN_10_1, PWM_PIN_10_2, VBAT_PIN_10, SHUNT_PIN_10);
 
+		state_machine_inscribe();
+		protections_inscribe();
 		Airgaps::inscribe();
 		Communication::init();
 		STLIB::start();
@@ -78,18 +84,35 @@ public:
 		generalStateMachine.add_transition(OPERATIONAL, FAULT, general_transition_operational_to_fault);
 
 		//################# ADDING ALL CYCLIC ACTIONS #######################
+		generalStateMachine.add_high_precision_cyclic_action(update_shunt_data, std::chrono::microseconds((int) (CURRENT_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
+		generalStateMachine.add_high_precision_cyclic_action(update_airgap_data, std::chrono::microseconds((int) (AIRGAP_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
+		generalStateMachine.add_low_precision_cyclic_action(update_vbat_data, std::chrono::microseconds((int) (10000)), OPERATIONAL);
+		generalStateMachine.add_low_precision_cyclic_action(rise_current_PI_flag, std::chrono::microseconds((int) (1000)), OPERATIONAL);
+		//generalStateMachine.add_low_precision_cyclic_action(general_enter_fault, std::chrono::milliseconds(1), FAULT);
+
+		//###############  ADDING ALL TRANSITION CALLBACKS  ###################
+		generalStateMachine.add_enter_action(general_enter_fault, FAULT);
 	}
 
-	bool general_transition_initial_to_operational(){
+	void protections_inscribe(){
+		//ProtectionManager::link_state_machine(generalStateMachine, FAULT);
+	}
+
+	static bool general_transition_initial_to_operational(){
 		return true;
 	}
 
-	bool general_transition_initial_to_fault(){
+	static bool general_transition_initial_to_fault(){
 		return false;
 	}
 
-	bool general_transition_operational_to_fault(){
-		return false;
+	static bool general_transition_operational_to_fault(){
+		return lcu_instance->FaultFlag;
+	}
+
+	static void general_enter_fault(){
+		//shut_down();
+		ldu_array[9].change_pwms_duty(0);
 	}
 
 	/* #############################################################################
