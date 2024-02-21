@@ -64,6 +64,11 @@ public:
 		SPIPackets[TEST_VBAT_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &data_to_change);
 		SPIPackets[TEST_VBAT_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[TEST_VBAT_ORDER_INDEX] = new SPIStackOrder(TEST_VBAT_ORDER_ID, *SPIPackets[TEST_VBAT_ORDER_INDEX*2], *SPIPackets[TEST_VBAT_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &data_to_change);
+		SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[TEST_DESIRED_CURRENT_ORDER_INDEX] = new SPIStackOrder(TEST_DESIRED_CURRENT_ORDER_ID, *SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2], *SPIPackets[TEST_VBAT_ORDER_INDEX*2+1]);
 	}
 
 	static void start(){
@@ -81,6 +86,7 @@ public:
 
 		EthernetOrders[TEST_PWM_TCP_ORDER_INDEX] = new StackOrder(TEST_PWM_TCP_ORDER_ID, send_pwm_data_from_backend, &ldu_number_to_change, &duty_to_change);
 		EthernetOrders[TEST_VBAT_TCP_ORDER_INDEX] = new StackOrder(TEST_VBAT_TCP_ORDER_ID, send_vbat_data_from_backend, &ldu_number_to_change, &data_from_backend);
+		EthernetOrders[TEST_DESIRED_CURRENT_TCP_ORDER_INDEX] = new StackOrder(TEST_DESIRED_CURRENT_TCP_ORDER_ID, send_desired_current_data_from_backend, &ldu_number_to_change, &data_from_backend);
 		EthernetOrders[TEST_START_RESET_TCP_ORDER_INDEX] = new StackOrder<2,uint16_t>(TEST_START_RESET_TCP_ORDER_ID, fix_buffer_reset_high, &ldu_number_to_change);
 		EthernetOrders[TEST_STOP_RESET_TCP_ORDER_INDEX] = new StackOrder<2,uint16_t>(TEST_STOP_RESET_TCP_ORDER_ID, fix_buffer_reset_low, &ldu_number_to_change);
 	}

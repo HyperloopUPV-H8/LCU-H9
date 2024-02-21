@@ -10,17 +10,24 @@ static constexpr uint8_t LDU_COUNT = 10;
 static const uint8_t AIRGAP_COUNT = 8;
 static constexpr uint32_t PWM_FREQ_HZ = 10000;
 
+static constexpr uint32_t LEVITATION_CONTROL_FREQ_HZ = 1000;
+static constexpr double LEVITATION_CONTROL_PERIOD_SECONDS = (double) (1.0 / LEVITATION_CONTROL_FREQ_HZ);
+
 static constexpr uint32_t CURRENT_PI_FREQ_HZ = 2000;
 static constexpr double CURRENT_PI_PERIOD_SECONDS = (double) (1.0 / CURRENT_PI_FREQ_HZ);
 
 static constexpr uint32_t CURRENT_UPDATE_DATA_HZ = 10000;
 static constexpr double CURRENT_UPDATE_PERIOD_SECONDS = (double) (1.0 / CURRENT_PI_FREQ_HZ);
 
-static constexpr uint32_t AIRGAP_UPDATE_DATA_HZ = 10000;
+static constexpr uint32_t AIRGAP_UPDATE_DATA_HZ = 7500;
 static constexpr double AIRGAP_UPDATE_PERIOD_SECONDS = (double) (1.0 / CURRENT_PI_FREQ_HZ);
+static constexpr uint32_t AIRGAP_MOVING_AVERAGE_COUNT = 10;
 
 static constexpr uint32_t VBAT_UPDATE_DATA_HZ = 10;
 static constexpr double VBAT_UPDATE_PERIOD_SECONDS = (double) (1.0 / CURRENT_PI_FREQ_HZ);
+
+
+static constexpr double MAXIMUM_DESIRED_CURRENT = 45.0;
 
 /*  #############################################################
  *  ################### LCU_RUNNING_MODE  #######################
@@ -34,6 +41,9 @@ enum LCU_running_modes{
 
 #define RUNNING_MODE GUI_CONTROL
 #define ARITHMETIC_MODE double
+
+#define DOF1_USED_LDU_INDEX 9
+#define DOF1_USED_AIRGAP_INDEX 0
 
 /*  ##############################################################
  *  ###################  SHARED_CONTROL_DATA  ####################
@@ -97,11 +107,12 @@ static constexpr uint16_t TEST_DESIRED_CURRENT_ORDER_INDEX = FIRST_TESTING_ORDER
  *  #################################################################
  */
 
-static void update_airgap_data();
+inline void update_airgap_data();
 static void update_shunt_data();
 static void update_vbat_data();
 
 void rise_current_PI_flag();
+void rise_levitation_control_flag();
 static void rise_rise_housekeeping_tasks_flag();
 
 static void run_current_PI();

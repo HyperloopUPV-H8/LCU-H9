@@ -6,8 +6,8 @@
 #define KI_CURRENT_TO_DUTY 400.0 //208.3333
 #define MOVING_AVERAGE_SIZE 20
 
-#define DOUBLE_VBAT_SLOPE 91.325
-#define DOUBLE_VBAT_OFFSET -9.3784
+#define DOUBLE_VBAT_SLOPE 180.29 //91.325
+#define DOUBLE_VBAT_OFFSET -18.524 //-9.3784
 
 #define DOUBLE_SHUNT_SLOPE -34.3
 #define DOUBLE_SHUNT_OFFSET 67.1
@@ -25,19 +25,17 @@ public:
 	arithmetic_number_type desired_current = 0;
 	arithmetic_number_type LDU_duty_cycle = 0;
 
+	PI<IntegratorType::Trapezoidal> Voltage_by_current_PI;
 
-	//arithmetic_number_type raw_voltage_battery = 0;
 	MovingAverage<10> raw_average_voltage_battery;
 	arithmetic_number_type voltage_battery = 0;
 	arithmetic_number_type raw_current_shunt = 0;
 	arithmetic_number_type current_shunt = 0;
-	PI<IntegratorType::Trapezoidal> Voltage_by_current_PI;
 
 
 	struct LDU_flags{
 		bool fixed_vbat = false;
 		bool fixed_desired_current = false;
-		bool fixed_pwm = false;
 		bool run_pi = false;
 	}flags;
 
@@ -62,14 +60,6 @@ public:
 		change_pwm2_freq(PWM_FREQ_HZ);
 	}
 
-	void update(){
-
-		/*if constexpr(running_mode == GUI_CONTROL){
-
-		}else{
-
-		}*/
-	}
 
 	void change_pwm1_duty(float duty){pwm1->set_duty_cycle(duty);}
 	void change_pwm2_duty(float duty){pwm2->set_duty_cycle(duty);}
@@ -114,11 +104,6 @@ public:
 		if(!flags.run_pi){
 			return;
 		}
-		if constexpr(running_mode == GUI_CONTROL){
-			if(flags.fixed_pwm){
-				return;
-			}
-		}
 		current_shunt = get_shunt_by_raw_data();
 		if(current_shunt > 50.0 || current_shunt < -50.0){
 			send_to_fault();
@@ -140,6 +125,9 @@ public:
 		if(voltage_battery < 0.0001){
 			return 0;
 		}
+		if(voltage_battery > 252.5){
+			voltage_battery = 252.5;
+		}
 
 		if(voltage > voltage_battery){
 			return 100.0;
@@ -156,7 +144,8 @@ public:
 
 	void shut_down(){
 		change_pwms_duty(0);
-		flags.fixed_pwm = true;
+		flags.run_pi = false;
+		//flags.fixed_pwm = true;
 	}
 };
 

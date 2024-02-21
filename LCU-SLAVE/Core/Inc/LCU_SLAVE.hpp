@@ -4,6 +4,7 @@
 #include <Communication/Communication.hpp>
 #include <LDU/LDU.hpp>
 #include <Airgaps/Airgaps.hpp>
+#include <Control/Control.hpp>
 
 template<LCU_running_modes running_mode, typename arithmetic_number_type>
 class LCU;
@@ -14,29 +15,42 @@ template<LCU_running_modes running_mode, typename arithmetic_number_type>
 class LCU{
 public:
 	Communication communication;
+	Control<running_mode, arithmetic_number_type> levitationControl;
 	StateMachine generalStateMachine;
 
-	uint8_t update_LDU_counter = 0; /**< Used to access one by one the LDUs on less urgent operations in the update*/
-
 	bool PendingCurrentPI = false;
+	bool PendingLevitationControl = false;
 	bool PendingHousekeepingTasks = false;
 	bool FaultFlag = false;
 
+
+	uint64_t LevitationControlCount = 0;
+	uint64_t CurrentPICount = 0;
+
 	LCU() : generalStateMachine(INITIAL){
-		if(lcu_instance == nullptr){
-			lcu_instance = this;
-		}else{
-			ErrorHandler("tried to set a second lcu");
-		}
+		if(lcu_instance == nullptr){	lcu_instance = this;
+		}else{		ErrorHandler("tried to set a second lcu");		}
 		setup_configuration();
 	}
 
-
-	void start();
 	void update(){
 		generalStateMachine.check_transitions();
 		ProtectionManager::check_protections();
-		if(PendingCurrentPI){run_current_PI();PendingCurrentPI = false;}
+
+		if(PendingLevitationControl){
+			LevitationControlCount++;
+			levitationControl.control_loop();
+			if(levitationControl.run_pid){
+				ldu_array[DOF1_USED_LDU_INDEX].desired_current = levitationControl.desired_current;
+			}
+			PendingLevitationControl = false;
+		}
+
+		if(PendingCurrentPI){
+			CurrentPICount++;
+			run_current_PI();
+			PendingCurrentPI = false;
+		}
 	}
 
 
@@ -53,13 +67,14 @@ public:
 		ldu_array[8] = LDU<running_mode, arithmetic_number_type>(8, PWM_PIN_9_1, PWM_PIN_9_2, VBAT_PIN_9, SHUNT_PIN_9);
 		ldu_array[9] = LDU<running_mode, arithmetic_number_type>(9, PWM_PIN_10_1, PWM_PIN_10_2, VBAT_PIN_10, SHUNT_PIN_10);
 
-		state_machine_inscribe();
+		state_machine_initialization();
 		protections_inscribe();
 		Airgaps::inscribe();
 		Communication::init();
+
 		STLIB::start();
 		Communication::start();
-		Airgaps::turn_on();
+		Airgaps::start();
 
 		for(uint8_t i = 0; i < LDU_COUNT; i++){
 			ldu_array[i].start();
@@ -73,7 +88,7 @@ public:
  * ###################################################################################
  */
 
-	void state_machine_inscribe(){
+	void state_machine_initialization(){
 		//################  ADDING ALL THE STATES  ##########################
 		generalStateMachine.add_state(OPERATIONAL);
 		generalStateMachine.add_state(FAULT);
@@ -87,8 +102,8 @@ public:
 		generalStateMachine.add_high_precision_cyclic_action(update_shunt_data, std::chrono::microseconds((int) (CURRENT_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
 		generalStateMachine.add_high_precision_cyclic_action(update_airgap_data, std::chrono::microseconds((int) (AIRGAP_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
 		generalStateMachine.add_low_precision_cyclic_action(update_vbat_data, std::chrono::microseconds((int) (10000)), OPERATIONAL);
-		generalStateMachine.add_low_precision_cyclic_action(rise_current_PI_flag, std::chrono::microseconds((int) (1000)), OPERATIONAL);
-		//generalStateMachine.add_low_precision_cyclic_action(general_enter_fault, std::chrono::milliseconds(1), FAULT);
+		generalStateMachine.add_mid_precision_cyclic_action(rise_current_PI_flag, std::chrono::microseconds((int) (500)), OPERATIONAL);
+		generalStateMachine.add_low_precision_cyclic_action(rise_levitation_control_flag,  std::chrono::microseconds((int) (1000)), OPERATIONAL);
 
 		//###############  ADDING ALL TRANSITION CALLBACKS  ###################
 		generalStateMachine.add_enter_action(general_enter_fault, FAULT);
@@ -111,7 +126,7 @@ public:
 	}
 
 	static void general_enter_fault(){
-		//shut_down();
+		shut_down();
 		ldu_array[9].change_pwms_duty(0);
 	}
 
@@ -125,5 +140,21 @@ public:
 			return;
 		}
 		ldu_array[ldu_index].change_pwms_duty(ldu_duty_cycle);
+	}
+
+	void set_desired_airgap_distance(arithmetic_number_type desired_airgap_distance){
+		levitationControl.desired_airgap_distance_m = desired_airgap_distance;
+	}
+
+	void start_control(){
+		ldu_array[DOF1_USED_LDU_INDEX].flags.run_pi = true;
+		levitationControl.start();
+	}
+
+	void stop_control(){
+		ldu_array[DOF1_USED_LDU_INDEX].change_pwms_duty(0);
+		ldu_array[DOF1_USED_LDU_INDEX].flags.run_pi = false;
+		ldu_array[DOF1_USED_LDU_INDEX].Voltage_by_current_PI.reset();
+		levitationControl.stop();
 	}
 };
