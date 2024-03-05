@@ -36,6 +36,7 @@ public:
 
 	static void init(){
 		spi_id = SPI::inscribe(SPI::spi3);
+		SPI::assign_RS(spi_id, PE0);
 	}
 
 	Communication(){

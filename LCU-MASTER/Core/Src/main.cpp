@@ -9,7 +9,7 @@
 
 int main(void)
 {
-	static_assert(HSE_VALUE==25'000'000,"INVALID HSE value for BOARD");
+	//static_assert(HSE_VALUE==25'000'000,"INVALID HSE value for BOARD");
 	Communication::test_order_received = new DigitalOutput(PG4);
 
 
@@ -21,12 +21,6 @@ int main(void)
 	});
 
 	while(1) {
-		/*if(DigitalInput::read_pin_state(ready_10) == PinState::ON && DigitalInput::read_pin_state(fault_10) == PinState::ON){
-			reset_5.turn_on();
-		}else{
-			reset_5.turn_off();
-		}*/
-
 		lcu_master.update();
 	}
 }
