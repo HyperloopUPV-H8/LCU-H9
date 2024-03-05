@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ST-LIB.hpp"
+#include "LCU-SHARED.hpp"
 #include "CommonCData.h"
 
 /** #############################################################
@@ -8,7 +9,7 @@
  *  #############################################################
  */
 
-static constexpr uint8_t LDU_COUNT = 10;
+//static constexpr uint8_t LDU_COUNT = 10;
 static constexpr uint8_t LDU_BUFFER_COUNT = LDU_COUNT/2;
 static constexpr uint8_t AIRGAP_COUNT = 8;
 

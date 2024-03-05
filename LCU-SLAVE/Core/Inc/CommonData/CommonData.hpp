@@ -1,12 +1,13 @@
 #pragma once
 
 #include "ST-LIB.hpp"
+#include "LCU-SHARED.hpp"
 
 /** #############################################################
  *  ###################  LCU_DESIGN_DATA  #######################
  *  #############################################################
  */
-static constexpr uint8_t LDU_COUNT = 10;
+//static constexpr uint8_t LDU_COUNT = 10;
 static const uint8_t AIRGAP_COUNT = 8;
 static constexpr uint32_t PWM_FREQ_HZ = 10000;
 

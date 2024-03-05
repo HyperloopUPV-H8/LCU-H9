@@ -5,6 +5,10 @@
 #define DOUBLE_AIRGAP_SLOPE 7.8112/1000
 #define DOUBLE_AIRGAP_OFFSET 3.0947/1000
 
+
+/**
+ * @brief this class handles the airgap sensor read and parsing, saving the results in a moving average
+ */
 class Airgaps{
 public:
 	static uint8_t airgaps_index_array[AIRGAP_COUNT];
