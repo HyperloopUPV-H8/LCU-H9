@@ -20,7 +20,6 @@ public:
 	bool run_pid = false;
 
 	void control_loop(){
-		if(!run_pid){return;}
 		arithmetic_number_type error = desired_airgap_distance_m - Airgaps::airgaps_data_array[DOF1_USED_AIRGAP_INDEX].output_value;
 		Levitation_control_PID.input(error);
 		Levitation_control_PID.execute();

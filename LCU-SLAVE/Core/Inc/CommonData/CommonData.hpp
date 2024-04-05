@@ -17,7 +17,7 @@ static constexpr double MAXIMUM_DESIRED_CURRENT = 45.0;
  *  ################### LCU_RUNNING_MODE  #######################
  *  #############################################################
  */
-
+/*
 enum LCU_running_modes{
 	GUI_CONTROL,
 	DOF1,
@@ -25,7 +25,7 @@ enum LCU_running_modes{
 
 #define RUNNING_MODE GUI_CONTROL
 #define ARITHMETIC_MODE double
-
+*/
 #define DOF1_USED_LDU_INDEX 9
 #define DOF1_USED_AIRGAP_INDEX 0
 
@@ -34,57 +34,10 @@ enum LCU_running_modes{
  *  ##############################################################
  */
 
-enum LCU_states{
-	INITIAL = 0,
-	OPERATIONAL,
-	FAULT,
-};
-
-static struct control_data{
-	uint8_t master_status = 0;
-	uint8_t slave_status = 0;
-
-	uint16_t fixed_coil_temperature[LDU_COUNT]{0};
-	uint16_t fixed_lpu_temperature[LDU_COUNT]{0};
-	uint16_t fixed_coil_current[LDU_COUNT]{0};
-	uint16_t fixed_battery_voltage[LDU_COUNT]{0};
-	uint16_t fixed_airgap_distance[AIRGAP_COUNT]{0};
-
-
-	float coil_temperature[LDU_COUNT]{0.0};
-	float lpu_temperature[LDU_COUNT]{0.0};
-	float coil_current[LDU_COUNT]{0.0};
-	float battery_voltage[LDU_COUNT]{0.0};
-	float airgap_distance[AIRGAP_COUNT]{0.0};
-}slave_control_data;
-
 static struct periph_pointers{
 	PWM* ldu_pwms[LDU_COUNT][2];
 
 }slave_periph_pointers;
-
-
-
-
-/*  #################################################################
- *  #######################  PACKET STRUCTURE  ######################
- *  #################################################################
- */
-
-static constexpr uint32_t ORDER_COUNT = 4;
-
-static const uint16_t MASTER_SLAVE_DATA_ORDER_ID = 27;
-static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_INDEX = 0;
-
-
-static constexpr uint32_t FIRST_TESTING_ORDER_INDEX = 1;
-
-static constexpr uint16_t TEST_PWM_ORDER_ID = 1001;
-static constexpr uint16_t TEST_PWM_ORDER_INDEX = FIRST_TESTING_ORDER_INDEX;
-static constexpr uint16_t TEST_VBAT_ORDER_ID = 1002;
-static constexpr uint16_t TEST_VBAT_ORDER_INDEX = FIRST_TESTING_ORDER_INDEX+1;
-static constexpr uint16_t TEST_DESIRED_CURRENT_ORDER_ID = 1003;
-static constexpr uint16_t TEST_DESIRED_CURRENT_ORDER_INDEX = FIRST_TESTING_ORDER_INDEX+2;
 
 /*  #################################################################
  *  ################  STATIC FUNCTIONS DECLARATION  #################
@@ -112,6 +65,7 @@ void shut_down();
  * #####################  PINOUT DISTRIBUTION  #####################
  * #################################################################
  */
+#define SPI_RS_PIN 		PE0
 
 #define PWM_PIN_1_1 	PE5
 #define PWM_PIN_1_2 	PE6
@@ -138,10 +92,10 @@ void shut_down();
 #define VBAT_PIN_5 		PF8
 #define SHUNT_PIN_5 	PA2
 
-#define PWM_PIN_6_1		PD12
-#define PWM_PIN_6_2		PD13
+#define PWM_PIN_6_1		PE9 //PD12 on board
+#define PWM_PIN_6_2		PE11 //PD13 on board
 #define VBAT_PIN_6 		PF7
-#define SHUNT_PIN_6 	PA3
+#define SHUNT_PIN_6 	PF11 //PA3 on board
 
 #define PWM_PIN_7_1		PB11
 #define PWM_PIN_7_2		PB10
@@ -158,15 +112,15 @@ void shut_down();
 #define VBAT_PIN_9 		PC3
 #define SHUNT_PIN_9 	PF12
 
-#define PWM_PIN_10_1	PE9
-#define PWM_PIN_10_2	PE11
+#define PWM_PIN_10_1	PD12 //PE9 on board
+#define PWM_PIN_10_2	PD13 //PE11 on board
 #define VBAT_PIN_10 	PC2
-#define SHUNT_PIN_10 	PF11
+#define SHUNT_PIN_10 	PA3 //PF11 on board
 
-#define AIRGAP_PIN_1 	PA7
+#define AIRGAP_PIN_1 	PA4 //PA7 on board
 #define AIRGAP_PIN_2 	PA6
 #define AIRGAP_PIN_3 	PA5
-#define AIRGAP_PIN_4 	PA4
+#define AIRGAP_PIN_4 	PA7 //PA4 on board
 #define AIRGAP_PIN_5 	PB1
 #define AIRGAP_PIN_6 	PB0
 #define AIRGAP_PIN_7 	PC5

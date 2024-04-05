@@ -13,7 +13,6 @@ int main(void)
 	//static_assert(HSE_VALUE==25'000'000,"INVALID HSE value for BOARD");
 	Communication::test_order_received = new DigitalOutput(PG4);
 
-
 	LCU lcu_master;
 
 	Communication::test_order_received->turn_on();
@@ -21,10 +20,7 @@ int main(void)
 		Communication::test_order_received->turn_off();
 	});
 
-	RAMManager::allocate_non_cached_memory(1024);
-	RAMManager::allocate_non_cached_memory(512);
-	RAMManager::allocate_non_cached_memory(512);
-	RAMManager::allocate_non_cached_memory(1);
+
 	while(1) {
 		lcu_master.update();
 	}

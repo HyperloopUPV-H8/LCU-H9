@@ -1,3 +1,4 @@
 #pragma once
 
-#import "Layout/StructureConfig.hpp"
+#include "Layout/StructureConfig.hpp"
+#include "Layout/HardwareStructure.hpp"

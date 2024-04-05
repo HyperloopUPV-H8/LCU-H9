@@ -20,11 +20,14 @@ void LCU::update(){
 	generalStateMachine.check_transitions();
 	Communication::update();
 	LDU_Buffer::update_buffers();
-	for(int i = 0; i < LDU_COUNT; i++){
-		master_control_data.fixed_lpu_temperature[i] = ADC::get_int_value(lpu_temperature_adc_id[i]);
-		master_control_data.lpu_temperature[i] = lpu_temperature_calculation(master_control_data.fixed_lpu_temperature[i]);
-		master_control_data.fixed_coil_temperature[i] = ADC::get_int_value(coil_temperature_adc_id[i]);
-		master_control_data.coil_temperature[i] = coil_temperature_calculation(master_control_data.fixed_coil_temperature[i]);
+	for(int i = 0; i < LDU_COUNT; i++){ //TODO: abstract these sensors
+		shared_control_data.fixed_lpu_temperature[i] = ADC::get_int_value(lpu_temperature_adc_id[i]);
+		shared_control_data.float_lpu_temperature[i] = lpu_temperature_calculation(shared_control_data.fixed_lpu_temperature[i]);
+		shared_control_data.fixed_coil_temperature[i] = ADC::get_int_value(coil_temperature_adc_id[i]);
+		shared_control_data.float_coil_temperature[i] = coil_temperature_calculation(shared_control_data.fixed_coil_temperature[i]);
+	}
+	for(int i = 0; i < AIRGAP_COUNT; i++){
+		*shared_control_data.float_airgap_distance[i] = airgap_distance_binary_to_real(*shared_control_data.fixed_airgap_distance[i])*1000;
 	}
 }
 

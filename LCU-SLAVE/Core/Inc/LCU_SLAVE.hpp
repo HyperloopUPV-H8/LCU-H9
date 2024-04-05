@@ -39,8 +39,8 @@ public:
 
 		if(PendingLevitationControl){
 			LevitationControlCount++;
-			levitationControl.control_loop();
 			if(levitationControl.run_pid){
+				levitationControl.control_loop();
 				ldu_array[DOF1_USED_LDU_INDEX].desired_current = levitationControl.desired_current;
 			}
 			PendingLevitationControl = false;
@@ -73,8 +73,10 @@ public:
 		Communication::init();
 
 		STLIB::start();
-		Communication::start();
 		Airgaps::start();
+		Communication::start();
+
+		communication.define_packets();
 
 		for(uint8_t i = 0; i < LDU_COUNT; i++){
 			ldu_array[i].start();

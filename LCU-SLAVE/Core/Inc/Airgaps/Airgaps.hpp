@@ -8,7 +8,8 @@
 class Airgaps{
 public:
 	static uint8_t airgaps_index_array[AIRGAP_COUNT];
-	static double airgaps_raw_data_array[AIRGAP_COUNT];
+	static uint16_t airgaps_binary_data_array[AIRGAP_COUNT];
+	static float airgaps_raw_data_array[AIRGAP_COUNT];
 	static MovingAverage<AIRGAP_MOVING_AVERAGE_COUNT> airgaps_data_array[AIRGAP_COUNT];
 
 	static inline void inscribe(){
@@ -20,6 +21,11 @@ public:
 			airgaps_index_array[5] = ADC::inscribe(AIRGAP_PIN_6);
 			airgaps_index_array[6] = ADC::inscribe(AIRGAP_PIN_7);
 			airgaps_index_array[7] = ADC::inscribe(AIRGAP_PIN_8);
+
+			for(int i = 0;  i < AIRGAP_COUNT; i++){
+				shared_control_data.fixed_airgap_distance[i] = &airgaps_binary_data_array[i];
+				shared_control_data.float_airgap_distance[i] = &airgaps_raw_data_array[i];
+			}
 	}
 
 	static inline void start(){
@@ -29,13 +35,16 @@ public:
 	}
 
 	static inline void update(){
-		airgaps_raw_data_array[DOF1_USED_AIRGAP_INDEX] = ADC::get_value(airgaps_index_array[DOF1_USED_AIRGAP_INDEX]);
-		airgaps_data_array[DOF1_USED_AIRGAP_INDEX].compute(airgaps_raw_data_array[DOF1_USED_AIRGAP_INDEX] * DOUBLE_AIRGAP_SLOPE + DOUBLE_AIRGAP_OFFSET);
+		for(int i = 0; i < AIRGAP_COUNT; i++){
+			airgaps_binary_data_array[i] = ADC::get_int_value(airgaps_index_array[i]);
+			airgaps_raw_data_array[i] = ADC::get_value(airgaps_index_array[i]);
+			airgaps_data_array[i].compute((double)airgaps_raw_data_array[i] * DOUBLE_AIRGAP_SLOPE + DOUBLE_AIRGAP_OFFSET);
+		}
 	}
 
 	static inline void parse_arrays(){
 		for(int i = 0; i < AIRGAP_COUNT; i++){
-			slave_control_data.fixed_airgap_distance[i] = ADC::get_int_value(airgaps_index_array[i]);
+			*shared_control_data.fixed_airgap_distance[i] = ADC::get_int_value(airgaps_index_array[i]);
 		}
 	}
 };
