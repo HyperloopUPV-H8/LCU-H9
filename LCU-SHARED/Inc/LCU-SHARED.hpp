@@ -1,3 +1,6 @@
 #pragma once
 
-#include "Layout/LayoutStructure.hpp"
+#include "Layout/Layout.hpp"
+#include "Sensors/Sensors.hpp"
+#include "Control/Control.hpp"
+#include "Tools/Tools.hpp"

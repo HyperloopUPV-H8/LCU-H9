@@ -41,7 +41,7 @@ public:
 
 
 	LDU() = default;
-	LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin) : index(index), Voltage_by_current_PI{KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY, CURRENT_PI_PERIOD_SECONDS}{
+	LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin) : index(index), Voltage_by_current_PI{KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY, CURRENT_CONTROL_PERIOD_SECONDS}{
 		pwm1 = new PWM(pwm1_pin);
 		slave_periph_pointers.ldu_pwms[index][0] = pwm1;
 		pwm2 = new PWM(pwm2_pin);

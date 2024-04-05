@@ -7,25 +7,8 @@
  *  ###################  LCU_DESIGN_DATA  #######################
  *  #############################################################
  */
-//static constexpr uint8_t LDU_COUNT = 10;
-static const uint8_t AIRGAP_COUNT = 8;
-static constexpr uint32_t PWM_FREQ_HZ = 10000;
-
-static constexpr uint32_t LEVITATION_CONTROL_FREQ_HZ = 1000;
-static constexpr double LEVITATION_CONTROL_PERIOD_SECONDS = (double) (1.0 / LEVITATION_CONTROL_FREQ_HZ);
-
-static constexpr uint32_t CURRENT_PI_FREQ_HZ = 2000;
-static constexpr double CURRENT_PI_PERIOD_SECONDS = (double) (1.0 / CURRENT_PI_FREQ_HZ);
-
 static constexpr uint32_t CURRENT_UPDATE_DATA_HZ = 10000;
-static constexpr double CURRENT_UPDATE_PERIOD_SECONDS = (double) (1.0 / CURRENT_PI_FREQ_HZ);
-
-static constexpr uint32_t AIRGAP_UPDATE_DATA_HZ = 7500;
-static constexpr double AIRGAP_UPDATE_PERIOD_SECONDS = (double) (1.0 / CURRENT_PI_FREQ_HZ);
-static constexpr uint32_t AIRGAP_MOVING_AVERAGE_COUNT = 10;
-
-static constexpr uint32_t VBAT_UPDATE_DATA_HZ = 10;
-static constexpr double VBAT_UPDATE_PERIOD_SECONDS = (double) (1.0 / CURRENT_PI_FREQ_HZ);
+static constexpr double CURRENT_UPDATE_PERIOD_SECONDS = (double) (1.0 / CURRENT_UPDATE_DATA_HZ);
 
 
 static constexpr double MAXIMUM_DESIRED_CURRENT = 45.0;

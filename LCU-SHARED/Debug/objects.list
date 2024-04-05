@@ -1,4 +1,2 @@
-"./Drivers/CMSIS/Device/ST/STM32H7xx/Source/Templates/system_stm32h7xx.o"
-"./Src/LCU-SHARED.o"
 "./Src/syscalls.o"
 "./Src/sysmem.o"

@@ -11,7 +11,7 @@
 
 //static constexpr uint8_t LDU_COUNT = 10;
 static constexpr uint8_t LDU_BUFFER_COUNT = LDU_COUNT/2;
-static constexpr uint8_t AIRGAP_COUNT = 8;
+//static constexpr uint8_t AIRGAP_COUNT = 8;
 
 static constexpr uint16_t ETH_REFRESH_DATA_PERIOD_MS = 100;
 static constexpr uint16_t SPI_REFRESH_DATA_PERIOD_MS = 10;

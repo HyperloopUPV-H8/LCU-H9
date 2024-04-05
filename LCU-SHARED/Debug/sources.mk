@@ -27,6 +27,5 @@ CPP_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
-Drivers/CMSIS/Device/ST/STM32H7xx/Source/Templates \
 Src \
 
