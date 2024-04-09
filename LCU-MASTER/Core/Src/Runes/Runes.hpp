@@ -83,6 +83,7 @@ SPI::Instance SPI::instance3 = { .SCK = &PC10, .MOSI = &PC12, .MISO = &PC11, .SS
 								 .hdma_rx = DMA::Stream::DMA1Stream6,
 								 .baud_rate_prescaler = SPI_BAUDRATEPRESCALER_256,
 								 .mode = SPI_MODE_MASTER,
+								 .use_DMA = true,
                                };
 
 SPI::Peripheral SPI::spi3 = SPI::Peripheral::peripheral3;
