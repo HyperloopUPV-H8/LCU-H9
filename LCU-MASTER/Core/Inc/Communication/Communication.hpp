@@ -118,16 +118,16 @@ public:
 	}
 
 	static void update(){
-		if(new_slave_data){
+		/*if(new_slave_data){
 			new_slave_data = false;
 			for(int i = 0; i < LDU_COUNT; i++){
-				shared_control_data.float_coil_current[i] = coil_current_calculation(coil_I[i]);
-				shared_control_data.float_battery_voltage[i] = battery_voltage_calculation(bat_V[i]);
+				*shared_control_data.float_coil_current[i] = coil_current_calculation(*coil_I[i]);
+				*shared_control_data.float_battery_voltage[i] = battery_voltage_calculation(*bat_V[i]);
 			}
 			for(int i = 0; i < AIRGAP_COUNT; i++){
 				*shared_control_data.float_airgap_distance[i] = airgap_distance_calculation(*airgap[i]);
 			}
-		}
+		}*/
 	}
 
 	//###################  PERIODIC FUNCTIONS  #########################

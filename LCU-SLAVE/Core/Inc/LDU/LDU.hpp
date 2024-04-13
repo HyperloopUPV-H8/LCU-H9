@@ -6,12 +6,6 @@
 #define KI_CURRENT_TO_DUTY 400.0 //208.3333
 #define MOVING_AVERAGE_SIZE 20
 
-#define DOUBLE_VBAT_SLOPE 180.29 //91.325
-#define DOUBLE_VBAT_OFFSET -18.524 //-9.3784
-
-#define DOUBLE_SHUNT_SLOPE -34.3
-#define DOUBLE_SHUNT_OFFSET 67.1
-
 template<LCU_running_modes running_mode, typename arithmetic_number_type>
 class LDU{
 public:
@@ -28,7 +22,9 @@ public:
 	PI<IntegratorType::Trapezoidal> Voltage_by_current_PI;
 
 	MovingAverage<10> raw_average_voltage_battery;
+	uint16_t binary_voltage_battery = 0;
 	arithmetic_number_type voltage_battery = 0;
+	uint16_t binary_current_shunt = 0;
 	arithmetic_number_type raw_current_shunt = 0;
 	arithmetic_number_type current_shunt = 0;
 
@@ -48,6 +44,9 @@ public:
 		slave_periph_pointers.ldu_pwms[index][1] = pwm2;
 		vbat_id = ADC::inscribe(vbat_pin);
 		shunt_id = ADC::inscribe(shunt_pin);
+		shared_control_data.fixed_coil_current[index] = &binary_current_shunt;
+		shared_control_data.fixed_battery_voltage[index] = &binary_voltage_battery;
+
 	}
 
 
@@ -81,6 +80,7 @@ public:
 	//################  DATA STORING, PROCESSING AND PARSING  ###################
 	void update_raw_vbat_value(){
 		double raw_voltage_battery = (double)ADC::get_value(vbat_id);
+		binary_voltage_battery = ADC::get_int_value(vbat_id);
 		raw_average_voltage_battery.compute(raw_voltage_battery);
 	}
 
@@ -90,6 +90,7 @@ public:
 
 	void update_raw_shunt_value(){
 		raw_current_shunt = (double)ADC::get_value(shunt_id);
+		binary_current_shunt = ADC::get_int_value(shunt_id);
 	}
 
 	arithmetic_number_type get_shunt_by_raw_data(){

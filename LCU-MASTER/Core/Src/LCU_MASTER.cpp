@@ -25,6 +25,8 @@ void LCU::update(){
 		shared_control_data.float_lpu_temperature[i] = lpu_temperature_calculation(shared_control_data.fixed_lpu_temperature[i]);
 		shared_control_data.fixed_coil_temperature[i] = ADC::get_int_value(coil_temperature_adc_id[i]);
 		shared_control_data.float_coil_temperature[i] = coil_temperature_calculation(shared_control_data.fixed_coil_temperature[i]);
+		*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(*shared_control_data.fixed_coil_current[i]);
+		*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
 	}
 	for(int i = 0; i < AIRGAP_COUNT; i++){
 		*shared_control_data.float_airgap_distance[i] = airgap_distance_binary_to_real(*shared_control_data.fixed_airgap_distance[i])*1000;
