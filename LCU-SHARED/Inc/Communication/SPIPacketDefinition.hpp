@@ -8,7 +8,7 @@ static constexpr uint32_t SPI_ORDER_COUNT = 5;
 static constexpr uint16_t MASTER_SLAVE_INITIAL_ORDER_ID = 15;
 static constexpr uint16_t MASTER_SLAVE_INITIAL_ORDER_INDEX = 0;
 
-static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_ID = 27;
+static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_ID = 85;
 static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_INDEX = 1;
 
 

@@ -35,7 +35,8 @@ public:
 
 	void update(){
 		generalStateMachine.check_transitions();
-		ProtectionManager::check_protections();
+		//ProtectionManager::check_protections();
+		Communication::update();
 
 		if(PendingLevitationControl){
 			LevitationControlCount++;
@@ -68,7 +69,7 @@ public:
 		ldu_array[9] = LDU<running_mode, arithmetic_number_type>(9, PWM_PIN_10_1, PWM_PIN_10_2, VBAT_PIN_10, SHUNT_PIN_10);
 
 		state_machine_initialization();
-		protections_inscribe();
+		//protections_inscribe();
 		Airgaps::inscribe();
 		Communication::init();
 

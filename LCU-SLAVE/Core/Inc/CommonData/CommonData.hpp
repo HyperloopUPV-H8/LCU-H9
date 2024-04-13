@@ -65,7 +65,7 @@ void shut_down();
  * #####################  PINOUT DISTRIBUTION  #####################
  * #################################################################
  */
-#define SPI_RS_PIN 		PE0
+#define SPI_RS_PIN 		PD2
 
 #define PWM_PIN_1_1 	PE5
 #define PWM_PIN_1_2 	PE6

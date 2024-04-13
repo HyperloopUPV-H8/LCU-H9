@@ -66,5 +66,9 @@ public:
 	static void start(){
 		SPI::slave_listen_Orders(spi_id);
 	}
+
+	static void update(){
+		SPI::Order_update();
+	}
 };
 

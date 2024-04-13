@@ -106,7 +106,7 @@ public:
 		}
 		current_shunt = get_shunt_by_raw_data();
 		if(current_shunt > 50.0 || current_shunt < -50.0){
-			send_to_fault();
+			//send_to_fault();
 		}
 		Voltage_by_current_PI.input(desired_current - current_shunt);
 		Voltage_by_current_PI.execute();

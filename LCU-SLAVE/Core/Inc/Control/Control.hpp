@@ -3,9 +3,9 @@
 #include "CommonData/CommonData.hpp"
 #include "LDU/LDU.hpp"
 
-#define KP_AIRGAP_TO_CURRENT -5500.0 //-11149.0
-#define KI_AIRGAP_TO_CURRENT -1700.0 //0.9434 * KP_AIRGAP_TO_CURRENT
-#define KD_AIRGAP_TO_CURRENT -550.0 //0.1427 * KP_AIRGAP_TO_CURRENT
+#define KP_AIRGAP_TO_CURRENT -4868.5//-5500.0
+#define KI_AIRGAP_TO_CURRENT -1030.1 //-1700.0
+#define KD_AIRGAP_TO_CURRENT -94.0 //-550.0
 #define MOVING_AVERAGE_SIZE 20
 
 template<LCU_running_modes running_mode, typename arithmetic_number_type>
