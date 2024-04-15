@@ -38,8 +38,8 @@ public:
 		);
 		SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2+1] = new SPIPacket<59, uint8_t, ldu_array_deduction, ldu_array_deduction, airgap_array_deduction>(
 				&shared_control_data.slave_status,
-				&coil_I[0], &coil_I[1], &coil_I[2], &coil_I[3], &coil_I[4], &coil_I[5], &coil_I[6], &coil_I[7], &coil_I[8], &coil_I[9],
-				&bat_V[0], &bat_V[1], &bat_V[2], &bat_V[3], &bat_V[4], &bat_V[5], &bat_V[6], &bat_V[7], &bat_V[8], &bat_V[9],
+				coil_I[0], coil_I[1], coil_I[2], coil_I[3], coil_I[4], coil_I[5], coil_I[6], coil_I[7], coil_I[8], coil_I[9],
+				bat_V[0], bat_V[1], bat_V[2], bat_V[3], bat_V[4], bat_V[5], bat_V[6], bat_V[7], bat_V[8], bat_V[9],
 				airgap[0], airgap[1], airgap[2], airgap[3], airgap[4], airgap[5], airgap[6], airgap[7]
 		);
 		SPIOrders[MASTER_SLAVE_DATA_ORDER_INDEX] = new SPIStackOrder(MASTER_SLAVE_DATA_ORDER_ID, *SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2], *SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2+1]);

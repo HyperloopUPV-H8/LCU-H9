@@ -44,13 +44,12 @@ public:
 		slave_periph_pointers.ldu_pwms[index][1] = pwm2;
 		vbat_id = ADC::inscribe(vbat_pin);
 		shunt_id = ADC::inscribe(shunt_pin);
-		shared_control_data.fixed_coil_current[index] = &binary_current_shunt;
-		shared_control_data.fixed_battery_voltage[index] = &binary_voltage_battery;
-
 	}
 
 
 	void start(){
+		shared_control_data.fixed_coil_current[index] = &binary_current_shunt;
+		shared_control_data.fixed_battery_voltage[index] = &binary_voltage_battery;
 		pwm1->turn_on();
 		pwm2->turn_on();
 		ADC::turn_on(vbat_id);

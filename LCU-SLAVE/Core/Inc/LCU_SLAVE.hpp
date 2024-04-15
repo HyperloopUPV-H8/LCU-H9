@@ -77,11 +77,11 @@ public:
 		Airgaps::start();
 		Communication::start();
 
-		communication.define_packets();
-
 		for(uint8_t i = 0; i < LDU_COUNT; i++){
 			ldu_array[i].start();
 		}
+
+		communication.define_packets();
 	}
 
 

@@ -40,6 +40,12 @@ public:
 	}
 
 	Communication(){
+		for(int i = 0;  i < LDU_COUNT; i++){
+			shared_control_data.fixed_battery_voltage[i] = new uint16_t;
+			shared_control_data.float_battery_voltage[i] = new float;
+			shared_control_data.fixed_coil_current[i] = new uint16_t;
+			shared_control_data.float_coil_current[i] = new float;
+		}
 		for(int i = 0;  i < AIRGAP_COUNT; i++){
 			shared_control_data.fixed_airgap_distance[i] = new uint16_t;
 			shared_control_data.float_airgap_distance[i] = new float;
@@ -53,8 +59,8 @@ public:
 		);
 		SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2+1] = new SPIPacket<59, uint8_t, ldu_array_deduction, ldu_array_deduction, airgap_array_deduction>(
 				&shared_control_data.slave_status,
-				&coil_I[0], &coil_I[1], &coil_I[2], &coil_I[3], &coil_I[4], &coil_I[5], &coil_I[6], &coil_I[7], &coil_I[8], &coil_I[9],
-				&bat_V[0], &bat_V[1], &bat_V[2], &bat_V[3], &bat_V[4], &bat_V[5], &bat_V[6], &bat_V[7], &bat_V[8], &bat_V[9],
+				coil_I[0], coil_I[1], coil_I[2], coil_I[3], coil_I[4], coil_I[5], coil_I[6], coil_I[7], coil_I[8], coil_I[9],
+				bat_V[0], bat_V[1], bat_V[2], bat_V[3], bat_V[4], bat_V[5], bat_V[6], bat_V[7], bat_V[8], bat_V[9],
 				airgap[0], airgap[1], airgap[2], airgap[3], airgap[4], airgap[5], airgap[6], airgap[7]
 		);
 		SPIOrders[MASTER_SLAVE_DATA_ORDER_INDEX] = new SPIStackOrder(MASTER_SLAVE_DATA_ORDER_ID, *SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2], *SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2+1]);
@@ -97,14 +103,14 @@ public:
 				&shared_control_data.float_lpu_temperature[3],&shared_control_data.float_lpu_temperature[4],&shared_control_data.float_lpu_temperature[5],
 				&shared_control_data.float_lpu_temperature[6],&shared_control_data.float_lpu_temperature[7],&shared_control_data.float_lpu_temperature[8],
 				&shared_control_data.float_lpu_temperature[9],
-				&shared_control_data.float_coil_current[0],&shared_control_data.float_coil_current[1],&shared_control_data.float_coil_current[2],
-				&shared_control_data.float_coil_current[3],&shared_control_data.float_coil_current[4],&shared_control_data.float_coil_current[5],
-				&shared_control_data.float_coil_current[6],&shared_control_data.float_coil_current[7],&shared_control_data.float_coil_current[8],
-				&shared_control_data.float_coil_current[9],
-				&shared_control_data.float_battery_voltage[0],&shared_control_data.float_battery_voltage[1],&shared_control_data.float_battery_voltage[2],
-				&shared_control_data.float_battery_voltage[3],&shared_control_data.float_battery_voltage[4],&shared_control_data.float_battery_voltage[5],
-				&shared_control_data.float_battery_voltage[6],&shared_control_data.float_battery_voltage[7],&shared_control_data.float_battery_voltage[8],
-				&shared_control_data.float_battery_voltage[9],
+				shared_control_data.float_coil_current[0],shared_control_data.float_coil_current[1],shared_control_data.float_coil_current[2],
+				shared_control_data.float_coil_current[3],shared_control_data.float_coil_current[4],shared_control_data.float_coil_current[5],
+				shared_control_data.float_coil_current[6],shared_control_data.float_coil_current[7],shared_control_data.float_coil_current[8],
+				shared_control_data.float_coil_current[9],
+				shared_control_data.float_battery_voltage[0],shared_control_data.float_battery_voltage[1],shared_control_data.float_battery_voltage[2],
+				shared_control_data.float_battery_voltage[3],shared_control_data.float_battery_voltage[4],shared_control_data.float_battery_voltage[5],
+				shared_control_data.float_battery_voltage[6],shared_control_data.float_battery_voltage[7],shared_control_data.float_battery_voltage[8],
+				shared_control_data.float_battery_voltage[9],
 				shared_control_data.float_airgap_distance[0],shared_control_data.float_airgap_distance[1],shared_control_data.float_airgap_distance[2],
 				shared_control_data.float_airgap_distance[3],shared_control_data.float_airgap_distance[4],shared_control_data.float_airgap_distance[5],
 				shared_control_data.float_airgap_distance[6],shared_control_data.float_airgap_distance[7]
@@ -118,16 +124,13 @@ public:
 	}
 
 	static void update(){
-		/*if(new_slave_data){
-			new_slave_data = false;
-			for(int i = 0; i < LDU_COUNT; i++){
-				*shared_control_data.float_coil_current[i] = coil_current_calculation(*coil_I[i]);
-				*shared_control_data.float_battery_voltage[i] = battery_voltage_calculation(*bat_V[i]);
-			}
-			for(int i = 0; i < AIRGAP_COUNT; i++){
-				*shared_control_data.float_airgap_distance[i] = airgap_distance_calculation(*airgap[i]);
-			}
-		}*/
+		for(int i = 0; i < AIRGAP_COUNT; i++){
+			*shared_control_data.float_airgap_distance[i] = airgap_distance_binary_to_real(*shared_control_data.fixed_airgap_distance[i])*1000;
+		}
+		for(int i = 0; i < LDU_COUNT; i++){
+			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(*shared_control_data.fixed_coil_current[i]);
+			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
+		}
 	}
 
 	//###################  PERIODIC FUNCTIONS  #########################
