@@ -7,6 +7,6 @@
 #include "Communication/Communication.hpp"
 
 
-#define RUNNING_MODE GUI_CONTROL
+#define RUNNING_MODE DOF5
 #define ARITHMETIC_MODE double
 

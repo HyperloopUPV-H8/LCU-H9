@@ -21,7 +21,6 @@ public:
 	bool PendingCurrentPI = false;
 	bool PendingLevitationControl = false;
 	bool PendingHousekeepingTasks = false;
-	bool FaultFlag = false;
 
 
 	uint64_t LevitationControlCount = 0;
@@ -38,11 +37,22 @@ public:
 		//ProtectionManager::check_protections();
 		Communication::update();
 
+		if constexpr(running_mode == DOF5){
+			DOF5_update();
+		}else{
+			DOF1_update();
+		}
+
+	}
+
+
+	void DOF5_update(){
 		if(PendingLevitationControl){
-			LevitationControlCount++;
-			if(levitationControl.run_pid){
-				levitationControl.control_loop();
-				ldu_array[DOF1_USED_LDU_INDEX].desired_current = levitationControl.desired_current;
+
+			if(status_flags.enable_levitation_control){
+				LevitationControlCount++;
+				levitationControl.DOF5_control_loop();
+				levitationControl.update_desired_current_control();
 			}
 			PendingLevitationControl = false;
 		}
@@ -54,6 +64,22 @@ public:
 		}
 	}
 
+	void DOF1_update(){
+		if(PendingLevitationControl){
+			if(status_flags.enable_levitation_control){
+				LevitationControlCount++;
+				levitationControl.DOF1_control_loop();
+				ldu_array[DOF1_USED_LDU_INDEX].desired_current = levitationControl.desired_current;
+			}
+			PendingLevitationControl = false;
+		}
+
+		if(PendingCurrentPI){
+			CurrentPICount++;
+			run_current_PI();
+			PendingCurrentPI = false;
+		}
+	}
 
 	void setup_configuration(){
 		//index is n but uses the n+1 hardware data, as hardware starts with 1 instead of 0.
@@ -102,9 +128,15 @@ public:
 		generalStateMachine.add_transition(OPERATIONAL, FAULT, general_transition_operational_to_fault);
 
 		//################# ADDING ALL CYCLIC ACTIONS #######################
-		generalStateMachine.add_high_precision_cyclic_action(update_shunt_data, std::chrono::microseconds((int) (CURRENT_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
-		generalStateMachine.add_high_precision_cyclic_action(update_airgap_data, std::chrono::microseconds((int) (AIRGAP_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
-		generalStateMachine.add_low_precision_cyclic_action(update_vbat_data, std::chrono::microseconds((int) (10000)), OPERATIONAL);
+		if constexpr(running_mode == DOF5){
+			generalStateMachine.add_high_precision_cyclic_action(DOF5_update_shunt_data, std::chrono::microseconds((int) (CURRENT_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
+			generalStateMachine.add_high_precision_cyclic_action(DOF5_update_airgap_data, std::chrono::microseconds((int) (AIRGAP_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
+			generalStateMachine.add_low_precision_cyclic_action(DOF5_update_vbat_data, std::chrono::microseconds((int) (VBAT_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
+		}else{
+			generalStateMachine.add_high_precision_cyclic_action(DOF1_update_shunt_data, std::chrono::microseconds((int) (CURRENT_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
+			generalStateMachine.add_high_precision_cyclic_action(DOF1_update_airgap_data, std::chrono::microseconds((int) (AIRGAP_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
+			generalStateMachine.add_low_precision_cyclic_action(DOF1_update_vbat_data, std::chrono::microseconds((int) (VBAT_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
+		}
 		generalStateMachine.add_mid_precision_cyclic_action(rise_current_PI_flag, std::chrono::microseconds((int) (CURRENT_CONTROL_PERIOD_SECONDS*1000000)), OPERATIONAL);
 		generalStateMachine.add_low_precision_cyclic_action(rise_levitation_control_flag,  std::chrono::microseconds((int) (LEVITATION_CONTROL_PERIOD_SECONDS*1000000)), OPERATIONAL);
 
@@ -125,12 +157,11 @@ public:
 	}
 
 	static bool general_transition_operational_to_fault(){
-		return lcu_instance->FaultFlag;
+		return status_flags.fault_flag;
 	}
 
 	static void general_enter_fault(){
-		shut_down();
-		ldu_array[9].change_pwms_duty(0);
+		shutdown();
 	}
 
 	/* #############################################################################
@@ -138,25 +169,18 @@ public:
 	 * #############################################################################
 	 */
 
-	void change_ldu_duty_cycle(uint16_t ldu_index, float ldu_duty_cycle){
-		if(ldu_index >= LDU_COUNT){
-			return;
-		}
-		ldu_array[ldu_index].change_pwms_duty(ldu_duty_cycle);
-	}
-
 	void set_desired_airgap_distance(arithmetic_number_type desired_airgap_distance){
 		levitationControl.desired_airgap_distance_m = desired_airgap_distance;
 	}
 
 	void start_control(){
-		ldu_array[DOF1_USED_LDU_INDEX].flags.run_pi = true;
+		status_flags.enable_current_control = true;
 		levitationControl.start();
 	}
 
 	void stop_control(){
-		ldu_array[DOF1_USED_LDU_INDEX].change_pwms_duty(0);
-		ldu_array[DOF1_USED_LDU_INDEX].flags.run_pi = false;
+		shutdown();
+		status_flags.enable_levitation_control = false;
 		ldu_array[DOF1_USED_LDU_INDEX].Voltage_by_current_PI.reset();
 		levitationControl.stop();
 	}

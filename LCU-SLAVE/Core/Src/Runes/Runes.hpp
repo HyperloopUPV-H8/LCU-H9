@@ -179,8 +179,8 @@ vector<reference_wrapper<TimerPeripheral>> TimerPeripheral::timers = {
 PWMmap TimerPeripheral::available_pwm  = {
 	{PB4, {timer3, {TIM_CHANNEL_1, NORMAL}}},
 	{PB5, {timer3, {TIM_CHANNEL_2, NORMAL}}},
-	{PB10, {timer2, {TIM_CHANNEL_3, NORMAL}}},
-	{PB11, {timer2, {TIM_CHANNEL_4, NORMAL}}},
+	{PB8, {timer16, {TIM_CHANNEL_1, NORMAL}}},
+	{PB9, {timer17, {TIM_CHANNEL_1, NORMAL}}},
 	{PB14, {timer12, {TIM_CHANNEL_1, NORMAL}}},
 	{PB15, {timer12, {TIM_CHANNEL_2, NORMAL}}},
 

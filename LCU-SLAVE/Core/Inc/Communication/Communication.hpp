@@ -54,8 +54,13 @@ public:
 		SPIPackets[TEST_VBAT_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_to_change, &data_to_change);
 		SPIPackets[TEST_VBAT_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[TEST_VBAT_ORDER_INDEX] = new SPIStackOrder(TEST_VBAT_ORDER_ID, *SPIPackets[TEST_VBAT_ORDER_INDEX*2], *SPIPackets[TEST_VBAT_ORDER_INDEX*2+1]);
-		SPIOrders[TEST_VBAT_ORDER_INDEX]->set_callback(set_vbat_on_LDU);
+		SPIOrders[TEST_VBAT_ORDER_INDEX]->set_callback(start_levitation_control);
 
+
+		SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2] = new SPIPacket<4,float>(&data_to_change);
+		SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[START_LEVITATION_CONTROL_ORDER_INDEX] = new SPIStackOrder(START_LEVITATION_CONTROL_ORDER_ID, *SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2], *SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2+1]);
+		SPIOrders[START_LEVITATION_CONTROL_ORDER_INDEX]->set_callback(start_levitation_control);
 
 		SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_to_change, &data_to_change);
 		SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2+1] = new SPIPacket<0>;

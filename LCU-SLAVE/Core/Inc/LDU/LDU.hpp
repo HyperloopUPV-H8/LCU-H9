@@ -16,23 +16,22 @@ public:
 	uint8_t shunt_id = 0;
 
 
-	arithmetic_number_type desired_current = 0;
-	arithmetic_number_type LDU_duty_cycle = 0;
+	float desired_current = 0;
+	float LDU_duty_cycle = 0;
 
 	PI<IntegratorType::Trapezoidal> Voltage_by_current_PI;
 
-	MovingAverage<10> raw_average_voltage_battery;
-	uint16_t binary_voltage_battery = 0;
-	arithmetic_number_type voltage_battery = 0;
+	uint16_t binary_battery_voltage = 0;
+	MovingAverageBlock<uint16_t, uint16_t, 10> binary_average_battery_voltage;
+	float battery_voltage = 0.0;
+
 	uint16_t binary_current_shunt = 0;
-	arithmetic_number_type raw_current_shunt = 0;
-	arithmetic_number_type current_shunt = 0;
+	float current_shunt = 0.0;
 
 
 	struct LDU_flags{
 		bool fixed_vbat = false;
 		bool fixed_desired_current = false;
-		bool run_pi = false;
 	}flags;
 
 
@@ -49,7 +48,7 @@ public:
 
 	void start(){
 		shared_control_data.fixed_coil_current[index] = &binary_current_shunt;
-		shared_control_data.fixed_battery_voltage[index] = &binary_voltage_battery;
+		shared_control_data.fixed_battery_voltage[index] = &binary_battery_voltage;
 		pwm1->turn_on();
 		pwm2->turn_on();
 		ADC::turn_on(vbat_id);
@@ -65,11 +64,16 @@ public:
 	void change_pwms_duty(float duty){
 		if(duty > 0){
 			change_pwm2_duty(0);
-			change_pwm1_duty(duty);
+			change_pwm1_duty((float)duty);
 		}else{
 			change_pwm1_duty(0);
-			change_pwm2_duty(-duty);
+			change_pwm2_duty((float)-duty);
 		}
+	}
+
+	void set_pwms_duty(float duty){
+		LDU_duty_cycle = duty;
+		change_pwms_duty(duty);
 	}
 
 	void change_pwm1_freq(uint32_t freq){pwm1->set_frequency(freq);}
@@ -77,23 +81,21 @@ public:
 
 
 	//################  DATA STORING, PROCESSING AND PARSING  ###################
-	void update_raw_vbat_value(){
-		double raw_voltage_battery = (double)ADC::get_value(vbat_id);
-		binary_voltage_battery = ADC::get_int_value(vbat_id);
-		raw_average_voltage_battery.compute(raw_voltage_battery);
+	void update_vbat_value(){
+		binary_battery_voltage = ADC::get_int_value(vbat_id);
+		binary_average_battery_voltage.compute(binary_battery_voltage);
 	}
 
-	arithmetic_number_type get_vbat_by_raw_data(){
-		return raw_average_voltage_battery.output_value * DOUBLE_VBAT_SLOPE + DOUBLE_VBAT_OFFSET;
+	float get_vbat_data(){
+		return binary_average_battery_voltage.output_value * ADC_BINARY_TO_VOLTAGE * DOUBLE_VBAT_SLOPE + DOUBLE_VBAT_OFFSET;
 	}
 
-	void update_raw_shunt_value(){
-		raw_current_shunt = (double)ADC::get_value(shunt_id);
+	void update_shunt_value(){
 		binary_current_shunt = ADC::get_int_value(shunt_id);
 	}
 
-	arithmetic_number_type get_shunt_by_raw_data(){
-		return raw_current_shunt * DOUBLE_SHUNT_SLOPE + DOUBLE_SHUNT_OFFSET;
+	float get_shunt_data(){
+		return  binary_current_shunt * ADC_BINARY_TO_VOLTAGE * DOUBLE_SHUNT_SLOPE + DOUBLE_SHUNT_OFFSET;
 	}
 
 
@@ -101,10 +103,11 @@ public:
 
 	//#################  CURRENT CONTROL  #########################
 	void PI_current_to_duty_cycle(){
-		if(!flags.run_pi){
+		current_shunt = get_shunt_data();
+		if(!status_flags.enable_current_control){
+			change_pwms_duty(LDU_duty_cycle);
 			return;
 		}
-		current_shunt = get_shunt_by_raw_data();
 		if(current_shunt > 50.0 || current_shunt < -50.0){
 			//send_to_fault();
 		}
@@ -116,36 +119,30 @@ public:
 	float calculate_duty_by_voltage(double voltage){
 		if constexpr(running_mode == GUI_CONTROL){
 			if(!flags.fixed_vbat){
-				voltage_battery = get_vbat_by_raw_data();
+				battery_voltage = get_vbat_data();
 			}
 		}else{
-			voltage_battery = get_vbat_by_raw_data();
+			battery_voltage = get_vbat_data();
 		}
 
-		if(voltage_battery < 0.0001){
+		if(battery_voltage < 0.0001){
 			return 0;
 		}
-		if(voltage_battery > 252.5){
-			voltage_battery = 252.5;
+		if(battery_voltage > 252.5){
+			battery_voltage = 252.5;
 		}
 
-		if(voltage > voltage_battery){
+		if(voltage > battery_voltage){
 			return 100.0;
-		}else if(voltage < -voltage_battery){
+		}else if(voltage < -battery_voltage){
 			return -100.0;
 		}
 
-		float duty = voltage * 100 / voltage_battery;
+		float duty = voltage * 100 / battery_voltage;
 
 		if(duty < 0.5 && duty > -0.5){return 0;}
 
 		return duty;
-	}
-
-	void shut_down(){
-		change_pwms_duty(0);
-		flags.run_pi = false;
-		//flags.fixed_pwm = true;
 	}
 };
 

@@ -44,22 +44,26 @@ static struct periph_pointers{
  *  #################################################################
  */
 
-inline void update_airgap_data();
-static void update_shunt_data();
-static void update_vbat_data();
+inline void DOF5_update_airgap_data();
+inline void DOF5_update_shunt_data();
+inline void DOF5_update_vbat_data();
+inline void DOF1_update_airgap_data();
+inline void DOF1_update_shunt_data();
+inline void DOF1_update_vbat_data();
 
-void rise_current_PI_flag();
-void rise_levitation_control_flag();
-static void rise_rise_housekeeping_tasks_flag();
+inline void rise_current_PI_flag();
+inline void rise_levitation_control_flag();
+inline void rise_rise_housekeeping_tasks_flag();
 
-static void run_current_PI();
+inline void update_desired_current_LDU();
+inline void run_current_PI();
 
-static void set_vbat_on_LDU();
-static void set_desired_current_on_LDU();
-static void test_pwm_order_callback();
+inline void start_levitation_control();
+inline void set_desired_current_on_LDU();
+inline void test_pwm_order_callback();
 
-void send_to_fault();
-void shut_down();
+inline void send_to_fault();
+inline void shutdown();
 
 /* #################################################################
  * #####################  PINOUT DISTRIBUTION  #####################
@@ -97,8 +101,8 @@ void shut_down();
 #define VBAT_PIN_6 		PF7
 #define SHUNT_PIN_6 	PF11 //PA3 on board
 
-#define PWM_PIN_7_1		PB11
-#define PWM_PIN_7_2		PB10
+#define PWM_PIN_7_1		PB9
+#define PWM_PIN_7_2		PB8
 #define VBAT_PIN_7 		PF10
 #define SHUNT_PIN_7 	PF14
 
