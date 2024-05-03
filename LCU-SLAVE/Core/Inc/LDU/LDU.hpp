@@ -63,11 +63,11 @@ public:
 
 	void change_pwms_duty(float duty){
 		if(duty > 0){
-			change_pwm2_duty(0);
-			change_pwm1_duty((float)duty);
+			change_pwm2_duty(5);
+			change_pwm1_duty((float)duty+5);
 		}else{
-			change_pwm1_duty(0);
-			change_pwm2_duty((float)-duty);
+			change_pwm1_duty(5);
+			change_pwm2_duty((float)-duty +5);
 		}
 	}
 
@@ -113,7 +113,15 @@ public:
 		}
 		Voltage_by_current_PI.input(desired_current - current_shunt);
 		Voltage_by_current_PI.execute();
-		change_pwms_duty(calculate_duty_by_voltage(Voltage_by_current_PI.output_value));
+
+		double voltage = Voltage_by_current_PI.output_value;
+
+		if(voltage > 200.0){
+			voltage = 200.0;
+		}else if(voltage < -200.0){
+			voltage = -200.0;
+		}
+		change_pwms_duty(calculate_duty_by_voltage(voltage));
 	}
 
 	float calculate_duty_by_voltage(double voltage){
