@@ -39,6 +39,14 @@ FDCAN_HandleTypeDef hfdcan1;
 FMAC_HandleTypeDef hfmac;
 
 
+
+/************************************************
+ *             	 		MPU
+ ***********************************************/
+
+MPUManager::config MPUManager::MPUConfig = {};
+
+
 /************************************************
  *              Communication-FDCAN
  ***********************************************/
@@ -75,6 +83,7 @@ SPI::Instance SPI::instance3 = { .SCK = &PC10, .MOSI = &PC12, .MISO = &PC11, .SS
 								 .hdma_rx = DMA::Stream::DMA1Stream6,
 								 .baud_rate_prescaler = SPI_BAUDRATEPRESCALER_256,
 								 .mode = SPI_MODE_MASTER,
+								 .use_DMA = true,
                                };
 
 SPI::Peripheral SPI::spi3 = SPI::Peripheral::peripheral3;
@@ -212,10 +221,6 @@ map<Pin, InputCapture::Instance> InputCapture::available_instances = {
  ***********************************************/
 #if defined(HAL_ADC_MODULE_ENABLED) && defined(HAL_LPTIM_MODULE_ENABLED)
 
-uint16_t adc_buf1[ADC_BUF_LEN];
-uint16_t adc_buf2[ADC_BUF_LEN];
-uint16_t adc_buf3[ADC_BUF_LEN];
-
 LowPowerTimer lptim1(*LPTIM1, hlptim1, LPTIM1_PERIOD, "LPTIM 1");
 LowPowerTimer lptim2(*LPTIM2, hlptim2, LPTIM2_PERIOD, "LPTIM 2");
 LowPowerTimer lptim3(*LPTIM3, hlptim3, LPTIM3_PERIOD, "LPTIM 3");
@@ -229,9 +234,9 @@ ADC::InitData init_data2(ADC2, ADC_RESOLUTION_16B, ADC_EXTERNALTRIG_LPTIM2_OUT, 
 ADC::InitData init_data3(ADC3, ADC_RESOLUTION_12B, ADC_EXTERNALTRIG_LPTIM3_OUT, channels3, DMA::Stream::DMA1Stream2, "ADC 3");
 
 ADC::Peripheral ADC::peripherals[3] = {
-		ADC::Peripheral(&hadc1, adc_buf1, lptim1, init_data1),
-		ADC::Peripheral(&hadc2, adc_buf2, lptim2, init_data2),
-		ADC::Peripheral(&hadc3, adc_buf3, lptim3, init_data3)
+		ADC::Peripheral(&hadc1, lptim1, init_data1),
+		ADC::Peripheral(&hadc2, lptim2, init_data2),
+		ADC::Peripheral(&hadc3, lptim3, init_data3)
 };
 
 map<Pin, ADC::Instance> ADC::available_instances = {

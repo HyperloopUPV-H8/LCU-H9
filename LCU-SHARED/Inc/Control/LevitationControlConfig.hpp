@@ -1,0 +1,12 @@
+#pragma once
+
+#include "Tools/Tools.hpp"
+
+static constexpr uint32_t LEVITATION_CONTROL_FREQ_HZ = 1000;
+static constexpr double LEVITATION_CONTROL_PERIOD_SECONDS = (double) (1.0 / LEVITATION_CONTROL_FREQ_HZ);
+
+
+#define KP_DOF1_AIRGAP_TO_CURRENT -11149.0 //-5500.0 //-4868.5
+#define KI_DOF1_AIRGAP_TO_CURRENT -10518.0 //-1700.0 //-1030.1
+#define KD_DOF1_AIRGAP_TO_CURRENT -1591.0 //-550.0 //-94.0
+#define LEVITATION_CONTROL_MOVING_AVERAGE_SIZE 20

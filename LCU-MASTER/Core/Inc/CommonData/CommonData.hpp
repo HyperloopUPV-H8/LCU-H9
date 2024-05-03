@@ -1,56 +1,44 @@
 #pragma once
 
 #include "ST-LIB.hpp"
+#include "LCU-SHARED.hpp"
 #include "CommonCData.h"
 
-static const uint8_t LDU_COUNT = 10;
-static const uint8_t AIRGAP_COUNT = 8;
+/** #############################################################
+ *  ###################  LCU_DESIGN_DATA  #######################
+ *  #############################################################
+ */
 
 static ip_addr_t master_ip_addr = IPADDR4_INIT_BYTES(MASTER_IP_B0,MASTER_IP_B1,MASTER_IP_B2,MASTER_IP_B3);
 static IPV4 MASTER_IP(master_ip_addr);
 static IPV4 BACKEND("192.168.0.9");
+
+
 static const uint32_t TCP_SERVER_PORT = 50500;
 static const uint32_t TCP_CLIENT_PORT = 50401;
 static const uint32_t UDP_PORT = 50400;
 
 
-static struct control_data{
-	uint8_t master_status = 0;
-	uint8_t slave_status = 0;
 
-	uint16_t fixed_coil_temperature[LDU_COUNT]{0};
-	uint16_t fixed_lpu_temperature[LDU_COUNT]{0};
-	uint16_t fixed_coil_current[LDU_COUNT]{0};
-	uint16_t fixed_battery_voltage[LDU_COUNT]{0};
-	uint16_t fixed_airgap_distance[AIRGAP_COUNT]{0};
+/*  #################################################################
+ *  #######################  PACKET STRUCTURE  ######################
+ *  #################################################################
+ */
 
+/*  #################################################################
+ *  ################  STATIC FUNCTIONS DECLARATION  #################
+ *  #################################################################
+ */
 
-	float coil_temperature[LDU_COUNT]{0.0};
-	float lpu_temperature[LDU_COUNT]{0.0};
-	float coil_current[LDU_COUNT]{0.0};
-	float battery_voltage[LDU_COUNT]{0.0};
-	float airgap_distance[AIRGAP_COUNT]{0.0};
-}master_control_data;
+void fix_buffer_reset_high();
+void fix_buffer_reset_low();
 
+/* #################################################################
+ * #####################  PINOUT DISTRIBUTION  #####################
+ * #################################################################
+ */
 
-static constexpr uint32_t ETH_ORDER_COUNT = 2;
-
-static constexpr uint16_t ETH_REFRESH_DATA_PERIOD_MS = 100;
-
-static const uint16_t TEST_PWM_TCP_ORDER_ID = 350;
-static constexpr uint16_t TEST_PWM_TCP_ORDER_INDEX = 0;
-static const uint16_t SEND_LPU_TEMPERATURES_TCP_ORDER_ID = 314;
-static constexpr uint16_t SEND_LPU_TEMPERATURES_TCP_ORDER_INDEX = 1;
-
-
-static constexpr uint32_t SPI_ORDER_COUNT = 2;
-
-static const uint16_t TEST_PWM_PACKET_ID = 1001;
-static constexpr uint16_t TEST_PWM_ORDER_INDEX = 0;
-static const uint16_t MASTER_SLAVE_DATA_ORDER_ID = 27;
-static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_INDEX = 1;
-
-
+#define SPI_RS_PIN PB2
 
 #define COIL_T_PIN_1	PC3
 #define LPU_T_PIN_1 	PA4
@@ -81,3 +69,34 @@ static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_INDEX = 1;
 
 #define COIL_T_PIN_10	PF8
 #define LPU_T_PIN_10 	PF12
+
+#define LCU_BUFFER_RESET_PIN_1 PD9
+#define LCU_BUFFER_FAULT_PIN_1 PE9
+#define LCU_BUFFER_READY_PIN_1 PE8
+#define LCU_BUFFER_FAULT_PIN_2 PE7
+#define LCU_BUFFER_READY_PIN_2 PG1
+
+#define LCU_BUFFER_RESET_PIN_2 PD10
+#define LCU_BUFFER_FAULT_PIN_3 PF2
+#define LCU_BUFFER_READY_PIN_3 PF1
+#define LCU_BUFFER_FAULT_PIN_4 PE6
+#define LCU_BUFFER_READY_PIN_4 PE5
+
+#define LCU_BUFFER_RESET_PIN_3 PD8
+#define LCU_BUFFER_FAULT_PIN_5 PE4
+#define LCU_BUFFER_READY_PIN_5 PE3
+#define LCU_BUFFER_FAULT_PIN_6 PC8
+#define LCU_BUFFER_READY_PIN_6 PC7
+
+#define LCU_BUFFER_RESET_PIN_4 PB15
+#define LCU_BUFFER_FAULT_PIN_7 PD15
+#define LCU_BUFFER_READY_PIN_7 PD14
+#define LCU_BUFFER_FAULT_PIN_8 PB10
+#define LCU_BUFFER_READY_PIN_8 PB11
+
+#define LCU_BUFFER_RESET_PIN_5 PB14
+#define LCU_BUFFER_FAULT_PIN_9 PE14
+#define LCU_BUFFER_READY_PIN_9 PE13
+#define LCU_BUFFER_FAULT_PIN_10 PE11
+#define LCU_BUFFER_READY_PIN_10 PE10
+
