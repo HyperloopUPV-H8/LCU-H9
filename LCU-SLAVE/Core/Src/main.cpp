@@ -10,6 +10,12 @@
 int main(void)
 {
 	//static_assert(HSE_VALUE==25'000'000);
+#ifndef USING_DOF1_CONFIG
+#ifndef USING_DOF5_CONFIG
+	static_assert(0==1,"neither DOF1 nor DOF5 config was used");
+#endif
+#endif
+
 
 	DigitalOutput buffer_enable{PB2};
 	LCU <RUNNING_MODE, ARITHMETIC_MODE>lcu_slave;

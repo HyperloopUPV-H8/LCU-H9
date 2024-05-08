@@ -128,13 +128,25 @@ public:
 	}
 
 	static void update(){
+#ifdef USING_DOF1_CONFIG
 		for(int i = 0; i < AIRGAP_COUNT; i++){
-			*shared_control_data.float_airgap_distance[i] = airgap_distance_binary_to_real(*shared_control_data.fixed_airgap_distance[i])*1000;
+			*shared_control_data.float_airgap_distance[i] = DOF1_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i])*1000;
 		}
 		for(int i = 0; i < LDU_COUNT; i++){
 			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(*shared_control_data.fixed_coil_current[i]);
 			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
 		}
+#endif
+#ifdef USING_DOF5_CONFIG
+		for(int i = 0; i < AIRGAP_COUNT/2; i++){
+			*shared_control_data.float_airgap_distance[i] = HEMS_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i])*1000;
+			*shared_control_data.float_airgap_distance[i+AIRGAP_COUNT/2] = EMS_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i+AIRGAP_COUNT/2])*1000;
+		}
+		for(int i = 0; i < LDU_COUNT; i++){
+			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(*shared_control_data.fixed_coil_current[i]);
+			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
+		}
+#endif
 	}
 
 	//###################  PERIODIC FUNCTIONS  #########################

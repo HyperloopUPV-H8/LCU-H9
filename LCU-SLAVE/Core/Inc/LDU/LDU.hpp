@@ -2,10 +2,6 @@
 
 #include <CommonData/CommonData.hpp>
 
-#define KP_CURRENT_TO_DUTY 10.0 //22.9546
-#define KI_CURRENT_TO_DUTY 400.0 //208.3333
-#define MOVING_AVERAGE_SIZE 20
-
 template<LCU_running_modes running_mode, typename arithmetic_number_type>
 class LDU{
 public:
@@ -22,10 +18,11 @@ public:
 	PI<IntegratorType::Trapezoidal> Voltage_by_current_PI;
 
 	uint16_t binary_battery_voltage = 0;
-	MovingAverageBlock<uint16_t, uint16_t, 10> binary_average_battery_voltage;
+	MovingAverageBlock<uint16_t, uint16_t, 0, VBAT_MOVING_AVERAGE_SIZE> binary_average_battery_voltage;
 	float battery_voltage = 0.0;
 
 	uint16_t binary_current_shunt = 0;
+	MovingAverageBlock<uint16_t, uint16_t, 0, CURRENT_MOVING_AVERAGE_SIZE> binary_average_current_shunt;
 	float current_shunt = 0.0;
 
 
@@ -36,7 +33,7 @@ public:
 
 
 	LDU() = default;
-	LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin) : index(index), Voltage_by_current_PI{KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY, CURRENT_CONTROL_PERIOD_SECONDS}{
+	LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin, float current_kp, float current_ki) : index(index), Voltage_by_current_PI{current_kp, current_ki, CURRENT_CONTROL_PERIOD_SECONDS}{
 		pwm1 = new PWM(pwm1_pin);
 		slave_periph_pointers.ldu_pwms[index][0] = pwm1;
 		pwm2 = new PWM(pwm2_pin);
@@ -87,15 +84,16 @@ public:
 	}
 
 	float get_vbat_data(){
-		return binary_average_battery_voltage.output_value * ADC_BINARY_TO_VOLTAGE * DOUBLE_VBAT_SLOPE + DOUBLE_VBAT_OFFSET;
+		return binary_average_battery_voltage.output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_VBAT_SLOPE + FLOAT_VBAT_OFFSET;
 	}
 
 	void update_shunt_value(){
 		binary_current_shunt = ADC::get_int_value(shunt_id);
+		binary_average_current_shunt.compute(binary_current_shunt);
 	}
 
 	float get_shunt_data(){
-		return  binary_current_shunt * ADC_BINARY_TO_VOLTAGE * DOUBLE_SHUNT_SLOPE + DOUBLE_SHUNT_OFFSET;
+		return binary_average_current_shunt.output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_SHUNT_SLOPE + FLOAT_SHUNT_OFFSET;
 	}
 
 
@@ -114,7 +112,7 @@ public:
 		Voltage_by_current_PI.input(desired_current - current_shunt);
 		Voltage_by_current_PI.execute();
 
-		double voltage = Voltage_by_current_PI.output_value;
+		float voltage = Voltage_by_current_PI.output_value;
 
 		if(voltage > 200.0){
 			voltage = 200.0;
@@ -124,7 +122,7 @@ public:
 		change_pwms_duty(calculate_duty_by_voltage(voltage));
 	}
 
-	float calculate_duty_by_voltage(double voltage){
+	float calculate_duty_by_voltage(float voltage){
 		if constexpr(running_mode == GUI_CONTROL){
 			if(!flags.fixed_vbat){
 				battery_voltage = get_vbat_data();

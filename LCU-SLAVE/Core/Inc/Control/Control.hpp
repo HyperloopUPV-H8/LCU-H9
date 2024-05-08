@@ -13,19 +13,7 @@
 #define DOF5_INTEGRATOR_DECLARATION Integrator<IntegratorType::Trapezoidal>(LEVITATION_CONTROL_PERIOD_SECONDS,1)
 
 
-float KID_MATRIX[10][15] = {
-		{0,			0,			-6180.3,	-200,	3431.6,		130,	4609.2,		130,	0,			0,			0,			-13434.0,	5374.2,		5529.6,		0},
-		{0,			0,			-6180.3,	-200,	3431.6,		130,	-4609.2,	-130,	0,			0,			0,			-13434.0,	5374.2,		-5529.6,	0},
-		{0,			0,			-6180.3,	-200,	-3431.6,	-130,	4609.2,		130,	0,			0,			0,			-13434.0,	-5374.2,	5529.6,		0},
-		{0,			0,			-6180.3,	-200,	-3431.6,	-130,	-4609.2,	-130,	0,			0,			0,			-13434.0,	-5374.2,	-5529.6,	0},
-		{-4338.3,	-867.6684,	0,			0,		0,			0,		0,			0,		-1681.3,	-187.0218,	-1204.0,	0,			0,			0,			-3072.7},
-		{4338.3,	867.6684,	0,			0,		0,			0,		0,			0,		1681.3,		187.0218,	1240.2,		0,			0,			0,			3072.7},
-		{-4338.3,	-867.6684,	0,			0,		0,			0,		0,			0,		0,			0,			-1204.0,	0,			0,			0,			0},
-		{4338.3,	867.6684,	0,			0,		0,			0,		0,			0,		0,			0,			1240.2,		0,			0,			0,			0},
-		{-4338.3,	-867.6684,	0,			0,		0,			0,		0,			0,		1681.3,		187.0218,	-1204.0,	0,			0,			0,			3072.7},
-		{4338.3,	867.6684,	0,			0,		0,			0,		0,			0,		-1681.3,	-187.0218,	1240.2,		0,			0,			0,			-3072.7},
-};
-
+float KID_MATRIX[LDU_COUNT][15] = {0};
 
 template<LCU_running_modes running_mode, typename arithmetic_number_type>
 class Control{
@@ -46,7 +34,9 @@ public:
 
 
 	Control() : Levitation_control_PID{KP_DOF1_AIRGAP_TO_CURRENT, KI_DOF1_AIRGAP_TO_CURRENT, KD_DOF1_AIRGAP_TO_CURRENT, LEVITATION_CONTROL_PERIOD_SECONDS},
-				KID_calculator(KID_MATRIX, levitation_data_vector, desired_current_vector){}
+				KID_calculator(KID_MATRIX, levitation_data_vector, desired_current_vector){
+		update_levitation_constants(initial_levitation_control_constants);
+	}
 
 	void DOF1_control_loop(){
 		Airgaps::update_data();

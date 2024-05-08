@@ -9,7 +9,7 @@ class Airgaps{
 public:
 	static uint8_t airgaps_index_array[AIRGAP_COUNT];
 	static uint16_t airgaps_binary_data_array[AIRGAP_COUNT];
-	static MovingAverageBlock<uint16_t, uint16_t, 10> airgaps_average_binary_data_array[AIRGAP_COUNT];
+	static MovingAverageBlock<uint16_t, uint16_t, 0, 10> airgaps_average_binary_data_array[AIRGAP_COUNT];
 	static float airgaps_data_array[AIRGAP_COUNT];
 
 	static inline void inscribe(){
@@ -42,9 +42,17 @@ public:
 	}
 
 	static inline void update_data(){
+#ifdef USING_DOF1_CONFIG
 		for(int i = 0; i < AIRGAP_COUNT; i++){
-			airgaps_data_array[i] = airgaps_average_binary_data_array[i].output_value * ADC_BINARY_TO_VOLTAGE * DOUBLE_AIRGAP_SLOPE + DOUBLE_AIRGAP_OFFSET;
+			airgaps_data_array[i] = airgaps_average_binary_data_array[i].output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_1DOF_AIRGAP_SLOPE + FLOAT_1DOF_AIRGAP_OFFSET;
 		}
+#endif
+#ifdef USING_DOF5_CONFIG
+		for(int i = 0; i < AIRGAP_COUNT/2; i++){
+			airgaps_data_array[i] = airgaps_average_binary_data_array[i].output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_HEMS_AIRGAP_SLOPE + FLOAT_HEMS_AIRGAP_OFFSET;
+			airgaps_data_array[i+AIRGAP_COUNT/2] = airgaps_average_binary_data_array[i+AIRGAP_COUNT/2].output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_EMS_AIRGAP_SLOPE + FLOAT_EMS_AIRGAP_OFFSET;
+		}
+#endif
 	}
 
 	static inline float get_airgap_data(uint16_t airgap_index){

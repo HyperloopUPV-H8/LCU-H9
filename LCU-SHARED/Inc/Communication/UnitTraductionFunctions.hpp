@@ -2,14 +2,22 @@
 
 #include "Sensors/Sensors.hpp"
 
-inline float airgap_distance_binary_to_real(uint16_t binary_value){
-	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * DOUBLE_AIRGAP_SLOPE + DOUBLE_AIRGAP_OFFSET;
+inline float DOF1_airgap_distance_binary_to_float(uint16_t binary_value){
+	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * FLOAT_1DOF_AIRGAP_SLOPE + FLOAT_1DOF_AIRGAP_OFFSET;
+}
+
+inline float EMS_airgap_distance_binary_to_float(uint16_t binary_value){
+	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * FLOAT_EMS_AIRGAP_SLOPE + FLOAT_EMS_AIRGAP_OFFSET;
+}
+
+inline float HEMS_airgap_distance_binary_to_float(uint16_t binary_value){
+	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * FLOAT_HEMS_AIRGAP_SLOPE + FLOAT_HEMS_AIRGAP_OFFSET;
 }
 
 inline float coil_current_binary_to_real(uint16_t binary_value){
-	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * DOUBLE_SHUNT_SLOPE + DOUBLE_SHUNT_OFFSET;
+	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * FLOAT_SHUNT_SLOPE + FLOAT_SHUNT_OFFSET;
 }
 
 inline float battery_voltage_binary_to_real(uint16_t binary_value){
-	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * DOUBLE_VBAT_SLOPE + DOUBLE_VBAT_OFFSET;
+	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * FLOAT_VBAT_SLOPE + FLOAT_VBAT_OFFSET;
 }

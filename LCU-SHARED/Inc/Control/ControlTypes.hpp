@@ -10,6 +10,7 @@
 
 enum LCU_running_modes{
 	GUI_CONTROL,
-	DOF1,
-	DOF5,
+	DOF1_FLOAT,
+	DOF5_FLOAT,
+	DOF5_FIXED,
 };
