@@ -7,9 +7,12 @@
 #include "Communication/Communication.hpp"
 
 
-constexpr LCU_running_modes RUNNING_MODE = DOF5_FLOAT;
+constexpr LCU_running_modes RUNNING_MODE = DOF5_HIL_FLOAT;
 
-#if (RUNNING_MODE == DOF5_FLOAT && RUNNING_MODE == DOF5_FIXED)
+//TODO: DEFINE THIS WHILE WORKING WITH LPUs!!!
+//#define BOARD_PROTECTIONS
+
+#if (RUNNING_MODE == DOF5_FLOAT || RUNNING_MODE == DOF5_FIXED || RUNNING_MODE == DOF5_HIL_FLOAT)
 #define USING_DOF5_CONFIG
 #else
 #define USING_DOF1_CONFIG

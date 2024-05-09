@@ -123,13 +123,14 @@ public:
 	}
 
 	float calculate_duty_by_voltage(float voltage){
-		if constexpr(running_mode == GUI_CONTROL){
-			if(!flags.fixed_vbat){
-				battery_voltage = get_vbat_data();
-			}
-		}else{
+#ifdef BOARD_PROTECTIONS
+		battery_voltage = get_vbat_data(); //no flag can alter this behavior to avoid any packet shenanigans
+#endif
+#ifndef BOARD_PROTECTIONS
+		if(!flags.fixed_vbat){
 			battery_voltage = get_vbat_data();
 		}
+#endif
 
 		if(battery_voltage < 0.0001){
 			return 0;

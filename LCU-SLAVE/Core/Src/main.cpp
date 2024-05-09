@@ -7,14 +7,11 @@
 #include "LCU_SLAVE.hpp"
 #include "LCU_functions_definition.hpp"
 
+void asserts();
+
 int main(void)
 {
-	//static_assert(HSE_VALUE==25'000'000);
-#ifndef USING_DOF1_CONFIG
-#ifndef USING_DOF5_CONFIG
-	static_assert(0==1,"neither DOF1 nor DOF5 config was used");
-#endif
-#endif
+	asserts();
 
 
 	DigitalOutput buffer_enable{PB2};
@@ -37,5 +34,20 @@ void Error_Handler(void)
 }
 
 
+void asserts(){
+#ifndef USING_DOF1_CONFIG
+#ifndef USING_DOF5_CONFIG
+	static_assert(0==1,"neither DOF1 nor DOF5 config was used");
+#endif
+#endif
+#ifdef USING_DOF1_CONFIG
+#ifdef USING_DOF5_CONFIG
+	static_assert(0==1,"both DOF1 and DOF5 configurations are active, only one can be used");
+#endif
+#endif
 
+#ifdef BOARD_PROTECTIONS
+	static_assert(HSE_VALUE==25'000'000);
+#endif
+}
 
