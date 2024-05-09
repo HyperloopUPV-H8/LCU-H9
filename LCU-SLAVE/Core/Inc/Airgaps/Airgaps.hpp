@@ -9,7 +9,7 @@ class Airgaps{
 public:
 	static uint8_t airgaps_index_array[AIRGAP_COUNT];
 	static uint16_t airgaps_binary_data_array[AIRGAP_COUNT];
-	static MovingAverageBlock<uint16_t, uint16_t, 0, 10> airgaps_average_binary_data_array[AIRGAP_COUNT];
+	static IntegerMovingAverage<uint16_t, uint16_t, 0, 10> airgaps_average_binary_data_array[AIRGAP_COUNT];
 	static float airgaps_data_array[AIRGAP_COUNT];
 
 	static inline void inscribe(){

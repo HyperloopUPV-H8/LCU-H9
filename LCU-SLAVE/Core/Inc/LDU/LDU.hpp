@@ -18,11 +18,11 @@ public:
 	PI<IntegratorType::Trapezoidal> Voltage_by_current_PI;
 
 	uint16_t binary_battery_voltage = 0;
-	MovingAverageBlock<uint16_t, uint16_t, 0, VBAT_MOVING_AVERAGE_SIZE> binary_average_battery_voltage;
+	IntegerMovingAverage<uint16_t, uint16_t, 0, VBAT_MOVING_AVERAGE_SIZE> binary_average_battery_voltage;
 	float battery_voltage = 0.0;
 
 	uint16_t binary_current_shunt = 0;
-	MovingAverageBlock<uint16_t, uint16_t, 0, CURRENT_MOVING_AVERAGE_SIZE> binary_average_current_shunt;
+	IntegerMovingAverage<uint16_t, uint16_t, 0, CURRENT_MOVING_AVERAGE_SIZE> binary_average_current_shunt;
 	float current_shunt = 0.0;
 
 
