@@ -84,7 +84,8 @@ public:
 	}
 
 	float get_vbat_data(){
-		return binary_average_battery_voltage.output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_VBAT_SLOPE + FLOAT_VBAT_OFFSET;
+		return 250.0;
+		//return binary_average_battery_voltage.output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_VBAT_SLOPE + FLOAT_VBAT_OFFSET;
 	}
 
 	void update_shunt_value(){
