@@ -75,10 +75,10 @@ public:
 										+Airgaps::get_airgap_data(6) - POD_CENTER_TO_L_DISTANCE + ( POD_CENTER_PLATE_DISTANCE_XY * sin_rot_z + POD_CENTER_PLATE_DISTANCE_YY * cos_rot_z - POD_CENTER_PLATE_DISTANCE_ZY * sin_rot_x)
 										-Airgaps::get_airgap_data(7) + POD_CENTER_TO_L_DISTANCE - (-POD_CENTER_PLATE_DISTANCE_XY * sin_rot_z + POD_CENTER_PLATE_DISTANCE_YY * cos_rot_z + POD_CENTER_PLATE_DISTANCE_ZY * sin_rot_x))/4;
 
-		position_data[Z_POSITION_INDEX] =(Airgaps::get_airgap_data(0) + POD_CENTER_TO_SR_DISTANCE + (-POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x - POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
-										+ Airgaps::get_airgap_data(1) + POD_CENTER_TO_SR_DISTANCE + ( POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x - POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
-										+ Airgaps::get_airgap_data(2) + POD_CENTER_TO_SR_DISTANCE + (-POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x + POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
-										+ Airgaps::get_airgap_data(3) + POD_CENTER_TO_SR_DISTANCE + ( POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x + POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x))/(-4)
+		position_data[Z_POSITION_INDEX] =(Airgaps::get_airgap_data(0) - POD_CENTER_TO_SR_DISTANCE - (-POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x - POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
+										+ Airgaps::get_airgap_data(1) - POD_CENTER_TO_SR_DISTANCE - ( POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x - POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
+										+ Airgaps::get_airgap_data(2) - POD_CENTER_TO_SR_DISTANCE - (-POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x + POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
+										+ Airgaps::get_airgap_data(3) - POD_CENTER_TO_SR_DISTANCE - ( POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x + POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x))/(-4)
 										- desired_airgap_distance_m /*substracts the reference of levitation distance, only for Z pos as all other references are 0*/;
 
 		for(int i = 0; i < 5; i++){

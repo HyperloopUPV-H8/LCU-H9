@@ -184,7 +184,7 @@ public:
 	 * #############################################################################
 	 */
 
-	void set_desired_airgap_distance(arithmetic_number_type desired_airgap_distance){
+	void set_desired_airgap_distance(float desired_airgap_distance){
 		levitationControl.desired_airgap_distance_m = desired_airgap_distance;
 	}
 
