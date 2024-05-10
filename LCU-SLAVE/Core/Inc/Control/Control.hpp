@@ -55,11 +55,11 @@ public:
 
 	void DOF5_control_loop(){
 		Airgaps::update_data();
-		position_data[X_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(0) - Airgaps::get_airgap_data(2)) / (2*POD_CENTER_PLATE_DISTANCE_YZ))
-										+ asin((Airgaps::get_airgap_data(1) - Airgaps::get_airgap_data(3)) / (2*POD_CENTER_PLATE_DISTANCE_YZ)))/2;
-
-		position_data[Y_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(0) - Airgaps::get_airgap_data(1)) / (2*POD_CENTER_PLATE_DISTANCE_XZ))
+		position_data[X_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(0) - Airgaps::get_airgap_data(1)) / (2*POD_CENTER_PLATE_DISTANCE_XZ))
 										+ asin((Airgaps::get_airgap_data(2) - Airgaps::get_airgap_data(3)) / (2*POD_CENTER_PLATE_DISTANCE_XZ)))/2;
+
+		position_data[Y_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(0) - Airgaps::get_airgap_data(2)) / (2*POD_CENTER_PLATE_DISTANCE_YZ))
+										+ asin((Airgaps::get_airgap_data(1) - Airgaps::get_airgap_data(3)) / (2*POD_CENTER_PLATE_DISTANCE_YZ)))/2;
 
 		position_data[Z_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(4) - Airgaps::get_airgap_data(6)) / (2*POD_CENTER_PLATE_DISTANCE_XY))
 										+ asin((Airgaps::get_airgap_data(7) - Airgaps::get_airgap_data(5)) / (2*POD_CENTER_PLATE_DISTANCE_XY)))/2;
