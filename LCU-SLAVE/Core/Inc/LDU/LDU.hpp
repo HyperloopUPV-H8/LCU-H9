@@ -98,8 +98,6 @@ public:
 	}
 
 
-
-
 	//#################  CURRENT CONTROL  #########################
 	void PI_current_to_duty_cycle(){
 		current_shunt = get_shunt_data();

@@ -64,21 +64,21 @@ public:
 		position_data[Z_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(4) - Airgaps::get_airgap_data(6)) / (2*POD_CENTER_PLATE_DISTANCE_XY))
 										+ asin((Airgaps::get_airgap_data(7) - Airgaps::get_airgap_data(5)) / (2*POD_CENTER_PLATE_DISTANCE_XY)))/2;
 
-		arithmetic_number_type cos_rot_z = cos(position_data[Z_ROTATION_INDEX]);
-		arithmetic_number_type sin_rot_z = sin(position_data[Z_ROTATION_INDEX]);
-		arithmetic_number_type sin_rot_y = sin(position_data[Y_ROTATION_INDEX]);
-		arithmetic_number_type cos_rot_x = cos(position_data[X_ROTATION_INDEX]);
-		arithmetic_number_type sin_rot_x = sin(position_data[X_ROTATION_INDEX]);
+		float cos_rot_z = cos(position_data[Z_ROTATION_INDEX]);
+		float sin_rot_z = sin(position_data[Z_ROTATION_INDEX]);
+		float sin_rot_y = sin(position_data[Y_ROTATION_INDEX]);
+		float cos_rot_x = cos(position_data[X_ROTATION_INDEX]);
+		float sin_rot_x = sin(position_data[X_ROTATION_INDEX]);
 
 		position_data[Y_POSITION_INDEX] = (Airgaps::get_airgap_data(4) - POD_CENTER_TO_L_DISTANCE+(-POD_CENTER_PLATE_DISTANCE_XY * sin_rot_z + POD_CENTER_PLATE_DISTANCE_YY * cos_rot_z - POD_CENTER_PLATE_DISTANCE_ZY * sin_rot_x)
 										-Airgaps::get_airgap_data(5) + POD_CENTER_TO_L_DISTANCE - ( POD_CENTER_PLATE_DISTANCE_XY * sin_rot_z + POD_CENTER_PLATE_DISTANCE_YY * cos_rot_z + POD_CENTER_PLATE_DISTANCE_ZY * sin_rot_x)
 										+Airgaps::get_airgap_data(6) - POD_CENTER_TO_L_DISTANCE + ( POD_CENTER_PLATE_DISTANCE_XY * sin_rot_z + POD_CENTER_PLATE_DISTANCE_YY * cos_rot_z - POD_CENTER_PLATE_DISTANCE_ZY * sin_rot_x)
 										-Airgaps::get_airgap_data(7) + POD_CENTER_TO_L_DISTANCE - (-POD_CENTER_PLATE_DISTANCE_XY * sin_rot_z + POD_CENTER_PLATE_DISTANCE_YY * cos_rot_z + POD_CENTER_PLATE_DISTANCE_ZY * sin_rot_x))/4;
 
-		position_data[Z_POSITION_INDEX] =(Airgaps::get_airgap_data(0) - POD_CENTER_TO_SR_DISTANCE - (-POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x - POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
-										+ Airgaps::get_airgap_data(1) - POD_CENTER_TO_SR_DISTANCE - ( POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x - POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
-										+ Airgaps::get_airgap_data(2) - POD_CENTER_TO_SR_DISTANCE - (-POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x + POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
-										+ Airgaps::get_airgap_data(3) - POD_CENTER_TO_SR_DISTANCE - ( POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x + POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x))/(-4)
+		position_data[Z_POSITION_INDEX] =(Airgaps::get_airgap_data(0) - POD_CENTER_TO_SR_DISTANCE + (-POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x - POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
+										+ Airgaps::get_airgap_data(1) - POD_CENTER_TO_SR_DISTANCE + ( POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x - POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
+										+ Airgaps::get_airgap_data(2) - POD_CENTER_TO_SR_DISTANCE + (-POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x + POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
+										+ Airgaps::get_airgap_data(3) - POD_CENTER_TO_SR_DISTANCE + ( POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x + POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x))/(-4)
 										- desired_airgap_distance_m /*substracts the reference of levitation distance, only for Z pos as all other references are 0*/;
 
 		for(int i = 0; i < 5; i++){
@@ -93,6 +93,11 @@ public:
 
 		KID_calculator.execute();
 
+		if(!status_flags.enable_lateral_levitation_control){
+			for(int i = 4; i < LDU_COUNT; i++){ //for all EMS
+				desired_current_vector[LDU_COUNT] = -desired_current; //minus necessary as update_desired_current_control changes sign
+			}
+		}
 	}
 
 	void update_desired_current_control(){
@@ -102,6 +107,7 @@ public:
 	}
 
 	void start(){
+		status_flags.enable_lateral_levitation_control = true; //TODO: change when this is enabled
 		status_flags.enable_levitation_control = true;
 	}
 

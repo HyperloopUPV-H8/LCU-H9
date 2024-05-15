@@ -57,13 +57,13 @@ void update_levitation_constants(float new_levitation_constants[LDU_COUNT][15]){
 }
 
 void start_levitation_control(){
-	lcu_instance->set_desired_airgap_distance(Communication::data_to_change);
+	lcu_instance->set_desired_airgap_distance(data_to_change);
 	lcu_instance->start_control();
 }
 
 
 void set_desired_current_on_LDU(){
- 	ldu_array[Communication::ldu_to_change].desired_current = Communication::data_to_change;
+ 	ldu_array[ldu_to_change].desired_current = data_to_change;
 	status_flags.enable_current_control = true;
 }
 
@@ -77,9 +77,9 @@ void reset_desired_current_on_LDU(){//TODO: implement as order on GUI
 
 void test_pwm_order_callback(){
 	lcu_instance->stop_control();
-	if(Communication::ldu_to_change >= LDU_COUNT){return;}
-	ldu_array[Communication::ldu_to_change].set_pwms_duty(Communication::duty_to_change);
-	ldu_array[Communication::ldu_to_change].desired_current = 0;
+	if(ldu_to_change >= LDU_COUNT){return;}
+	ldu_array[ldu_to_change].set_pwms_duty(duty_to_change);
+	ldu_array[ldu_to_change].desired_current = 0;
 }
 
 void send_to_fault(){

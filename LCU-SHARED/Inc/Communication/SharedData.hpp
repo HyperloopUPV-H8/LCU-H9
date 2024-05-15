@@ -20,3 +20,7 @@ static struct control_data{
 	float *float_battery_voltage[LDU_COUNT]{nullptr};
 	float *float_airgap_distance[AIRGAP_COUNT]{nullptr};
 }shared_control_data;
+
+static uint16_t ldu_to_change = 0;
+static float duty_to_change = 0;
+static float data_to_change = 0;

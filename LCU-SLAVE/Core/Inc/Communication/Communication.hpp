@@ -15,9 +15,6 @@
 class Communication{
 public:
 	static uint8_t spi_id;
-	static uint16_t ldu_to_change;
-	static float duty_to_change;
-	static float data_to_change;
 
 	SPIStackOrder* SPIOrders[SPI_ORDER_COUNT];
 	SPIBasePacket* SPIPackets[SPI_ORDER_COUNT*2];
