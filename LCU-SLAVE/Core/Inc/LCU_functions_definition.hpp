@@ -51,7 +51,7 @@ void run_current_PI(){
 void update_levitation_constants(float new_levitation_constants[LDU_COUNT][15]){
 	for(int i = 0; i < LDU_COUNT; i++){
 		for(int j = 0; j < 15; j++){
-			KID_MATRIX[i][j] = new_levitation_constants[i][j];
+			KID_MATRIX[i][j] = -new_levitation_constants[i][j];
 		}
 	}
 }

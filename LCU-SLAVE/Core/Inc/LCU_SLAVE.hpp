@@ -196,7 +196,9 @@ public:
 	void stop_control(){
 		shutdown();
 		status_flags.enable_levitation_control = false;
-		ldu_array[DOF1_USED_LDU_INDEX].Voltage_by_current_PI.reset();
+		for(int i = 0; i < LDU_COUNT; i++){
+			ldu_array[i].Voltage_by_current_PI.reset();
+		}
 		levitationControl.stop();
 	}
 };

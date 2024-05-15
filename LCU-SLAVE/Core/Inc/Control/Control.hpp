@@ -95,14 +95,20 @@ public:
 
 		if(!status_flags.enable_lateral_levitation_control){
 			for(int i = 4; i < LDU_COUNT; i++){ //for all EMS
-				desired_current_vector[LDU_COUNT] = -desired_current; //minus necessary as update_desired_current_control changes sign
+				desired_current_vector[i] = -desired_current; //minus necessary as update_desired_current_control changes sign
+			}
+		}else{
+			for(int i = 4; i < LDU_COUNT; i++){ //for all EMS
+				if(desired_current_vector[i] < 0.0){
+					desired_current_vector[i] = 0.0; //negative currents still attract in EMS, so they just get negated.
+				}
 			}
 		}
 	}
 
 	void update_desired_current_control(){
 		for(int i = 0; i < LDU_COUNT; i++){
-			ldu_array[i].desired_current = -desired_current_vector[LDU_COUNT]; //the k multiplications of the matrix are negative, so we put a minus on the result
+			ldu_array[i].desired_current = desired_current_vector[i]; //the k multiplications of the matrix are negative, so we put a minus on the result
 		}
 	}
 
@@ -118,6 +124,10 @@ public:
 
 	void reset(){
 		Levitation_control_PID.reset();
+		for(int i = 0; i < 5; i++){
+			position_data_derivative[i].reset();
+			position_data_integral[i].reset();
+		}
 		desired_current = 0;
 	}
 };
