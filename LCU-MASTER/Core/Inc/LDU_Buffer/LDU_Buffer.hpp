@@ -26,17 +26,22 @@ public:
 	}
 
 	bool check_ready_and_fault(){
-		return //DigitalInput::read_pin_state(LDU_Fault_1_ID) == PinState::ON &&
+#ifdef BOARD_PROTECTIONS
+		return 	DigitalInput::read_pin_state(LDU_Fault_1_ID) == PinState::ON &&
 				DigitalInput::read_pin_state(LDU_Fault_2_ID) == PinState::ON &&
-				//DigitalInput::read_pin_state(LDU_Ready_1_ID) == PinState::ON &&
+				DigitalInput::read_pin_state(LDU_Ready_1_ID) == PinState::ON &&
 				DigitalInput::read_pin_state(LDU_Ready_2_ID) == PinState::ON;
+#endif
+#ifndef BOARD_PROTECTIONS
+		return false;
+#endif
 	}
 
 	void update(){
 		if(shut_down){
 			reset.turn_off();
 		}else{
-			if(fixed_reset && fixed_reset_value){
+			if(fixed_reset && fixed_reset_value || !fixed_reset && check_ready_and_fault()){
 				reset.turn_on();
 			}else{
 				reset.turn_off();
