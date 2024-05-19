@@ -28,6 +28,7 @@ public:
 	float position_data[5];
 	SimpleDerivator position_data_derivative[5]{DOF5_DERIVATOR_DECLARATION, DOF5_DERIVATOR_DECLARATION, DOF5_DERIVATOR_DECLARATION, DOF5_DERIVATOR_DECLARATION, DOF5_DERIVATOR_DECLARATION};
 	Integrator<IntegratorType::Trapezoidal> position_data_integral[5]{DOF5_INTEGRATOR_DECLARATION,DOF5_INTEGRATOR_DECLARATION,DOF5_INTEGRATOR_DECLARATION,DOF5_INTEGRATOR_DECLARATION,DOF5_INTEGRATOR_DECLARATION};
+	MovingAverage<20> derivative_moving_average[5]{};
 	float levitation_data_vector[15];
 	float desired_current_vector[LDU_COUNT];
 	MatrixMultiplier<10,15,1> KID_calculator;
@@ -52,8 +53,7 @@ public:
 		}
 	}
 
-
-	void DOF5_control_loop(){
+	void airgap_to_pos(){
 		Airgaps::update_data();
 		position_data[X_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(0) - Airgaps::get_airgap_data(1)) / (2*POD_CENTER_PLATE_DISTANCE_XZ))
 										+ asin((Airgaps::get_airgap_data(2) - Airgaps::get_airgap_data(3)) / (2*POD_CENTER_PLATE_DISTANCE_XZ)))/2;
@@ -79,15 +79,20 @@ public:
 										+ Airgaps::get_airgap_data(1) - POD_CENTER_TO_SR_DISTANCE + ( POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x - POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
 										+ Airgaps::get_airgap_data(2) - POD_CENTER_TO_SR_DISTANCE + (-POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x + POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
 										+ Airgaps::get_airgap_data(3) - POD_CENTER_TO_SR_DISTANCE + ( POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x + POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x))/(-4)
-										- desired_airgap_distance_m /*substracts the reference of levitation distance, only for Z pos as all other references are 0*/;
+										- desired_airgap_distance_m; /*substracts the reference of levitation distance, only for Z pos as all other references are 0*/
+	}
+
+	void DOF5_control_loop(){
+		airgap_to_pos();
 
 		for(int i = 0; i < 5; i++){
 			position_data_derivative[i].input(position_data[i]);
 			position_data_derivative[i].execute();
+			derivative_moving_average[i].compute(position_data_derivative[i].output_value);
 			position_data_integral[i].input(position_data[i]);
 			position_data_integral[i].execute();
 			levitation_data_vector[i*2] = position_data[i];
-			levitation_data_vector[i*2+1] = position_data_derivative[i].output_value;
+			levitation_data_vector[i*2+1] = derivative_moving_average[i].output_value;
 			levitation_data_vector[i+10] = position_data_integral[i].output_value;
 		}
 
@@ -95,7 +100,7 @@ public:
 
 		if(!status_flags.enable_lateral_levitation_control){
 			for(int i = 4; i < LDU_COUNT; i++){ //for all EMS
-				desired_current_vector[i] = -desired_current; //minus necessary as update_desired_current_control changes sign
+				desired_current_vector[i] = desired_current;
 			}
 		}else{
 			for(int i = 4; i < LDU_COUNT; i++){ //for all EMS
@@ -112,9 +117,18 @@ public:
 		}
 	}
 
+	void prepare_derivator_buffer(){
+		airgap_to_pos();
+		for(int i = 0; i < 5; i++){
+			position_data_derivative[i].input(position_data[i]);
+			position_data_derivative[i].execute();
+		}
+	}
+
 	void start(){
 		status_flags.enable_lateral_levitation_control = true; //TODO: change when this is enabled
 		status_flags.enable_levitation_control = true;
+		prepare_derivator_buffer(); //TODO: still testing if this is better or not
 	}
 
 	void stop(){
@@ -130,4 +144,6 @@ public:
 		}
 		desired_current = 0;
 	}
+
+
 };
