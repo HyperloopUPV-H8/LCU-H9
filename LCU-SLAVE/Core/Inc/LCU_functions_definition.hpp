@@ -87,6 +87,7 @@ void send_to_fault(){
 }
 
 void shutdown(){
+	lcu_instance->ldu_buffers.turn_off();
 	status_flags.enable_current_control = false;
 	for(int i = 0; i < LDU_COUNT; i++){
 		ldu_array[i].Voltage_by_current_PI.reset();

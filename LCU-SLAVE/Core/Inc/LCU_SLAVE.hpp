@@ -5,6 +5,7 @@
 #include <LDU/LDU.hpp>
 #include <Airgaps/Airgaps.hpp>
 #include <Control/Control.hpp>
+#include "PWM_Buffer/PWM_Buffer.hpp"
 
 template<LCU_running_modes running_mode, typename arithmetic_number_type>
 class LCU;
@@ -17,6 +18,7 @@ public:
 	Communication communication;
 	Control<running_mode, arithmetic_number_type> levitationControl;
 	StateMachine generalStateMachine;
+	PWM_Buffer ldu_buffers;
 
 	bool PendingCurrentPI = false;
 	bool PendingLevitationControl = false;
@@ -156,6 +158,7 @@ public:
 		generalStateMachine.add_low_precision_cyclic_action(rise_levitation_control_flag,  std::chrono::microseconds((int) (LEVITATION_CONTROL_PERIOD_SECONDS*1000000)), OPERATIONAL);
 
 		//###############  ADDING ALL TRANSITION CALLBACKS  ###################
+		generalStateMachine.add_enter_action(general_enter_operational, OPERATIONAL);
 		generalStateMachine.add_enter_action(general_enter_fault, FAULT);
 	}
 
@@ -173,6 +176,10 @@ public:
 
 	static bool general_transition_operational_to_fault(){
 		return status_flags.fault_flag;
+	}
+
+	static void general_enter_operational(){
+		ldu_buffers.turn_on();
 	}
 
 	static void general_enter_fault(){

@@ -11,19 +11,6 @@
 
 static constexpr double MAXIMUM_DESIRED_CURRENT = 45.0;
 
-/*  #############################################################
- *  ################### LCU_RUNNING_MODE  #######################
- *  #############################################################
- */
-/*
-enum LCU_running_modes{
-	GUI_CONTROL,
-	DOF1,
-};
-
-#define RUNNING_MODE GUI_CONTROL
-#define ARITHMETIC_MODE double
-*/
 #define DOF1_USED_LDU_INDEX 9
 #define DOF1_USED_AIRGAP_INDEX 0
 
@@ -128,3 +115,10 @@ inline void shutdown();
 #define AIRGAP_PIN_6 	PB0
 #define AIRGAP_PIN_7 	PC5
 #define AIRGAP_PIN_8 	PC4
+
+#define ON_BUFF_PIN_1 		PG7
+#define ON_BUFF_PIN_2 		PG6
+#define ON_BUFF_PIN_3 		PG5
+#define ON_BUFF_PIN_4 		PG4
+#define ON_BUFF_PIN_5 		PB2
+
