@@ -59,6 +59,7 @@ public:
 	void change_pwm2_duty(float duty){pwm2->set_duty_cycle(duty);}
 
 	void change_pwms_duty(float duty){
+#ifdef USING_HIL_MODE
 		if(duty > 0){
 			change_pwm2_duty(5);
 			change_pwm1_duty((float)duty+5);
@@ -66,6 +67,15 @@ public:
 			change_pwm1_duty(5);
 			change_pwm2_duty((float)-duty +5);
 		}
+#else
+		if(duty > 0){
+			change_pwm2_duty(5);
+			change_pwm1_duty((float)duty);
+		}else{
+			change_pwm1_duty(5);
+			change_pwm2_duty((float)-duty);
+		}
+#endif
 	}
 
 	void set_pwms_duty(float duty){
@@ -84,8 +94,12 @@ public:
 	}
 
 	float get_vbat_data(){
+#ifdef USING_HIL_MODE
 		return 250.0;
-		//return binary_average_battery_voltage.output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_VBAT_SLOPE + FLOAT_VBAT_OFFSET;
+#endif
+#ifndef USING_HIL_MODE
+		return binary_average_battery_voltage.output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_VBAT_SLOPE + FLOAT_VBAT_OFFSET;
+#endif
 	}
 
 	void update_shunt_value(){
@@ -105,9 +119,11 @@ public:
 			change_pwms_duty(LDU_duty_cycle);
 			return;
 		}
+#ifdef BOARD_PROTECTIONS
 		if(current_shunt > 50.0 || current_shunt < -50.0){
-			//send_to_fault();
+			send_to_fault();
 		}
+#endif
 		Voltage_by_current_PI.input(desired_current - current_shunt);
 		Voltage_by_current_PI.execute();
 
@@ -134,7 +150,7 @@ public:
 		if(battery_voltage < 0.0001){
 			return 0;
 		}
-		if(battery_voltage > 252.5){
+		if(battery_voltage > 252.5){ //TODO: check if we can do something with the noise here instead of saturating
 			battery_voltage = 252.5;
 		}
 

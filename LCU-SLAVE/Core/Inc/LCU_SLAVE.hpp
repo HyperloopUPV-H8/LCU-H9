@@ -179,7 +179,7 @@ public:
 	}
 
 	static void general_enter_operational(){
-		ldu_buffers.turn_on();
+		lcu_instance->ldu_buffers.turn_on();
 	}
 
 	static void general_enter_fault(){

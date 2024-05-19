@@ -12,15 +12,7 @@ void asserts();
 int main(void)
 {
 	asserts();
-
-
-	DigitalOutput buffer_enable{PB2};
 	LCU <RUNNING_MODE, ARITHMETIC_MODE>lcu_slave;
-
-	buffer_enable.turn_on();
-	uint8_t unused_variable = Time::set_timeout(1000,[&buffer_enable](){
-		buffer_enable.turn_off();
-	});
 
 	while(1) {
 		lcu_slave.update();
