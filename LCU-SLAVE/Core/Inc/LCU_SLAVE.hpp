@@ -9,7 +9,7 @@ template<LCU_running_modes running_mode, typename arithmetic_number_type>
 class LCU;
 
 static LCU<RUNNING_MODE, ARITHMETIC_MODE> *lcu_instance = nullptr;
-
+static std::array<DigitalOutput,5> buffer_enables{};
 template<LCU_running_modes running_mode, typename arithmetic_number_type>
 class LCU{
 public:
@@ -36,6 +36,7 @@ public:
 	void update(){
 		generalStateMachine.check_transitions();
 		ProtectionManager::check_protections();
+		SPI::Order_update();
 		if(PendingCurrentPI){run_current_PI();PendingCurrentPI = false;}
 	}
 
@@ -52,7 +53,11 @@ public:
 		ldu_array[7] = LDU<running_mode, arithmetic_number_type>(7, PWM_PIN_8_1, PWM_PIN_8_2, VBAT_PIN_8, SHUNT_PIN_8);
 		ldu_array[8] = LDU<running_mode, arithmetic_number_type>(8, PWM_PIN_9_1, PWM_PIN_9_2, VBAT_PIN_9, SHUNT_PIN_9);
 		ldu_array[9] = LDU<running_mode, arithmetic_number_type>(9, PWM_PIN_10_1, PWM_PIN_10_2, VBAT_PIN_10, SHUNT_PIN_10);
-
+		buffer_enables[0] = DigitalOutput(PG7);
+		buffer_enables[1] = DigitalOutput(PG6);
+		buffer_enables[2] = DigitalOutput(PG5);
+		buffer_enables[3]= DigitalOutput(PG4);
+		buffer_enables[4] = DigitalOutput(PB2);
 		state_machine_inscribe();
 		protections_inscribe();
 		Airgaps::inscribe();
