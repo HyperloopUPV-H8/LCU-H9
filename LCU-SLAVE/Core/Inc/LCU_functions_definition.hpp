@@ -50,6 +50,13 @@ static void set_desired_current_on_LDU(){
 
 
 static void test_pwm_order_callback(){
+	int result{};
+    if((Communication::ldu_to_change % 2) == 0){
+        result += Communication::ldu_to_change % 2 + 1 + Communication::ldu_to_change /2;
+    }else{
+        result += Communication::ldu_to_change % 2  + Communication::ldu_to_change /2;
+    }
+    buffer_enables[result-1].turn_off();
 	ldu_array[Communication::ldu_to_change].change_pwms_duty(Communication::duty_to_change);
 	ldu_array[Communication::ldu_to_change].flags.fixed_pwm = true;
 	ldu_array[Communication::ldu_to_change].Voltage_by_current_PI.reset();

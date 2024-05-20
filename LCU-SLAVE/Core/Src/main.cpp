@@ -9,7 +9,7 @@
 
 int main(void)
 {
-	//static_assert(HSE_VALUE==25'000'000);
+	static_assert(HSE_VALUE==25'000'000);
 	DigitalOutput buffer_enable{PB2};
 	LCU <RUNNING_MODE, ARITHMETIC_MODE>lcu_slave;
 
