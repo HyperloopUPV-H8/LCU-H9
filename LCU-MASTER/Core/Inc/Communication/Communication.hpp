@@ -101,7 +101,7 @@ public:
 	//###################  PERIODIC FUNCTIONS  #########################
 
 	static void send_lcu_data_to_backend(){
-		udp_connection->send(*EthernetPackets[SEND_LPU_TEMPERATURES_TCP_PACKET_INDEX]);
+		udp_connection->send_packet(*EthernetPackets[SEND_LPU_TEMPERATURES_TCP_PACKET_INDEX]);
 	}
 
 	static void lcu_data_transaction(){
