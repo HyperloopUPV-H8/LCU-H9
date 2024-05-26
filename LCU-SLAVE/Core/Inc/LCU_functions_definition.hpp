@@ -88,6 +88,7 @@ void test_pwm_order_callback(){
 	if(ldu_to_change >= LDU_COUNT){return;}
 	ldu_array[ldu_to_change].set_pwms_duty(duty_to_change);
 	ldu_array[ldu_to_change].desired_current = 0;
+	lcu_instance->ldu_buffers.turn_on();
 }
 
 void send_to_fault(){

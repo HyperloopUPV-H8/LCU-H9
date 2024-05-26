@@ -34,16 +34,16 @@ public:
 
 	void update(){
 if constexpr(IS_HIL){
-		reset.turn_on();
+		reset.turn_off();
 		return;
 }
 		if(shut_down){
-			reset.turn_on();
+			reset.turn_off();
 		}else{
 			if(fixed_reset && fixed_reset_value || !fixed_reset && check_ready_and_fault()){
-				reset.turn_off();
-			}else{
 				reset.turn_on();
+			}else{
+				reset.turn_off();
 			}
 		}
 	}

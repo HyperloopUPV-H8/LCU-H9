@@ -15,18 +15,10 @@ if constexpr(!IS_HIL){
 		Buffers[3] = DigitalOutputService::inscribe(ON_BUFF_PIN_4);
 		Buffers[4] = DigitalOutputService::inscribe(ON_BUFF_PIN_5);
 }
-		turn_off();
+		turn_on(); //buffers are active on low
 	}
 
 	void turn_on(){
-if constexpr(!IS_HIL){
-		for(int i = 0; i < 5; i++){
-			DigitalOutputService::turn_on(Buffers[i]);
-		}
-}
-	}
-
-	void turn_off(){
 if constexpr(!IS_HIL){
 		for(int i = 0; i < 5; i++){
 			DigitalOutputService::turn_off(Buffers[i]);
@@ -34,10 +26,18 @@ if constexpr(!IS_HIL){
 }
 	}
 
+	void turn_off(){
+if constexpr(!IS_HIL){
+		for(int i = 0; i < 5; i++){
+			DigitalOutputService::turn_on(Buffers[i]);
+		}
+}
+	}
+
 	void turn_on_hems(){
 if constexpr(!IS_HIL){
 		for(int i = 0; i < 2; i++){
-			DigitalOutputService::turn_on(Buffers[i]);
+			DigitalOutputService::turn_off(Buffers[i]);
 		}
 }
 	}
@@ -45,7 +45,7 @@ if constexpr(!IS_HIL){
 	void turn_on_ems(){
 if constexpr(!IS_HIL){
 		for(int i = 2; i < 5; i++){
-			DigitalOutputService::turn_on(Buffers[i]);
+			DigitalOutputService::turn_off(Buffers[i]);
 		}
 }
 	}

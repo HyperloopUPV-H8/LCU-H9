@@ -81,8 +81,8 @@ inline void shutdown();
 #define VBAT_PIN_4 		PF6
 #define SHUNT_PIN_4 	PA1
 
-#define PWM_PIN_5_1		PD14
-#define PWM_PIN_5_2		PD15
+#define PWM_PIN_5_1		PD15
+#define PWM_PIN_5_2		PD14
 #define VBAT_PIN_5 		PF8
 #define SHUNT_PIN_5 	PA2
 
