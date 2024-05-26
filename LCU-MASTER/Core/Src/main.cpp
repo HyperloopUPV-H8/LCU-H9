@@ -10,12 +10,7 @@
 
 int main(void)
 {
-#ifndef USING_DOF1_CONFIG
-#ifndef USING_DOF5_CONFIG
-	static_assert(0==1,"neither DOF1 nor DOF5 config was used");
-#endif
-#endif
-	//static_assert(HSE_VALUE==25'000'000,"INVALID HSE value for BOARD");
+	asserts();
 	Communication::test_order_received = new DigitalOutput(PG4);
 
 	LCU lcu_master;
@@ -35,4 +30,8 @@ void Error_Handler(void)
 {
 	ErrorHandler("HAL error handler triggered");
 	while (1){}
+}
+
+void asserts(){
+	//static_assert(HSE_VALUE==25'000'000,"INVALID HSE value for BOARD");
 }

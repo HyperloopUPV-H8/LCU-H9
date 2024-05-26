@@ -7,24 +7,10 @@
 #include "Communication/Communication.hpp"
 
 
-constexpr LCU_running_modes RUNNING_MODE = DOF5_FLOAT;
-
-#if (RUNNING_MODE != DOF5_HIL_FLOAT)
-#define BOARD_PROTECTIONS
-#else
-#define USING_HIL_MODE
-#endif
-
-#if (RUNNING_MODE == DOF5_FLOAT || RUNNING_MODE == DOF5_FIXED || RUNNING_MODE == DOF5_HIL_FLOAT)
-#define USING_DOF5_CONFIG
-#else
-#define USING_DOF1_CONFIG
-#endif
-
-#if (RUNNING_MODE == DOF5_FIXED)
-#define ARITHMETIC_MODE uint32_t
-#define USING_FIXED_ARITHMETIC
-#else
 #define ARITHMETIC_MODE float
-#define USING_FLOATING_ARITHMETIC
-#endif
+constexpr LCU_running_modes RUNNING_MODE = DOF5;
+
+
+uint8_t initial_exchange_value(){
+	return LCU_states::INITIAL || RUNNING_MODE;
+}

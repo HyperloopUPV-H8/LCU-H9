@@ -8,6 +8,9 @@
  *  #############################################################
  */
 
+#define USING_1DOF (RUNNING_MODE == DOF1)
+#define USING_5DOF (RUNNING_MODE != DOF1)
+#define IS_HIL (RUNNING_MODE == DOF5_HIL)
 
 static constexpr double MAXIMUM_DESIRED_CURRENT = 45.0;
 
@@ -46,6 +49,7 @@ inline void run_current_PI();
 inline void update_levitation_constants(float new_levitation_constants[LDU_COUNT][15]);
 inline void start_levitation_control();
 inline void set_desired_current_on_LDU();
+inline void initial_order_callback();
 inline void test_pwm_order_callback();
 
 inline void send_to_fault();

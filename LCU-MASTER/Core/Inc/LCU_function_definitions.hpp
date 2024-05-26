@@ -17,3 +17,11 @@ void fix_buffer_reset_low(){
 void general_enter_fault(){
 	LDU_Buffer::shutdown_buffers();
 }
+
+void initial_order_callback(){
+	if(slave_status == RUNNING_MODE){
+		Communication::flags.SPIStablished = true;
+	}else{
+		ErrorHandler("Slave and master are not in the same mode");
+	}
+}

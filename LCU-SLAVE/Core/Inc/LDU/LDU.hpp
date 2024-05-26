@@ -59,7 +59,7 @@ public:
 	void change_pwm2_duty(float duty){pwm2->set_duty_cycle(duty);}
 
 	void change_pwms_duty(float duty){
-#ifdef USING_HIL_MODE
+if constexpr(IS_HIL){
 		if(duty > 0){
 			change_pwm2_duty(5);
 			change_pwm1_duty((float)duty+5);
@@ -67,15 +67,15 @@ public:
 			change_pwm1_duty(5);
 			change_pwm2_duty((float)-duty +5);
 		}
-#else
+}else{
 		if(duty > 0){
-			change_pwm2_duty(5);
+			change_pwm2_duty(0);
 			change_pwm1_duty((float)duty);
 		}else{
-			change_pwm1_duty(5);
+			change_pwm1_duty(0);
 			change_pwm2_duty((float)-duty);
 		}
-#endif
+}
 	}
 
 	void set_pwms_duty(float duty){
@@ -94,12 +94,12 @@ public:
 	}
 
 	float get_vbat_data(){
-#ifdef USING_HIL_MODE
+if constexpr(IS_HIL){
 		return 250.0;
-#endif
-#ifndef USING_HIL_MODE
+}
+else{
 		return binary_average_battery_voltage.output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_VBAT_SLOPE + FLOAT_VBAT_OFFSET;
-#endif
+}
 	}
 
 	void update_shunt_value(){
@@ -119,11 +119,11 @@ public:
 			change_pwms_duty(LDU_duty_cycle);
 			return;
 		}
-#ifdef BOARD_PROTECTIONS
+if constexpr(!IS_HIL){
 		if(current_shunt > 50.0 || current_shunt < -50.0){
 			send_to_fault();
 		}
-#endif
+}
 		Voltage_by_current_PI.input(desired_current - current_shunt);
 		Voltage_by_current_PI.execute();
 
@@ -138,14 +138,9 @@ public:
 	}
 
 	float calculate_duty_by_voltage(float voltage){
-#ifdef BOARD_PROTECTIONS
-		battery_voltage = get_vbat_data(); //no flag can alter this behavior to avoid any packet shenanigans
-#endif
-#ifndef BOARD_PROTECTIONS
 		if(!flags.fixed_vbat){
 			battery_voltage = get_vbat_data();
 		}
-#endif
 
 		if(battery_voltage < 0.0001){
 			return 0;

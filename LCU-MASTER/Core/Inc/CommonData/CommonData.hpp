@@ -9,6 +9,10 @@
  *  #############################################################
  */
 
+#define USING_1DOF (RUNNING_MODE == DOF1)
+#define USING_5DOF (RUNNING_MODE != DOF1)
+#define IS_HIL (RUNNING_MODE == DOF5_HIL)
+
 static ip_addr_t master_ip_addr = IPADDR4_INIT_BYTES(MASTER_IP_B0,MASTER_IP_B1,MASTER_IP_B2,MASTER_IP_B3);
 static IPV4 MASTER_IP(master_ip_addr);
 static IPV4 BACKEND("192.168.0.9");
@@ -26,6 +30,7 @@ static const uint32_t UDP_PORT = 50400;
 void fix_buffer_reset_high();
 void fix_buffer_reset_low();
 void general_enter_fault();
+void initial_order_callback();
 
 /* #################################################################
  * #####################  PINOUT DISTRIBUTION  #####################

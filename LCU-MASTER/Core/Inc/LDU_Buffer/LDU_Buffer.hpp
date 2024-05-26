@@ -26,18 +26,17 @@ public:
 	}
 
 	bool check_ready_and_fault(){
-#ifdef BOARD_PROTECTIONS
 		return 	DigitalInput::read_pin_state(LDU_Fault_1_ID) == PinState::ON &&
 				DigitalInput::read_pin_state(LDU_Fault_2_ID) == PinState::ON &&
 				DigitalInput::read_pin_state(LDU_Ready_1_ID) == PinState::ON &&
 				DigitalInput::read_pin_state(LDU_Ready_2_ID) == PinState::ON;
-#endif
-#ifndef BOARD_PROTECTIONS
-		return false;
-#endif
 	}
 
 	void update(){
+if constexpr(IS_HIL){
+		reset.turn_off();
+		return;
+}
 		if(shut_down){
 			reset.turn_off();
 		}else{
