@@ -7,6 +7,7 @@
 #include "LCU_MASTER.hpp"
 #include "LCU_function_definitions.hpp"
 
+void asserts();
 
 int main(void)
 {

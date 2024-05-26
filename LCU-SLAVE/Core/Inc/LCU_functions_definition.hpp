@@ -76,11 +76,11 @@ void reset_desired_current_on_LDU(){//TODO: implement as order on GUI
 }
 
 void initial_order_callback(){
-	if(master_status == RUNNING_MODE){
-		Communication::flags.SPIStablished = true;
+	/*if(master_status == RUNNING_MODE){
+		Communication::flags.SPIEstablished = true;
 	}else{
 		ErrorHandler("Slave and master are not in the same mode");
-	}
+	}*/
 }
 
 void test_pwm_order_callback(){

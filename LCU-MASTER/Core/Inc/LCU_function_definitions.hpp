@@ -19,9 +19,4 @@ void general_enter_fault(){
 }
 
 void initial_order_callback(){
-	if(slave_status == RUNNING_MODE){
-		Communication::flags.SPIStablished = true;
-	}else{
-		ErrorHandler("Slave and master are not in the same mode");
-	}
 }

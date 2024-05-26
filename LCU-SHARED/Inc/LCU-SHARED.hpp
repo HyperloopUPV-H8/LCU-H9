@@ -11,6 +11,4 @@
 constexpr LCU_running_modes RUNNING_MODE = DOF5;
 
 
-uint8_t initial_exchange_value(){
-	return LCU_states::INITIAL || RUNNING_MODE;
-}
+//uint8_t initial_exchange_value = (uint8_t)LCU_states::INITIAL || (uint8_t)RUNNING_MODE;
