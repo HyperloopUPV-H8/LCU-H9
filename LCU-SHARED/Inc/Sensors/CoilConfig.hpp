@@ -3,8 +3,10 @@
 #include "Tools/Tools.hpp"
 
 
-static constexpr double FLOAT_SHUNT_SLOPE = -34.3;
-static constexpr double FLOAT_SHUNT_OFFSET = 67.1;
+//-34.3
+//67.1
+static constexpr double FLOAT_SHUNT_SLOPE[LDU_COUNT] = {-82.32*1.1125, -82.32*1.1125, -82.32*1.1125, -82.32*1.1125, -82.32*1.1125, -82.32*1.1125, -82.32*1.1125, -82.32*1.1125, -82.32*1.1125, -82.32*1.1125};
+static constexpr double FLOAT_SHUNT_OFFSET[LDU_COUNT] = {196.7*1.1125, 196.7*1.1125, 196.7*1.1125, 196.7*1.1125, 196.7*1.1125, 196.7*1.1125, 196.7*1.1125, 196.7*1.1125, 196.7*1.1125, 196.7*1.1125};
 
 
 static constexpr uint32_t CURRENT_UPDATE_DATA_HZ = 2000;

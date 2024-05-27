@@ -141,7 +141,7 @@ if constexpr(USING_1DOF){
 			*shared_control_data.float_airgap_distance[i] = DOF1_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i])*1000;
 		}
 		for(int i = 0; i < LDU_COUNT; i++){
-			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(*shared_control_data.fixed_coil_current[i]);
+			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]);
 			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
 		}
 }
@@ -151,7 +151,7 @@ if constexpr(USING_5DOF){
 			*shared_control_data.float_airgap_distance[i+AIRGAP_COUNT/2] = EMS_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i+AIRGAP_COUNT/2])*1000;
 		}
 		for(int i = 0; i < LDU_COUNT; i++){
-			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(*shared_control_data.fixed_coil_current[i]);
+			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]);
 			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
 		}
 }

@@ -108,7 +108,7 @@ else{
 	}
 
 	float get_shunt_data(){
-		return binary_average_current_shunt.output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_SHUNT_SLOPE + FLOAT_SHUNT_OFFSET;
+		return coil_current_binary_to_real(index, binary_average_current_shunt.output_value);
 	}
 
 
