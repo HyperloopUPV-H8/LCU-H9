@@ -36,7 +36,7 @@ public:
 
 	void update(){
 		generalStateMachine.check_transitions();
-		//ProtectionManager::check_protections();
+		ProtectionManager::check_protections();
 		Communication::update();
 
 if constexpr(USING_1DOF){
@@ -110,7 +110,7 @@ if constexpr(USING_5DOF){
 		ldu_array[9] = LDU<running_mode, arithmetic_number_type>(9, PWM_PIN_10_1, PWM_PIN_10_2, VBAT_PIN_10, SHUNT_PIN_10, KP_EMS_CURRENT_TO_DUTY, KI_EMS_CURRENT_TO_DUTY);
 }
 		state_machine_initialization();
-		//protections_inscribe();
+		protections_inscribe();
 		Airgaps::inscribe();
 		Communication::init();
 
@@ -162,7 +162,7 @@ if constexpr(USING_1DOF){
 	}
 
 	void protections_inscribe(){
-		//ProtectionManager::link_state_machine(generalStateMachine, FAULT);
+		ProtectionManager::link_state_machine(generalStateMachine, FAULT);
 	}
 
 	static bool general_transition_initial_to_operational(){

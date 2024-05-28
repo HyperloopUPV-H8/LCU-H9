@@ -120,7 +120,7 @@ else{
 			return;
 		}
 if constexpr(!IS_HIL){
-		if(current_shunt > 50.0 || current_shunt < -50.0){
+		if(current_shunt > MAXIMUM_PEAK_CURRENT || current_shunt < -MAXIMUM_PEAK_CURRENT){
 			send_to_fault();
 		}
 }
@@ -160,6 +160,10 @@ if constexpr(!IS_HIL){
 		if(duty < 0.5 && duty > -0.5){return 0;}
 
 		return duty;
+	}
+
+	void add_ldu_protection(){
+		ProtectionManager::_add_protection(src, Boundary<typeid(current_shunt), TIME_ACCUMULATION>(current_shunt, MAXIMUM_PEAK_CURRENT, MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS, CURRENT_CONTROL_FREQ_HZ));
 	}
 };
 
