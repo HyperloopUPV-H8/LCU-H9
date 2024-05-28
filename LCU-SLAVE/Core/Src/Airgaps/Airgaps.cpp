@@ -2,5 +2,5 @@
 
 uint8_t Airgaps::airgaps_index_array[AIRGAP_COUNT]{0};
 uint16_t Airgaps::airgaps_binary_data_array[AIRGAP_COUNT]{0};
-MovingAverageBlock<uint16_t, uint16_t, 10> Airgaps::airgaps_average_binary_data_array[AIRGAP_COUNT]{};
+IntegerMovingAverage<uint16_t, uint16_t, 0, 10> Airgaps::airgaps_average_binary_data_array[AIRGAP_COUNT]{};
 float Airgaps::airgaps_data_array[AIRGAP_COUNT]{0.0};

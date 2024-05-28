@@ -48,15 +48,22 @@ void run_current_PI(){
 	}
 }
 
+void update_levitation_constants(float new_levitation_constants[LDU_COUNT][15]){
+	for(int i = 0; i < LDU_COUNT; i++){
+		for(int j = 0; j < 15; j++){
+			KID_MATRIX[i][j] = -new_levitation_constants[i][j];
+		}
+	}
+}
 
 void start_levitation_control(){
-	lcu_instance->set_desired_airgap_distance(Communication::data_to_change);
+	lcu_instance->set_desired_airgap_distance(data_to_change);
 	lcu_instance->start_control();
 }
 
 
 void set_desired_current_on_LDU(){
- 	ldu_array[Communication::ldu_to_change].desired_current = Communication::data_to_change;
+ 	ldu_array[ldu_to_change].desired_current = data_to_change;
 	status_flags.enable_current_control = true;
 }
 
@@ -68,11 +75,20 @@ void reset_desired_current_on_LDU(){//TODO: implement as order on GUI
 	}
 }
 
+void initial_order_callback(){
+	/*if(master_status == RUNNING_MODE){
+		Communication::flags.SPIEstablished = true;
+	}else{
+		ErrorHandler("Slave and master are not in the same mode");
+	}*/
+}
+
 void test_pwm_order_callback(){
 	lcu_instance->stop_control();
-	if(Communication::ldu_to_change >= LDU_COUNT){return;}
-	ldu_array[Communication::ldu_to_change].set_pwms_duty(Communication::duty_to_change);
-	ldu_array[Communication::ldu_to_change].desired_current = 0;
+	if(ldu_to_change >= LDU_COUNT){return;}
+	ldu_array[ldu_to_change].set_pwms_duty(duty_to_change);
+	ldu_array[ldu_to_change].desired_current = 0;
+	lcu_instance->ldu_buffers.turn_on();
 }
 
 void send_to_fault(){
@@ -80,6 +96,7 @@ void send_to_fault(){
 }
 
 void shutdown(){
+	lcu_instance->ldu_buffers.turn_off();
 	status_flags.enable_current_control = false;
 	for(int i = 0; i < LDU_COUNT; i++){
 		ldu_array[i].Voltage_by_current_PI.reset();

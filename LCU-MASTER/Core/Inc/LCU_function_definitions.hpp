@@ -13,3 +13,10 @@ void fix_buffer_reset_low(){
 	LDU_Buffer::ldu_buffers[Communication::ldu_index_to_change].fixed_reset = true;
 	LDU_Buffer::ldu_buffers[Communication::ldu_index_to_change].fixed_reset_value = false;
 }
+
+void general_enter_fault(){
+	LDU_Buffer::shutdown_buffers();
+}
+
+void initial_order_callback(){
+}

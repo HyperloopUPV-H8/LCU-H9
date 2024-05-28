@@ -4,14 +4,15 @@
 
 
 enum LCU_states{
-	INITIAL = 0,
-	OPERATIONAL,
-	FAULT,
+	INITIAL = 0b00100000,
+	OPERATIONAL = 0b01010000,
+	FAULT = 0b11111111,
 };
 
 static struct lcu_status_flags{
 	bool enable_current_control = false;
 	bool enable_levitation_control = false;
+	bool enable_lateral_levitation_control = false;
 	bool enable_nominal_control = false;
 	bool fault_flag = false;
 }status_flags;

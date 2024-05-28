@@ -23,9 +23,11 @@ public:
 	SPIStackOrder* SPIOrders[SPI_ORDER_COUNT];
 	SPIBasePacket* SPIPackets[SPI_ORDER_COUNT*2];
 
+
 	static struct communication_flags{
 		bool SPIStart = false;
 	}flags;
+
 
 	static uint16_t ldu_number_to_change;
 	static uint16_t ldu_index_to_change;
@@ -50,7 +52,13 @@ public:
 			shared_control_data.fixed_airgap_distance[i] = new uint16_t;
 			shared_control_data.float_airgap_distance[i] = new float;
 		}
-		//SPIOrders[MASTER_SLAVE_INITIAL_ORDER_INDEX] = new SPIBinaryOrder(MASTER_SLAVE_INITIAL_ORDER_ID,0,0);
+		/*shared_control_data.master_status = initial_exchange_value();
+
+		SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2] = new SPIPacket<2, uint8_t>(&master_status);
+		SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2] = new SPIPacket<2, uint8_t>(&slave_status);
+		SPIOrders[MASTER_SLAVE_INITIAL_ORDER_INDEX] = new SPIStackOrder(MASTER_SLAVE_INITIAL_ORDER_ID, *SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2], *SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2+1]);
+		SPIOrders[MASTER_SLAVE_INITIAL_ORDER_INDEX]->set_callback(initial_order_callback);*/
+
 
 		SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2] = new SPIPacket<41, uint8_t, ldu_array_deduction, ldu_array_deduction>(
 				&shared_control_data.master_status,
@@ -128,13 +136,25 @@ public:
 	}
 
 	static void update(){
+if constexpr(USING_1DOF){
 		for(int i = 0; i < AIRGAP_COUNT; i++){
-			*shared_control_data.float_airgap_distance[i] = airgap_distance_binary_to_real(*shared_control_data.fixed_airgap_distance[i])*1000;
+			*shared_control_data.float_airgap_distance[i] = DOF1_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i])*1000;
 		}
 		for(int i = 0; i < LDU_COUNT; i++){
-			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(*shared_control_data.fixed_coil_current[i]);
+			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]);
 			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
 		}
+}
+if constexpr(USING_5DOF){
+		for(int i = 0; i < AIRGAP_COUNT/2; i++){
+			*shared_control_data.float_airgap_distance[i] = HEMS_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i])*1000;
+			*shared_control_data.float_airgap_distance[i+AIRGAP_COUNT/2] = EMS_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i+AIRGAP_COUNT/2])*1000;
+		}
+		for(int i = 0; i < LDU_COUNT; i++){
+			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]);
+			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
+		}
+}
 	}
 
 	//###################  PERIODIC FUNCTIONS  #########################

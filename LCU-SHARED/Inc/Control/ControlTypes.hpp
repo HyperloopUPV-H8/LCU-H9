@@ -9,7 +9,7 @@
  */
 
 enum LCU_running_modes{
-	GUI_CONTROL,
 	DOF1,
 	DOF5,
+	DOF5_HIL,
 };

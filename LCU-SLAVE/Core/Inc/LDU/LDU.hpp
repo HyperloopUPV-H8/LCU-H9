@@ -2,10 +2,6 @@
 
 #include <CommonData/CommonData.hpp>
 
-#define KP_CURRENT_TO_DUTY 10.0 //22.9546
-#define KI_CURRENT_TO_DUTY 400.0 //208.3333
-#define MOVING_AVERAGE_SIZE 20
-
 template<LCU_running_modes running_mode, typename arithmetic_number_type>
 class LDU{
 public:
@@ -22,10 +18,11 @@ public:
 	PI<IntegratorType::Trapezoidal> Voltage_by_current_PI;
 
 	uint16_t binary_battery_voltage = 0;
-	MovingAverageBlock<uint16_t, uint16_t, 10> binary_average_battery_voltage;
+	IntegerMovingAverage<uint16_t, uint16_t, 0, VBAT_MOVING_AVERAGE_SIZE> binary_average_battery_voltage;
 	float battery_voltage = 0.0;
 
 	uint16_t binary_current_shunt = 0;
+	IntegerMovingAverage<uint16_t, uint16_t, 0, CURRENT_MOVING_AVERAGE_SIZE> binary_average_current_shunt;
 	float current_shunt = 0.0;
 
 
@@ -36,7 +33,7 @@ public:
 
 
 	LDU() = default;
-	LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin) : index(index), Voltage_by_current_PI{KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY, CURRENT_CONTROL_PERIOD_SECONDS}{
+	LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin, float current_kp, float current_ki) : index(index), Voltage_by_current_PI{current_kp, current_ki, CURRENT_CONTROL_PERIOD_SECONDS}{
 		pwm1 = new PWM(pwm1_pin);
 		slave_periph_pointers.ldu_pwms[index][0] = pwm1;
 		pwm2 = new PWM(pwm2_pin);
@@ -62,6 +59,7 @@ public:
 	void change_pwm2_duty(float duty){pwm2->set_duty_cycle(duty);}
 
 	void change_pwms_duty(float duty){
+if constexpr(IS_HIL){
 		if(duty > 0){
 			change_pwm2_duty(5);
 			change_pwm1_duty((float)duty+5);
@@ -69,6 +67,15 @@ public:
 			change_pwm1_duty(5);
 			change_pwm2_duty((float)-duty +5);
 		}
+}else{
+		if(duty > 0){
+			change_pwm2_duty(0);
+			change_pwm1_duty((float)duty);
+		}else{
+			change_pwm1_duty(0);
+			change_pwm2_duty((float)-duty);
+		}
+}
 	}
 
 	void set_pwms_duty(float duty){
@@ -87,18 +94,22 @@ public:
 	}
 
 	float get_vbat_data(){
-		return binary_average_battery_voltage.output_value * ADC_BINARY_TO_VOLTAGE * DOUBLE_VBAT_SLOPE + DOUBLE_VBAT_OFFSET;
+if constexpr(IS_HIL){
+		return 250.0;
+}
+else{
+		return binary_average_battery_voltage.output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_VBAT_SLOPE + FLOAT_VBAT_OFFSET;
+}
 	}
 
 	void update_shunt_value(){
 		binary_current_shunt = ADC::get_int_value(shunt_id);
+		binary_average_current_shunt.compute(binary_current_shunt);
 	}
 
 	float get_shunt_data(){
-		return  binary_current_shunt * ADC_BINARY_TO_VOLTAGE * DOUBLE_SHUNT_SLOPE + DOUBLE_SHUNT_OFFSET;
+		return coil_current_binary_to_real(index, binary_average_current_shunt.output_value);
 	}
-
-
 
 
 	//#################  CURRENT CONTROL  #########################
@@ -108,13 +119,15 @@ public:
 			change_pwms_duty(LDU_duty_cycle);
 			return;
 		}
+if constexpr(!IS_HIL){
 		if(current_shunt > 50.0 || current_shunt < -50.0){
-			//send_to_fault();
+			send_to_fault();
 		}
+}
 		Voltage_by_current_PI.input(desired_current - current_shunt);
 		Voltage_by_current_PI.execute();
 
-		double voltage = Voltage_by_current_PI.output_value;
+		float voltage = Voltage_by_current_PI.output_value;
 
 		if(voltage > 200.0){
 			voltage = 200.0;
@@ -124,19 +137,15 @@ public:
 		change_pwms_duty(calculate_duty_by_voltage(voltage));
 	}
 
-	float calculate_duty_by_voltage(double voltage){
-		if constexpr(running_mode == GUI_CONTROL){
-			if(!flags.fixed_vbat){
-				battery_voltage = get_vbat_data();
-			}
-		}else{
+	float calculate_duty_by_voltage(float voltage){
+		if(!flags.fixed_vbat){
 			battery_voltage = get_vbat_data();
 		}
 
 		if(battery_voltage < 0.0001){
 			return 0;
 		}
-		if(battery_voltage > 252.5){
+		if(battery_voltage > 252.5){ //TODO: check if we can do something with the noise here instead of saturating
 			battery_voltage = 252.5;
 		}
 

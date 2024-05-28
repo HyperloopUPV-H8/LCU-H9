@@ -15,12 +15,13 @@
 class Communication{
 public:
 	static uint8_t spi_id;
-	static uint16_t ldu_to_change;
-	static float duty_to_change;
-	static float data_to_change;
 
 	SPIStackOrder* SPIOrders[SPI_ORDER_COUNT];
 	SPIBasePacket* SPIPackets[SPI_ORDER_COUNT*2];
+
+	static struct communication_flags{
+		bool SPIEstablished = false;
+	}flags;
 
 	static void init(){
 		spi_id = SPI::inscribe(SPI::spi3);
@@ -28,9 +29,16 @@ public:
 	}
 
 	Communication(){
+		//shared_control_data.slave_status = initial_exchange_value;
 	}
 
 	void define_packets(){
+		/*SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2] = new SPIPacket<1, uint8_t>(&shared_control_data.master_status);
+		SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2] = new SPIPacket<1, uint8_t>(&shared_control_data.slave_status);
+		SPIOrders[MASTER_SLAVE_INITIAL_ORDER_INDEX] = new SPIStackOrder(MASTER_SLAVE_INITIAL_ORDER_ID, *SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2], *SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2+1]);
+		SPIOrders[MASTER_SLAVE_INITIAL_ORDER_INDEX]->set_callback(initial_order_callback);*/
+
+
 		SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2] = new SPIPacket<41, uint8_t, ldu_array_deduction, ldu_array_deduction>(
 				&shared_control_data.master_status,
 				&coil_t[0], &coil_t[1], &coil_t[2], &coil_t[3], &coil_t[4], &coil_t[5], &coil_t[6], &coil_t[7], &coil_t[8], &coil_t[9],

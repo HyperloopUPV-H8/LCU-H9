@@ -7,17 +7,12 @@
 #include "LCU_SLAVE.hpp"
 #include "LCU_functions_definition.hpp"
 
+void asserts();
+
 int main(void)
 {
-	//static_assert(HSE_VALUE==25'000'000);
-
-	DigitalOutput buffer_enable{PB2};
+	asserts();
 	LCU <RUNNING_MODE, ARITHMETIC_MODE>lcu_slave;
-
-	buffer_enable.turn_on();
-	uint8_t unused_variable = Time::set_timeout(1000,[&buffer_enable](){
-		buffer_enable.turn_off();
-	});
 
 	while(1) {
 		lcu_slave.update();
@@ -31,5 +26,7 @@ void Error_Handler(void)
 }
 
 
-
+void asserts(){
+	//static_assert(HSE_VALUE==25'000'000,"INVALID HSE value for BOARD");
+}
 

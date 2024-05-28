@@ -9,3 +9,5 @@
 #define MASTER_IP_B1 168
 #define MASTER_IP_B2 1
 #define MASTER_IP_B3 4
+
+#define MASTER_MASK_B2 255

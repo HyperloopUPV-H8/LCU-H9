@@ -7,10 +7,11 @@
 #include "LCU_MASTER.hpp"
 #include "LCU_function_definitions.hpp"
 
+void asserts();
 
 int main(void)
 {
-	//static_assert(HSE_VALUE==25'000'000,"INVALID HSE value for BOARD");
+	asserts();
 	Communication::test_order_received = new DigitalOutput(PG4);
 
 	LCU lcu_master;
@@ -30,4 +31,8 @@ void Error_Handler(void)
 {
 	ErrorHandler("HAL error handler triggered");
 	while (1){}
+}
+
+void asserts(){
+	//static_assert(HSE_VALUE==25'000'000,"INVALID HSE value for BOARD");
 }
