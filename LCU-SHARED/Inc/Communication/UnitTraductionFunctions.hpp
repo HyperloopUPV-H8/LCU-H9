@@ -18,6 +18,10 @@ inline float coil_current_binary_to_real(uint8_t id, uint16_t binary_value){
 	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * FLOAT_SHUNT_SLOPE[id] + FLOAT_SHUNT_OFFSET[id];
 }
 
+inline float coil_current_binary_to_real_HIL(uint16_t binary_value){
+	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * FLOAT_SHUNT_SLOPE_HIL + FLOAT_SHUNT_OFFSET_HIL;
+}
+
 inline float battery_voltage_binary_to_real(uint16_t binary_value){
 	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * FLOAT_VBAT_SLOPE + FLOAT_VBAT_OFFSET;
 }

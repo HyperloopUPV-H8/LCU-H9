@@ -12,7 +12,7 @@
 #define USING_5DOF (RUNNING_MODE != DOF1)
 #define IS_HIL (RUNNING_MODE == DOF5_HIL)
 
-static constexpr double MAXIMUM_DESIRED_CURRENT = 45.0;
+static constexpr double MAXIMUM_DESIRED_CURRENT = 40.0;
 
 #define DOF1_USED_LDU_INDEX 9
 #define DOF1_USED_AIRGAP_INDEX 0
