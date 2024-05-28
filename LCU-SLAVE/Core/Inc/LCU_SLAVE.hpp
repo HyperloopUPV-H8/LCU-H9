@@ -163,6 +163,10 @@ if constexpr(USING_1DOF){
 
 	void protections_inscribe(){
 		ProtectionManager::link_state_machine(generalStateMachine, FAULT);
+
+		for(int i = 0; i < LDU_COUNT; i++){
+			ldu_array[i].add_ldu_protection();
+		}
 	}
 
 	static bool general_transition_initial_to_operational(){

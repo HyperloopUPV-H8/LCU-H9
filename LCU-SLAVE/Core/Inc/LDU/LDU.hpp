@@ -25,6 +25,8 @@ public:
 	IntegerMovingAverage<uint16_t, uint16_t, 0, CURRENT_MOVING_AVERAGE_SIZE> binary_average_current_shunt;
 	float current_shunt = 0.0;
 
+	Boundary<decltype(current_shunt), TIME_ACCUMULATION> *extended_current_protection;
+
 
 	struct LDU_flags{
 		bool fixed_vbat = false;
@@ -33,7 +35,8 @@ public:
 
 
 	LDU() = default;
-	LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin, float current_kp, float current_ki) : index(index), Voltage_by_current_PI{current_kp, current_ki, CURRENT_CONTROL_PERIOD_SECONDS}{
+	LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin, float current_kp, float current_ki) :
+		index(index), Voltage_by_current_PI{current_kp, current_ki, CURRENT_CONTROL_PERIOD_SECONDS}{
 		pwm1 = new PWM(pwm1_pin);
 		slave_periph_pointers.ldu_pwms[index][0] = pwm1;
 		pwm2 = new PWM(pwm2_pin);
@@ -121,6 +124,11 @@ else{
 		}
 if constexpr(!IS_HIL){
 		if(current_shunt > MAXIMUM_PEAK_CURRENT || current_shunt < -MAXIMUM_PEAK_CURRENT){
+			//send_to_fault();
+		}
+
+		extended_current_protection->check_accumulation(current_shunt);
+		if(extended_current_protection->still_good == Protections::FAULT){
 			send_to_fault();
 		}
 }
@@ -163,7 +171,8 @@ if constexpr(!IS_HIL){
 	}
 
 	void add_ldu_protection(){
-		ProtectionManager::_add_protection(src, Boundary<typeid(current_shunt), TIME_ACCUMULATION>(current_shunt, MAXIMUM_PEAK_CURRENT, MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS, CURRENT_CONTROL_FREQ_HZ));
+		extended_current_protection = new Boundary<decltype(current_shunt), TIME_ACCUMULATION>(&current_shunt, MAXIMUM_PEAK_CURRENT, MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS, CURRENT_CONTROL_FREQ_HZ);
+		add_protection(&current_shunt,*extended_current_protection); //TODO: doesn t work
 	}
 };
 
