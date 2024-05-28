@@ -111,7 +111,11 @@ else{
 	}
 
 	float get_shunt_data(){
-		return coil_current_binary_to_real(index, binary_average_current_shunt.output_value);
+		if constexpr(IS_HIL){
+			return coil_current_binary_to_real_HIL(binary_average_current_shunt.output_value);
+		}else{
+			return coil_current_binary_to_real(index, binary_average_current_shunt.output_value);
+		}
 	}
 
 
