@@ -34,6 +34,7 @@ static struct periph_pointers{
  *  ################  STATIC FUNCTIONS DECLARATION  #################
  *  #################################################################
  */
+inline void LDUs_zeroing();
 
 inline void DOF5_update_airgap_data();
 inline void DOF5_update_shunt_data();

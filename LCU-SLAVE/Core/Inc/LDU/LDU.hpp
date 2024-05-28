@@ -25,12 +25,17 @@ public:
 	IntegerMovingAverage<uint16_t, uint16_t, 0, CURRENT_MOVING_AVERAGE_SIZE> binary_average_current_shunt;
 	float current_shunt = 0.0;
 
+	MovingAverage<CURRENT_ZEROING_SAMPLE_AMOUNT> average_current_for_zeroing;
+	uint32_t zeroing_sample_count = 0;
+	float shunt_zeroing_offset = 0.0;
+
 	Boundary<decltype(current_shunt), TIME_ACCUMULATION> *extended_current_protection;
 
 
 	struct LDU_flags{
 		bool fixed_vbat = false;
 		bool fixed_desired_current = false;
+		bool finished_zeroing = false;
 	}flags;
 
 
@@ -114,7 +119,7 @@ else{
 		if constexpr(IS_HIL){
 			return coil_current_binary_to_real_HIL(binary_average_current_shunt.output_value);
 		}else{
-			return coil_current_binary_to_real(index, binary_average_current_shunt.output_value);
+			return (coil_current_binary_to_real(index, binary_average_current_shunt.output_value) - shunt_zeroing_offset);
 		}
 	}
 
@@ -128,7 +133,7 @@ else{
 		}
 if constexpr(!IS_HIL){
 		if(current_shunt > MAXIMUM_PEAK_CURRENT || current_shunt < -MAXIMUM_PEAK_CURRENT){
-			//send_to_fault();
+			send_to_fault();
 		}
 
 		extended_current_protection->check_accumulation(current_shunt);
@@ -177,6 +182,17 @@ if constexpr(!IS_HIL){
 	void add_ldu_protection(){
 		extended_current_protection = new Boundary<decltype(current_shunt), TIME_ACCUMULATION>(&current_shunt, MAXIMUM_PEAK_CURRENT, MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS, CURRENT_CONTROL_FREQ_HZ);
 		add_protection(&current_shunt,*extended_current_protection); //TODO: doesn t work
+	}
+
+	void ldu_zeroing(){
+		if(flags.finished_zeroing){
+			return;
+		}
+		average_current_for_zeroing.compute(get_shunt_data() + shunt_zeroing_offset);
+		zeroing_sample_count++;
+		if(zeroing_sample_count > CURRENT_ZEROING_SAMPLE_AMOUNT){
+			flags.finished_zeroing = true;
+		}
 	}
 };
 

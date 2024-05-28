@@ -1,5 +1,19 @@
 #include "LCU_SLAVE.hpp"
 
+void LDUs_zeroing(){
+	bool zeroing_complete = true;
+	for(int i = 0; i < LDU_COUNT; i++){
+		ldu_array[i].ldu_zeroing();
+		zeroing_complete &= ldu_array[i].flags.finished_zeroing;
+	}
+	if(zeroing_complete){
+		for(int i = 0; i < LDU_COUNT; i++){
+			ldu_array[i].shunt_zeroing_offset = ldu_array[i].average_current_for_zeroing.output_value;
+		}
+		lcu_instance->CalibrationCompleted = true;
+	}
+}
+
 void DOF5_update_airgap_data(){
 	Airgaps::update_binary();
 }
