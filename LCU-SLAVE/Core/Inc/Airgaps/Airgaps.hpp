@@ -21,11 +21,6 @@ public:
 			airgaps_index_array[5] = ADC::inscribe(AIRGAP_PIN_6);
 			airgaps_index_array[6] = ADC::inscribe(AIRGAP_PIN_7);
 			airgaps_index_array[7] = ADC::inscribe(AIRGAP_PIN_8);
-
-			for(int i = 0;  i < AIRGAP_COUNT; i++){
-				shared_control_data.fixed_airgap_distance[i] = &airgaps_binary_data_array[i];
-				shared_control_data.float_airgap_distance[i] = &airgaps_data_array[i];
-			}
 	}
 
 	static inline void start(){

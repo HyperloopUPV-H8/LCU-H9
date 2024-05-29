@@ -19,6 +19,7 @@ public:
 	Control<running_mode, arithmetic_number_type> levitationControl;
 	StateMachine generalStateMachine;
 	PWM_Buffer ldu_buffers;
+	LDU<RUNNING_MODE, ARITHMETIC_MODE> ldu_array[LDU_COUNT];
 
 	bool PendingCurrentPI = false;
 	bool PendingLevitationControl = false;
@@ -48,6 +49,17 @@ if constexpr(USING_5DOF){
 }
 	}
 
+	void update_desired_current_control(){
+		for(int i = 0; i < LDU_COUNT; i++){
+			if(levitationControl.desired_current_vector[i] > MAXIMUM_DESIRED_CURRENT){
+				ldu_array[i].desired_current = MAXIMUM_DESIRED_CURRENT;
+			}else if(levitationControl.desired_current_vector[i] < -MAXIMUM_DESIRED_CURRENT){
+				ldu_array[i].desired_current = -MAXIMUM_DESIRED_CURRENT;
+			}else{
+				ldu_array[i].desired_current = levitationControl.desired_current_vector[i]; //the k multiplications of the matrix are negative, so we put a minus on the result
+			}
+		}
+	}
 
 	void DOF5_update(){
 		if(PendingLevitationControl){
@@ -55,7 +67,7 @@ if constexpr(USING_5DOF){
 			if(status_flags.enable_levitation_control){
 				LevitationControlCount++;
 				levitationControl.DOF5_control_loop();
-				levitationControl.update_desired_current_control();
+				update_desired_current_control();
 			}
 			PendingLevitationControl = false;
 		}
@@ -123,7 +135,7 @@ if constexpr(USING_5DOF){
 			ldu_array[i].start();
 		}
 
-		communication.define_packets();
+		communication.define_packets(); //packets need to be defined after everything so they can pull the pointers to the variables
 	}
 
 
@@ -202,7 +214,7 @@ if constexpr(USING_1DOF){
 	}
 
 	void start_control(){
-		status_flags.enable_current_control = true;
+		enable_all_current_controls();
 		levitationControl.start();
 	}
 

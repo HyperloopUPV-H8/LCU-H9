@@ -3,9 +3,14 @@
 #include "Tools/Tools.hpp"
 #include "Layout/Layout.hpp"
 
-static struct control_data{
-	uint8_t master_status = 0;
-	uint8_t slave_status = 0;
+struct control_data{
+	uint8_t *master_status = nullptr;
+	uint8_t *master_secondary_status = nullptr; //does nothing for now
+	uint8_t *master_running_mode = nullptr; //running mode code on INITIAL
+	uint8_t *slave_status = nullptr;
+	uint8_t *slave_secondary_status = nullptr; //contains flags on INITIAL, levitation state machine on OPERATIONAL, and TODO: error code on FAULT
+	uint8_t *slave_running_mode = nullptr; //running mode code on INITIAL
+
 
 	uint16_t fixed_coil_temperature[LDU_COUNT]{0};
 	uint16_t fixed_lpu_temperature[LDU_COUNT]{0};
@@ -19,7 +24,8 @@ static struct control_data{
 	float *float_coil_current[LDU_COUNT]{nullptr};
 	float *float_battery_voltage[LDU_COUNT]{nullptr};
 	float *float_airgap_distance[AIRGAP_COUNT]{nullptr};
-}shared_control_data;
+	float *shunt_zeroing_offset[LDU_COUNT]{nullptr};
+};
 
 static uint16_t ldu_to_change = 0;
 static float duty_to_change = 0;

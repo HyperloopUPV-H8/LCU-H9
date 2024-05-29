@@ -111,18 +111,6 @@ public:
 		}
 	}
 
-	void update_desired_current_control(){
-		for(int i = 0; i < LDU_COUNT; i++){
-			if(desired_current_vector[i] > MAXIMUM_DESIRED_CURRENT){
-				ldu_array[i].desired_current = MAXIMUM_DESIRED_CURRENT;
-			}else if(desired_current_vector[i] < -MAXIMUM_DESIRED_CURRENT){
-				ldu_array[i].desired_current = -MAXIMUM_DESIRED_CURRENT;
-			}else{
-				ldu_array[i].desired_current = desired_current_vector[i]; //the k multiplications of the matrix are negative, so we put a minus on the result
-			}
-		}
-	}
-
 	void prepare_derivator_buffer(){
 		airgap_to_pos();
 		for(int i = 0; i < 5; i++){

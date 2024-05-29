@@ -34,6 +34,7 @@ public:
 
 	struct LDU_flags{
 		bool fixed_vbat = false;
+		bool enable_current_control = false;
 		bool fixed_desired_current = false;
 		bool finished_zeroing = false;
 	}flags;
@@ -52,8 +53,6 @@ public:
 
 
 	void start(){
-		shared_control_data.fixed_coil_current[index] = &binary_current_shunt;
-		shared_control_data.fixed_battery_voltage[index] = &binary_battery_voltage;
 		pwm1->turn_on();
 		pwm2->turn_on();
 		ADC::turn_on(vbat_id);
@@ -127,7 +126,7 @@ else{
 	//#################  CURRENT CONTROL  #########################
 	void PI_current_to_duty_cycle(){
 		current_shunt = get_shunt_data();
-		if(!status_flags.enable_current_control){
+		if(!flags.enable_current_control){
 			change_pwms_duty(LDU_duty_cycle);
 			return;
 		}
@@ -195,5 +194,3 @@ if constexpr(!IS_HIL){
 		}
 	}
 };
-
-static LDU<RUNNING_MODE, ARITHMETIC_MODE> ldu_array[LDU_COUNT];

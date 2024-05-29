@@ -20,6 +20,8 @@ constexpr float MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS = 4.0;
 #define DOF1_USED_LDU_INDEX 9
 #define DOF1_USED_AIRGAP_INDEX 0
 
+extern control_data shared_control_data;
+
 /*  ##############################################################
  *  ###################  SHARED_CONTROL_DATA  ####################
  *  ##############################################################
@@ -46,6 +48,8 @@ inline void DOF1_update_vbat_data();
 inline void rise_current_PI_flag();
 inline void rise_levitation_control_flag();
 inline void rise_rise_housekeeping_tasks_flag();
+inline void enable_all_current_controls();
+inline void disable_all_current_controls();
 
 inline void update_desired_current_LDU();
 inline void run_current_PI();
@@ -55,6 +59,8 @@ inline void start_levitation_control();
 inline void set_desired_current_on_LDU();
 inline void initial_order_callback();
 inline void test_pwm_order_callback();
+
+inline void define_shared_data();
 
 inline void send_to_fault();
 inline void shutdown();

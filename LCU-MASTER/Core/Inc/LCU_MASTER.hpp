@@ -4,6 +4,10 @@
 #include "LDU_Buffer/LDU_Buffer.hpp"
 #include "CommonData/CommonData.hpp"
 
+class LCU;
+
+extern LCU *lcu_instance;
+
 class LCU{
 public:
 	uint8_t coil_temperature_adc_id[LDU_COUNT]{0};
@@ -27,7 +31,7 @@ public:
 	}
 
 	static bool initial_to_operational_transition(){
-		return Communication::gui_connection->is_connected();
+		return Communication::gui_connection->is_connected() && Communication::flags.SPIEstablished;
 	}
 
 	static bool initial_to_fault_transition(){

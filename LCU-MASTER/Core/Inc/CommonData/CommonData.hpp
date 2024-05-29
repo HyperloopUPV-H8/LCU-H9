@@ -5,7 +5,7 @@
 #include "CommonCData.h"
 
 /** #############################################################
- *  ###################  LCU_DESIGN_DATA  #######################
+ *  ###################  LCU_MASTER_SHARED  #######################
  *  #############################################################
  */
 
@@ -22,6 +22,8 @@ static const uint32_t TCP_SERVER_PORT = 50500;
 static const uint32_t TCP_CLIENT_PORT = 50401;
 static const uint32_t UDP_PORT = 50400;
 
+extern control_data shared_control_data;
+
 /*  #################################################################
  *  ################  STATIC FUNCTIONS DECLARATION  #################
  *  #################################################################
@@ -29,6 +31,7 @@ static const uint32_t UDP_PORT = 50400;
 
 void fix_buffer_reset_high();
 void fix_buffer_reset_low();
+void define_shared_data();
 void general_enter_fault();
 void initial_order_callback();
 
