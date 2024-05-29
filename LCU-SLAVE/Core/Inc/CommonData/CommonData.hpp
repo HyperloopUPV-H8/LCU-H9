@@ -85,8 +85,8 @@ inline void shutdown();
 #define VBAT_PIN_4 		PF6
 #define SHUNT_PIN_4 	PA1
 
-#define PWM_PIN_5_1		PD15
-#define PWM_PIN_5_2		PD14
+#define PWM_PIN_5_1		PD15 //PD14
+#define PWM_PIN_5_2		PD14 //PD15
 #define VBAT_PIN_5 		PF8
 #define SHUNT_PIN_5 	PA2
 
@@ -115,12 +115,12 @@ inline void shutdown();
 #define VBAT_PIN_10 	PC2
 #define SHUNT_PIN_10 	PF11
 
-#define AIRGAP_PIN_1 	PA7
+#define AIRGAP_PIN_1 	PB0//PA7
 #define AIRGAP_PIN_2 	PA6
 #define AIRGAP_PIN_3 	PA5
 #define AIRGAP_PIN_4 	PA4
 #define AIRGAP_PIN_5 	PB1
-#define AIRGAP_PIN_6 	PB0
+#define AIRGAP_PIN_6 	PA7//PB0
 #define AIRGAP_PIN_7 	PC5
 #define AIRGAP_PIN_8 	PC4
 
