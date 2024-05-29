@@ -103,7 +103,7 @@ void reset_desired_current_on_LDU(){//TODO: implement as order on GUI
 }
 
 void initial_order_callback(){
-	if(*shared_control_data.master_running_mode == *shared_control_data.slave_running_mode){
+	if(*shared_control_data.master_running_mode == *shared_control_data.slave_running_mode && *shared_control_data.slave_secondary_status == 1){
 		Communication::flags.SPIEstablished = true;
 	}else{
 
@@ -119,11 +119,11 @@ void test_pwm_order_callback(){
 }
 
 void define_shared_data(){
-	shared_control_data.master_status = new uint8_t;
-	shared_control_data.master_secondary_status = new uint8_t;
+	shared_control_data.master_status = new uint8_t{0};
+	shared_control_data.master_secondary_status = new uint8_t{0};
 	shared_control_data.master_running_mode = new uint8_t{255};
 	shared_control_data.slave_status = (uint8_t*) &lcu_instance->generalStateMachine.current_state;
-	shared_control_data.slave_secondary_status = new uint8_t;
+	shared_control_data.slave_secondary_status = new uint8_t{0};
 	shared_control_data.slave_running_mode = new uint8_t{(uint8_t)RUNNING_MODE};
 	for(int i = 0; i < LDU_COUNT; i++){
 		shared_control_data.fixed_coil_current[i] = &(lcu_instance->ldu_array[i].binary_current_shunt);

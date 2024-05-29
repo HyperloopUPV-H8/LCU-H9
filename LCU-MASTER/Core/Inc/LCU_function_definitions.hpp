@@ -35,7 +35,12 @@ void define_shared_data(){
 	}
 }
 
+void general_enter_operational(){
+	lcu_instance->leds.Set_Operational_Led();
+}
+
 void general_enter_fault(){
+	lcu_instance->leds.Set_Fault_Led();
 	LDU_Buffer::shutdown_buffers();
 }
 

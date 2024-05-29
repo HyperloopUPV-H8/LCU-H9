@@ -3,6 +3,7 @@
 #include "Communication/Communication.hpp"
 #include "LDU_Buffer/LDU_Buffer.hpp"
 #include "CommonData/CommonData.hpp"
+#include "LEDs/LEDs.hpp"
 
 class LCU;
 
@@ -14,6 +15,7 @@ public:
 	uint8_t lpu_temperature_adc_id[LDU_COUNT]{0};
 	Communication communication;
 	StateMachine generalStateMachine;
+	LEDs leds;
 
 
 	LCU();
@@ -31,7 +33,10 @@ public:
 	}
 
 	static bool initial_to_operational_transition(){
-		return Communication::gui_connection->is_connected() && Communication::flags.SPIEstablished;
+		if(Communication::flags.SPIEstablished){
+			return Communication::gui_connection->is_connected();
+		}
+		return false;
 	}
 
 	static bool initial_to_fault_transition(){
@@ -39,6 +44,7 @@ public:
 	}
 
 	static bool operational_to_fault_transition(){
-		return false;
+		return !(Communication::gui_connection->is_connected()) || *shared_control_data.slave_status == (uint8_t)FAULT;
 	}
 };
+

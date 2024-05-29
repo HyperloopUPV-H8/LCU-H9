@@ -25,12 +25,13 @@ public:
 	bool PendingLevitationControl = false;
 	bool PendingHousekeepingTasks = false;
 	bool CalibrationCompleted = false;
+	bool DefinitionCompleted = false;
 
 
 	uint64_t LevitationControlCount = 0;
 	uint64_t CurrentPICount = 0;
 
-	LCU() : generalStateMachine(INITIAL){
+	LCU() : generalStateMachine(DEFINING){
 		if(lcu_instance == nullptr){	lcu_instance = this;
 		}else{		ErrorHandler("tried to set a second lcu");		}
 		setup_configuration();
@@ -136,6 +137,7 @@ if constexpr(USING_5DOF){
 		}
 
 		communication.define_packets(); //packets need to be defined after everything so they can pull the pointers to the variables
+		DefinitionCompleted = true;
 	}
 
 
@@ -147,10 +149,12 @@ if constexpr(USING_5DOF){
 
 	void state_machine_initialization(){
 		//################  ADDING ALL THE STATES  ##########################
+		generalStateMachine.add_state(INITIAL);
 		generalStateMachine.add_state(OPERATIONAL);
 		generalStateMachine.add_state(FAULT);
 
 		//################# ADDING ALL TRANSITIONS ##########################
+		generalStateMachine.add_transition(DEFINING, INITIAL, general_transition_defining_to_initial);
 		generalStateMachine.add_transition(INITIAL, OPERATIONAL, general_transition_initial_to_operational);
 		generalStateMachine.add_transition(INITIAL, FAULT, general_transition_initial_to_fault);
 		generalStateMachine.add_transition(OPERATIONAL, FAULT, general_transition_operational_to_fault);
@@ -184,6 +188,10 @@ if constexpr(USING_1DOF){
 		}
 	}
 
+	static bool general_transition_defining_to_initial(){
+		return lcu_instance->DefinitionCompleted;
+	}
+
 	static bool general_transition_initial_to_operational(){
 		return lcu_instance->CalibrationCompleted;
 	}
@@ -193,7 +201,7 @@ if constexpr(USING_1DOF){
 	}
 
 	static bool general_transition_operational_to_fault(){
-		return status_flags.fault_flag;
+		return status_flags.fault_flag || *shared_control_data.master_status == (uint8_t) FAULT;
 	}
 
 	static void general_enter_operational(){

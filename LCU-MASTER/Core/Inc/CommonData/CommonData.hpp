@@ -32,6 +32,7 @@ extern control_data shared_control_data;
 void fix_buffer_reset_high();
 void fix_buffer_reset_low();
 void define_shared_data();
+void general_enter_operational();
 void general_enter_fault();
 void initial_order_callback();
 
@@ -102,3 +103,5 @@ void initial_order_callback();
 #define LCU_BUFFER_FAULT_PIN_10 PE11
 #define LCU_BUFFER_READY_PIN_10 PE10
 
+#define OPERATIONAL_LED_PIN 	PG8
+#define FAULT_LED_PIN			PG6
