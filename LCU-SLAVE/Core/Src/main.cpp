@@ -7,6 +7,7 @@
 #include "LCU_SLAVE.hpp"
 #include "LCU_functions_definition.hpp"
 
+
 void asserts();
 
 int main(void)

@@ -12,8 +12,8 @@
 #define USING_5DOF (RUNNING_MODE != DOF1)
 #define IS_HIL (RUNNING_MODE == DOF5_HIL)
 
-constexpr float MAXIMUM_DESIRED_CURRENT = 40.0;
-constexpr float MAXIMUM_PEAK_CURRENT = 35.0;
+constexpr float MAXIMUM_DESIRED_CURRENT = 38.0;
+constexpr float MAXIMUM_PEAK_CURRENT = 45.0;
 constexpr float MAXIMUM_EXTENDED_CURRENT = 25.0;
 constexpr float MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS = 4.0;
 
@@ -121,12 +121,12 @@ inline void shutdown();
 #define VBAT_PIN_10 	PC2
 #define SHUNT_PIN_10 	PF11
 
-#define AIRGAP_PIN_1 	PB0//PA7
+#define AIRGAP_PIN_1 	PA7
 #define AIRGAP_PIN_2 	PA6
 #define AIRGAP_PIN_3 	PA5
 #define AIRGAP_PIN_4 	PA4
 #define AIRGAP_PIN_5 	PB1
-#define AIRGAP_PIN_6 	PA7//PB0
+#define AIRGAP_PIN_6 	PB0
 #define AIRGAP_PIN_7 	PC5
 #define AIRGAP_PIN_8 	PC4
 

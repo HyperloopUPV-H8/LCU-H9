@@ -6,5 +6,5 @@
 #include "Communication/EthernetPacketDefinition.hpp"
 #include "Communication/UnitTraductionFunctions.hpp"
 
-static constexpr uint16_t ETH_REFRESH_DATA_PERIOD_MS = 100;
+static constexpr uint16_t ETH_REFRESH_DATA_PERIOD_MS = 5;
 static constexpr uint16_t SPI_REFRESH_DATA_PERIOD_MS = 5;
