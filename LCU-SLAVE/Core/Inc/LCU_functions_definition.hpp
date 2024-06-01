@@ -59,12 +59,16 @@ void rise_housekeeping_tasks_flag(){
 void enable_all_current_controls(){
 	for(int i = 0; i < LDU_COUNT; i++){
 		lcu_instance->ldu_array[i].flags.enable_current_control = true;
+		lcu_instance->ldu_array[i].flags.fixed_vbat = true;
 	}
 }
 
 void disable_all_current_controls(){
 	for(int i = 0; i < LDU_COUNT; i++){
 		lcu_instance->ldu_array[i].flags.enable_current_control = false;
+		lcu_instance->ldu_array[i].flags.fixed_vbat = false;
+		lcu_instance->ldu_array[i].Voltage_by_current_PI.reset();
+		lcu_instance->ldu_array[i].set_pwms_duty(0);
 	}
 }
 
@@ -91,6 +95,7 @@ void start_levitation_control(){
 void set_desired_current_on_LDU(){
 	lcu_instance->ldu_array[ldu_to_change].desired_current = data_to_change;
  	disable_all_current_controls();
+ 	lcu_instance->ldu_array[ldu_to_change].flags.fixed_vbat = true;
  	lcu_instance->ldu_array[ldu_to_change].flags.enable_current_control = true;
 }
 

@@ -96,8 +96,10 @@ if constexpr(IS_HIL){
 
 	//################  DATA STORING, PROCESSING AND PARSING  ###################
 	void update_vbat_value(){
-		binary_battery_voltage = ADC::get_int_value(vbat_id);
-		binary_average_battery_voltage.compute(binary_battery_voltage);
+		if(!flags.fixed_vbat){
+			binary_battery_voltage = ADC::get_int_value(vbat_id);
+			binary_average_battery_voltage.compute(binary_battery_voltage);
+		}
 	}
 
 	float get_vbat_data(){
@@ -126,6 +128,9 @@ else{
 	//#################  CURRENT CONTROL  #########################
 	void PI_current_to_duty_cycle(){
 		current_shunt = get_shunt_data();
+		if(!flags.fixed_vbat){ //fixed VBAT is used to clamp value when levitating
+			battery_voltage = get_vbat_data();
+		}
 		if(!flags.enable_current_control){
 			change_pwms_duty(LDU_duty_cycle);
 			return;
@@ -154,10 +159,6 @@ if constexpr(!IS_HIL){
 	}
 
 	float calculate_duty_by_voltage(float voltage){
-		if(!flags.fixed_vbat){
-			battery_voltage = get_vbat_data();
-		}
-
 		if(battery_voltage < 0.0001){
 			return 0;
 		}
