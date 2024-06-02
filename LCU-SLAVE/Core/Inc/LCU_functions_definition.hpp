@@ -130,6 +130,8 @@ void define_shared_data(){
 	shared_control_data.slave_status = (uint8_t*) &lcu_instance->generalStateMachine.current_state;
 	shared_control_data.slave_secondary_status = new uint8_t{0};
 	shared_control_data.slave_running_mode = new uint8_t{(uint8_t)RUNNING_MODE};
+	shared_control_data.current_control_count = &lcu_instance->CurrentPICount;
+	shared_control_data.levitation_control_count = &lcu_instance->LevitationControlCount;
 	for(int i = 0; i < LDU_COUNT; i++){
 		shared_control_data.fixed_coil_current[i] = &(lcu_instance->ldu_array[i].binary_average_current_shunt.output_value);
 		shared_control_data.fixed_battery_voltage[i] = &(lcu_instance->ldu_array[i].binary_average_battery_voltage.output_value);

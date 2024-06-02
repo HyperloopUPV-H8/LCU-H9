@@ -8,6 +8,7 @@
 class Airgaps{
 public:
 	static uint8_t airgaps_index_array[AIRGAP_COUNT];
+	static uint16_t* airgaps_binary_data_pointer_array[AIRGAP_COUNT];
 	static uint16_t airgaps_binary_data_array[AIRGAP_COUNT];
 	static IntegerMovingAverage<uint16_t, uint16_t, 0, 10> airgaps_average_binary_data_array[AIRGAP_COUNT];
 	static float airgaps_data_array[AIRGAP_COUNT];
@@ -26,12 +27,13 @@ public:
 	static inline void start(){
 		for(int i = 0; i < AIRGAP_COUNT; i++){
 			ADC::turn_on(airgaps_index_array[i]);
+			airgaps_binary_data_pointer_array[i] = ADC::get_value_pointer(airgaps_index_array[i]);
 		}
 	}
 
 	static inline void update_binary(){
 		for(int i = 0; i < AIRGAP_COUNT; i++){
-			airgaps_binary_data_array[i] = ADC::get_int_value(airgaps_index_array[i]);
+			airgaps_binary_data_array[i] = *airgaps_binary_data_pointer_array[i];
 			airgaps_average_binary_data_array[i].compute(airgaps_binary_data_array[i]);
 		}
 	}

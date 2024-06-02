@@ -21,6 +21,7 @@ public:
 	IntegerMovingAverage<uint16_t, uint16_t, 0, VBAT_MOVING_AVERAGE_SIZE> binary_average_battery_voltage;
 	float battery_voltage = 0.0;
 
+	uint16_t* binary_current_shunt_pointer = nullptr;
 	uint16_t binary_current_shunt = 0;
 	IntegerMovingAverage<uint16_t, uint16_t, 0, CURRENT_MOVING_AVERAGE_SIZE> binary_average_current_shunt;
 	float current_shunt = 0.0;
@@ -57,6 +58,7 @@ public:
 		pwm2->turn_on();
 		ADC::turn_on(vbat_id);
 		ADC::turn_on(shunt_id);
+		binary_current_shunt_pointer = ADC::get_value_pointer(shunt_id);
 		change_pwm1_freq(PWM_FREQ_HZ);
 		change_pwm2_freq(PWM_FREQ_HZ);
 	}
@@ -112,7 +114,7 @@ else{
 	}
 
 	void update_shunt_value(){
-		binary_current_shunt = ADC::get_int_value(shunt_id);
+		binary_current_shunt = *binary_current_shunt_pointer;
 		binary_average_current_shunt.compute(binary_current_shunt);
 	}
 

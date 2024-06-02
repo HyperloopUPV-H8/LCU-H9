@@ -61,7 +61,8 @@ public:
 
 
 		SPIPackets[LEVITATION_DATA_ORDER_INDEX*2] = new SPIPacket<0>();
-		SPIPackets[LEVITATION_DATA_ORDER_INDEX*2+1] = new SPIPacket<52, float, float, float, float, float, float, float, float, float, float, float, float, float>(
+		SPIPackets[LEVITATION_DATA_ORDER_INDEX*2+1] = new SPIPacket<60, uint32_t, uint32_t, float, float, float, float, float, float, float, float, float, float, float, float, float>(
+			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
 			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2], shared_control_data.float_current_ref[3],
 			shared_control_data.float_airgap_to_pos[1], shared_control_data.float_airgap_to_pos[2], shared_control_data.float_airgap_to_pos[3],
 			shared_control_data.float_airgap_to_pos_der[1], shared_control_data.float_airgap_to_pos_der[2], shared_control_data.float_airgap_to_pos_der[3],

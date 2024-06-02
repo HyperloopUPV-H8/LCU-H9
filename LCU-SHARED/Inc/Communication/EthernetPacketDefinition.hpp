@@ -6,11 +6,11 @@
 
 static constexpr uint32_t ETH_PACKET_COUNT = 2;
 
-static const uint16_t SEND_LPU_TEMPERATURES_TCP_PACKET_ID = 314;
-static constexpr uint16_t SEND_LPU_TEMPERATURES_TCP_PACKET_INDEX = 0;
-
 static const uint16_t SEND_LCU_DATA_TCP_PACKET_ID = 315;
-static constexpr uint16_t SEND_LCU_DATA_TCP_PACKET_INDEX = 1;
+static constexpr uint16_t SEND_LCU_DATA_TCP_PACKET_INDEX = 0;
+
+static const uint16_t SEND_LEVITATION_DATA_TCP_PACKET_ID = 316;
+static constexpr uint16_t SEND_LEVITATION_DATA_TCP_PACKET_INDEX = 1;
 
 
 

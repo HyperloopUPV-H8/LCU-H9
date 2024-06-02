@@ -28,8 +28,8 @@ public:
 	bool DefinitionCompleted = false;
 
 
-	uint64_t LevitationControlCount = 0;
-	uint64_t CurrentPICount = 0;
+	uint32_t LevitationControlCount = 0;
+	uint32_t CurrentPICount = 0;
 
 	LCU() : generalStateMachine(DEFINING){
 		if(lcu_instance == nullptr){	lcu_instance = this;
@@ -64,9 +64,8 @@ if constexpr(USING_5DOF){
 
 	void DOF5_update(){
 		if(PendingLevitationControl){
-
+			LevitationControlCount++;
 			if(status_flags.enable_levitation_control){
-				LevitationControlCount++;
 				levitationControl.DOF5_control_loop();
 				update_desired_current_control();
 			}

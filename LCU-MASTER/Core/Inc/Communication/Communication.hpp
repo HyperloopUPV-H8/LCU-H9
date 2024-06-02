@@ -52,13 +52,21 @@ public:
 	static void start_ethernet(){
 		gui_connection = new ServerSocket(MASTER_IP, TCP_SERVER_PORT);
 		udp_connection = new DatagramSocket(MASTER_IP, UDP_PORT, BACKEND, UDP_PORT);
-		EthernetPackets[SEND_LPU_TEMPERATURES_TCP_PACKET_INDEX] = new StackPacket(SEND_LPU_TEMPERATURES_TCP_PACKET_ID,
-				&shared_control_data.float_lpu_temperature[0],&shared_control_data.float_lpu_temperature[1],&shared_control_data.float_lpu_temperature[2],
-				&shared_control_data.float_lpu_temperature[3],&shared_control_data.float_lpu_temperature[4],&shared_control_data.float_lpu_temperature[5],
-				&shared_control_data.float_lpu_temperature[6],&shared_control_data.float_lpu_temperature[7],&shared_control_data.float_lpu_temperature[8],
-				&shared_control_data.float_lpu_temperature[9]);
+		EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LEVITATION_DATA_TCP_PACKET_ID,
+			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
+			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2],
+			shared_control_data.float_current_ref[3], shared_control_data.float_current_ref[4], shared_control_data.float_current_ref[5],
+			shared_control_data.float_current_ref[6], shared_control_data.float_current_ref[7], shared_control_data.float_current_ref[8],
+			shared_control_data.float_current_ref[9],
+			shared_control_data.float_airgap_to_pos[0], shared_control_data.float_airgap_to_pos_der[0], shared_control_data.float_airgap_to_pos_in[0],
+			shared_control_data.float_airgap_to_pos[1], shared_control_data.float_airgap_to_pos_der[1], shared_control_data.float_airgap_to_pos_in[1],
+			shared_control_data.float_airgap_to_pos[2], shared_control_data.float_airgap_to_pos_der[2], shared_control_data.float_airgap_to_pos_in[2],
+			shared_control_data.float_airgap_to_pos[3], shared_control_data.float_airgap_to_pos_der[3], shared_control_data.float_airgap_to_pos_in[3],
+			shared_control_data.float_airgap_to_pos[4], shared_control_data.float_airgap_to_pos_der[4], shared_control_data.float_airgap_to_pos_in[4]
+		);
 
 		EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LCU_DATA_TCP_PACKET_ID,
+				shared_control_data.master_status, shared_control_data.slave_status,
 				&shared_control_data.float_coil_temperature[0],&shared_control_data.float_coil_temperature[1],&shared_control_data.float_coil_temperature[2],
 				&shared_control_data.float_coil_temperature[3],&shared_control_data.float_coil_temperature[4],&shared_control_data.float_coil_temperature[5],
 				&shared_control_data.float_coil_temperature[6],&shared_control_data.float_coil_temperature[7],&shared_control_data.float_coil_temperature[8],
@@ -117,7 +125,8 @@ public:
 
 
 		SPIPackets[LEVITATION_DATA_ORDER_INDEX*2] = new SPIPacket<0>();
-		SPIPackets[LEVITATION_DATA_ORDER_INDEX*2+1] = new SPIPacket<52, float, float, float, float, float, float, float, float, float, float, float, float, float>(
+		SPIPackets[LEVITATION_DATA_ORDER_INDEX*2+1] = new SPIPacket<60, uint32_t, uint32_t, float, float, float, float, float, float, float, float, float, float, float, float, float>(
+			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
 			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2], shared_control_data.float_current_ref[3],
 			shared_control_data.float_airgap_to_pos[1], shared_control_data.float_airgap_to_pos[2], shared_control_data.float_airgap_to_pos[3],
 			shared_control_data.float_airgap_to_pos_der[1], shared_control_data.float_airgap_to_pos_der[2], shared_control_data.float_airgap_to_pos_der[3],
@@ -172,6 +181,10 @@ if constexpr(USING_5DOF){
 
 	static void send_lcu_data_to_backend(){
 		udp_connection->send_packet(*EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX]);
+	}
+
+	static void send_levitation_data_to_backend(){
+		udp_connection->send_packet(*EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX]);
 	}
 
 	static void lcu_data_transaction(){
