@@ -131,9 +131,15 @@ void define_shared_data(){
 	shared_control_data.slave_secondary_status = new uint8_t{0};
 	shared_control_data.slave_running_mode = new uint8_t{(uint8_t)RUNNING_MODE};
 	for(int i = 0; i < LDU_COUNT; i++){
-		shared_control_data.fixed_coil_current[i] = &(lcu_instance->ldu_array[i].binary_current_shunt);
-		shared_control_data.fixed_battery_voltage[i] = &(lcu_instance->ldu_array[i].binary_battery_voltage);
+		shared_control_data.fixed_coil_current[i] = &(lcu_instance->ldu_array[i].binary_average_current_shunt.output_value);
+		shared_control_data.fixed_battery_voltage[i] = &(lcu_instance->ldu_array[i].binary_average_battery_voltage.output_value);
 		shared_control_data.shunt_zeroing_offset[i] = &(lcu_instance->ldu_array[i].shunt_zeroing_offset);
+		shared_control_data.float_current_ref[i] =  &(lcu_instance->ldu_array[i].desired_current);
+	}
+	for(int i = 0; i < 5; i++){
+		shared_control_data.float_airgap_to_pos[i] = &(lcu_instance->levitationControl.position_data[i]);
+		shared_control_data.float_airgap_to_pos_der[i] = &(lcu_instance->levitationControl.position_data_derivative[i].output_value);
+		shared_control_data.float_airgap_to_pos_in[i] = &(lcu_instance->levitationControl.position_data_integral[i].output_value);
 	}
 	for(int i = 0;  i < AIRGAP_COUNT; i++){
 		shared_control_data.fixed_airgap_distance[i] = &Airgaps::airgaps_binary_data_array[i];

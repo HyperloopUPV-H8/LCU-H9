@@ -28,6 +28,12 @@ void define_shared_data(){
 		shared_control_data.fixed_coil_current[i] = new uint16_t;
 		shared_control_data.float_coil_current[i] = new float;
 		shared_control_data.shunt_zeroing_offset[i] = new float;
+		shared_control_data.float_current_ref[i] = new float;
+	}
+	for(int i = 0; i < 5; i++){
+		shared_control_data.float_airgap_to_pos[i] = new float;
+		shared_control_data.float_airgap_to_pos_der[i] = new float;
+		shared_control_data.float_airgap_to_pos_in[i] = new float;
 	}
 	for(int i = 0;  i < AIRGAP_COUNT; i++){
 		shared_control_data.fixed_airgap_distance[i] = new uint16_t;
