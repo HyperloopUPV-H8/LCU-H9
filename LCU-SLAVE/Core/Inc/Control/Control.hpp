@@ -12,6 +12,16 @@
 #define DOF5_DERIVATOR_DECLARATION SimpleFloatDerivator(LEVITATION_CONTROL_PERIOD_SECONDS)
 #define DOF5_INTEGRATOR_DECLARATION FloatIntegrator<IntegratorType::Trapezoidal>(LEVITATION_CONTROL_PERIOD_SECONDS,1)
 
+#define AIRGAP_1 Airgaps::get_airgap_data(0)
+#define AIRGAP_2 Airgaps::get_airgap_data(1)
+#define AIRGAP_3 Airgaps::get_airgap_data(2)
+#define AIRGAP_4 Airgaps::get_airgap_data(3)
+#define AIRGAP_5 Airgaps::get_airgap_data(4)
+#define AIRGAP_6 Airgaps::get_airgap_data(5)
+#define AIRGAP_7 Airgaps::get_airgap_data(6)
+#define AIRGAP_8 Airgaps::get_airgap_data(7)
+
+
 
 float KID_MATRIX[LDU_COUNT][15] = {0};
 
@@ -55,14 +65,14 @@ public:
 
 	void airgap_to_pos(){
 		Airgaps::update_data();
-		position_data[X_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(0) - Airgaps::get_airgap_data(1)) / (2*POD_CENTER_PLATE_DISTANCE_XZ))
-										+ asin((Airgaps::get_airgap_data(2) - Airgaps::get_airgap_data(3)) / (2*POD_CENTER_PLATE_DISTANCE_XZ)))/2;
+		position_data[X_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(0) - Airgaps::get_airgap_data(1)) / (2*POD_CENTER_DISTANCE_Y_TO_AIRGAP_Z))
+										+ asin((Airgaps::get_airgap_data(2) - Airgaps::get_airgap_data(3)) / (2*POD_CENTER_DISTANCE_Y_TO_AIRGAP_Z)))/2;
 
-		position_data[Y_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(0) - Airgaps::get_airgap_data(2)) / (2*POD_CENTER_PLATE_DISTANCE_YZ))
-										+ asin((Airgaps::get_airgap_data(1) - Airgaps::get_airgap_data(3)) / (2*POD_CENTER_PLATE_DISTANCE_YZ)))/2;
+		position_data[Y_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(0) - Airgaps::get_airgap_data(2)) / (2*POD_CENTER_DISTANCE_X_TO_AIRGAP_Z))
+										+ asin((Airgaps::get_airgap_data(1) - Airgaps::get_airgap_data(3)) / (2*POD_CENTER_DISTANCE_X_TO_AIRGAP_Z)))/2;
 
-		position_data[Z_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(4) - Airgaps::get_airgap_data(6)) / (2*POD_CENTER_PLATE_DISTANCE_XY))
-										+ asin((Airgaps::get_airgap_data(7) - Airgaps::get_airgap_data(5)) / (2*POD_CENTER_PLATE_DISTANCE_XY)))/2;
+		position_data[Z_ROTATION_INDEX] = (asin((Airgaps::get_airgap_data(4) - Airgaps::get_airgap_data(6)) / (2*POD_CENTER_DISTANCE_X_TO_AIRGAP_Y))
+										+ asin((Airgaps::get_airgap_data(7) - Airgaps::get_airgap_data(5)) / (2*POD_CENTER_DISTANCE_X_TO_AIRGAP_Y)))/2;
 
 		float cos_rot_z = cos(position_data[Z_ROTATION_INDEX]);
 		float sin_rot_z = sin(position_data[Z_ROTATION_INDEX]);
@@ -70,15 +80,15 @@ public:
 		float cos_rot_x = cos(position_data[X_ROTATION_INDEX]);
 		float sin_rot_x = sin(position_data[X_ROTATION_INDEX]);
 
-		position_data[Y_POSITION_INDEX] = (Airgaps::get_airgap_data(4) - POD_CENTER_TO_L_DISTANCE+(-POD_CENTER_PLATE_DISTANCE_XY * sin_rot_z + POD_CENTER_PLATE_DISTANCE_YY * cos_rot_z - POD_CENTER_PLATE_DISTANCE_ZY * sin_rot_x)
-										-Airgaps::get_airgap_data(5) + POD_CENTER_TO_L_DISTANCE - ( POD_CENTER_PLATE_DISTANCE_XY * sin_rot_z + POD_CENTER_PLATE_DISTANCE_YY * cos_rot_z + POD_CENTER_PLATE_DISTANCE_ZY * sin_rot_x)
-										+Airgaps::get_airgap_data(6) - POD_CENTER_TO_L_DISTANCE + ( POD_CENTER_PLATE_DISTANCE_XY * sin_rot_z + POD_CENTER_PLATE_DISTANCE_YY * cos_rot_z - POD_CENTER_PLATE_DISTANCE_ZY * sin_rot_x)
-										-Airgaps::get_airgap_data(7) + POD_CENTER_TO_L_DISTANCE - (-POD_CENTER_PLATE_DISTANCE_XY * sin_rot_z + POD_CENTER_PLATE_DISTANCE_YY * cos_rot_z + POD_CENTER_PLATE_DISTANCE_ZY * sin_rot_x))/4;
+		position_data[Y_POSITION_INDEX] = (Airgaps::get_airgap_data(4) - POD_CENTER_TO_L_DISTANCE+(-POD_CENTER_DISTANCE_X_TO_AIRGAP_Y * sin_rot_z + POD_CENTER_DISTANCE_Y_TO_AIRGAP_Y * cos_rot_z - POD_CENTER_DISTANCE_Z_TO_AIRGAP_Y * sin_rot_x)
+										-Airgaps::get_airgap_data(5) + POD_CENTER_TO_L_DISTANCE - ( POD_CENTER_DISTANCE_X_TO_AIRGAP_Y * sin_rot_z + POD_CENTER_DISTANCE_Y_TO_AIRGAP_Y * cos_rot_z + POD_CENTER_DISTANCE_Z_TO_AIRGAP_Y * sin_rot_x)
+										+Airgaps::get_airgap_data(6) - POD_CENTER_TO_L_DISTANCE + ( POD_CENTER_DISTANCE_X_TO_AIRGAP_Y * sin_rot_z + POD_CENTER_DISTANCE_Y_TO_AIRGAP_Y * cos_rot_z - POD_CENTER_DISTANCE_Z_TO_AIRGAP_Y * sin_rot_x)
+										-Airgaps::get_airgap_data(7) + POD_CENTER_TO_L_DISTANCE - (-POD_CENTER_DISTANCE_X_TO_AIRGAP_Y * sin_rot_z + POD_CENTER_DISTANCE_Y_TO_AIRGAP_Y * cos_rot_z + POD_CENTER_DISTANCE_Z_TO_AIRGAP_Y * sin_rot_x))/4;
 
-		position_data[Z_POSITION_INDEX] =(Airgaps::get_airgap_data(0) - POD_CENTER_TO_SR_DISTANCE + (-POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x - POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
-										+ Airgaps::get_airgap_data(1) - POD_CENTER_TO_SR_DISTANCE + ( POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x - POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
-										+ Airgaps::get_airgap_data(2) - POD_CENTER_TO_SR_DISTANCE + (-POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x + POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x)
-										+ Airgaps::get_airgap_data(3) - POD_CENTER_TO_SR_DISTANCE + ( POD_CENTER_PLATE_DISTANCE_XZ * sin_rot_x + POD_CENTER_PLATE_DISTANCE_YZ * sin_rot_y - POD_CENTER_PLATE_DISTANCE_ZZ * cos_rot_x))/(-4)
+		position_data[Z_POSITION_INDEX] =(Airgaps::get_airgap_data(0) - POD_CENTER_TO_SR_DISTANCE + (-POD_CENTER_DISTANCE_X_TO_AIRGAP_Z * sin_rot_x - POD_CENTER_DISTANCE_Y_TO_AIRGAP_Z * sin_rot_y - POD_CENTER_DISTANCE_Z_TO_AIRGAP_Z * cos_rot_x)
+										+ Airgaps::get_airgap_data(1) - POD_CENTER_TO_SR_DISTANCE + ( POD_CENTER_DISTANCE_X_TO_AIRGAP_Z * sin_rot_x - POD_CENTER_DISTANCE_Y_TO_AIRGAP_Z * sin_rot_y - POD_CENTER_DISTANCE_Z_TO_AIRGAP_Z * cos_rot_x)
+										+ Airgaps::get_airgap_data(2) - POD_CENTER_TO_SR_DISTANCE + (-POD_CENTER_DISTANCE_X_TO_AIRGAP_Z * sin_rot_x + POD_CENTER_DISTANCE_Y_TO_AIRGAP_Z * sin_rot_y - POD_CENTER_DISTANCE_Z_TO_AIRGAP_Z * cos_rot_x)
+										+ Airgaps::get_airgap_data(3) - POD_CENTER_TO_SR_DISTANCE + ( POD_CENTER_DISTANCE_X_TO_AIRGAP_Z * sin_rot_x + POD_CENTER_DISTANCE_Y_TO_AIRGAP_Z * sin_rot_y - POD_CENTER_DISTANCE_Z_TO_AIRGAP_Z * cos_rot_x))/(-4)
 										- desired_airgap_distance_m; //substracts the reference of levitation distance, only for Z pos as all other references are 0
 	}
 
