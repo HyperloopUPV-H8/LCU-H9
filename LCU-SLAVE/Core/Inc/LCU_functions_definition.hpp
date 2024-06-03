@@ -147,9 +147,9 @@ void define_shared_data(){
 		shared_control_data.float_current_ref[i] =  &(lcu_instance->ldu_array[i].desired_current);
 	}
 	for(int i = 0; i < 5; i++){
-		shared_control_data.float_airgap_to_pos[i] = &(lcu_instance->levitationControl.position_data[i]);
-		shared_control_data.float_airgap_to_pos_der[i] = &(lcu_instance->levitationControl.derivative_moving_average[i].output_value);
-		shared_control_data.float_airgap_to_pos_in[i] = &(lcu_instance->levitationControl.position_data_integral[i].output_value);
+		shared_control_data.float_airgap_to_pos[i] = &(lcu_instance->levitationControl.position_error_data[i]);
+		shared_control_data.float_airgap_to_pos_der[i] = &(lcu_instance->levitationControl.position_error_data_derivative[i].output_value);
+		shared_control_data.float_airgap_to_pos_in[i] = &(lcu_instance->levitationControl.position_error_data_integral[i].output_value);
 	}
 	shared_control_data.float_airgap_to_pos[Z_POSITION_INDEX] = &(lcu_instance->levitationControl.position_z); //overwrites to use the position instead of the position error
 	for(int i = 0;  i < AIRGAP_COUNT; i++){
