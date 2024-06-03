@@ -164,7 +164,7 @@ if constexpr(!IS_HIL){
 		if(battery_voltage < 0.0001){
 			return 0;
 		}
-		if(battery_voltage > 252.5){ //TODO: check if we can do something with the noise here instead of saturating
+		if(battery_voltage > 252.5){ //TODO: check if we can remove this
 			battery_voltage = 252.5;
 		}
 

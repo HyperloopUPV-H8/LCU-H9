@@ -39,8 +39,10 @@ public:
 
 	void update(){
 		generalStateMachine.check_transitions();
-		ProtectionManager::check_protections();
 		Communication::update();
+if constexpr(!IS_HIL){
+		ProtectionManager::check_protections();
+}
 
 if constexpr(USING_1DOF){
 		DOF1_update();
@@ -65,6 +67,7 @@ if constexpr(USING_5DOF){
 	void DOF5_update(){
 		if(PendingLevitationControl){
 			LevitationControlCount++;
+			levitationControl.airgap_to_pos();
 			if(status_flags.enable_levitation_control){
 				levitationControl.DOF5_control_loop();
 				update_desired_current_control();
@@ -181,10 +184,11 @@ if constexpr(USING_1DOF){
 
 	void protections_inscribe(){
 		ProtectionManager::link_state_machine(generalStateMachine, FAULT);
-
+if constexpr(!IS_HIL){
 		for(int i = 0; i < LDU_COUNT; i++){
 			ldu_array[i].add_ldu_protection();
 		}
+}
 	}
 
 	static bool general_transition_defining_to_initial(){

@@ -1,6 +1,14 @@
 #include "LCU_SLAVE.hpp"
 
 void LDUs_zeroing(){
+if constexpr(IS_HIL){
+		for(int i = 0; i < LDU_COUNT; i++){
+			lcu_instance->ldu_array[i].shunt_zeroing_offset = 0.0;
+		}
+		lcu_instance->CalibrationCompleted = true;
+		*shared_control_data.slave_secondary_status |= 1;
+		return;
+}
 	bool zeroing_complete = true;
 	for(int i = 0; i < LDU_COUNT; i++){
 		lcu_instance->ldu_array[i].ldu_zeroing();
@@ -140,11 +148,12 @@ void define_shared_data(){
 	}
 	for(int i = 0; i < 5; i++){
 		shared_control_data.float_airgap_to_pos[i] = &(lcu_instance->levitationControl.position_data[i]);
-		shared_control_data.float_airgap_to_pos_der[i] = &(lcu_instance->levitationControl.position_data_derivative[i].output_value);
+		shared_control_data.float_airgap_to_pos_der[i] = &(lcu_instance->levitationControl.derivative_moving_average[i].output_value);
 		shared_control_data.float_airgap_to_pos_in[i] = &(lcu_instance->levitationControl.position_data_integral[i].output_value);
 	}
+	shared_control_data.float_airgap_to_pos[Z_POSITION_INDEX] = &(lcu_instance->levitationControl.position_z); //overwrites to use the position instead of the position error
 	for(int i = 0;  i < AIRGAP_COUNT; i++){
-		shared_control_data.fixed_airgap_distance[i] = &Airgaps::airgaps_binary_data_array[i];
+		shared_control_data.fixed_airgap_distance[i] = &(Airgaps::airgaps_average_binary_data_array[i].output_value);
 		shared_control_data.float_airgap_distance[i] = &Airgaps::airgaps_data_array[i];
 	}
 }
