@@ -9,6 +9,7 @@
 #define bat_V shared_control_data.fixed_battery_voltage
 #define airgap shared_control_data.fixed_airgap_distance
 #define ldu_array_deduction uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t
+#define float_ldu_array_deduction float, float, float, float, float, float, float, float, float, float
 #define airgap_array_deduction uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t
 
 class Communication{
@@ -25,7 +26,7 @@ public:
 
 
 	static struct communication_flags{
-		bool SPIStart = false;
+		bool SPIEstablished = false;
 	}flags;
 
 
@@ -42,55 +43,6 @@ public:
 	}
 
 	Communication(){
-		for(int i = 0;  i < LDU_COUNT; i++){
-			shared_control_data.fixed_battery_voltage[i] = new uint16_t;
-			shared_control_data.float_battery_voltage[i] = new float;
-			shared_control_data.fixed_coil_current[i] = new uint16_t;
-			shared_control_data.float_coil_current[i] = new float;
-		}
-		for(int i = 0;  i < AIRGAP_COUNT; i++){
-			shared_control_data.fixed_airgap_distance[i] = new uint16_t;
-			shared_control_data.float_airgap_distance[i] = new float;
-		}
-		/*shared_control_data.master_status = initial_exchange_value();
-
-		SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2] = new SPIPacket<2, uint8_t>(&master_status);
-		SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2] = new SPIPacket<2, uint8_t>(&slave_status);
-		SPIOrders[MASTER_SLAVE_INITIAL_ORDER_INDEX] = new SPIStackOrder(MASTER_SLAVE_INITIAL_ORDER_ID, *SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2], *SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2+1]);
-		SPIOrders[MASTER_SLAVE_INITIAL_ORDER_INDEX]->set_callback(initial_order_callback);*/
-
-
-		SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2] = new SPIPacket<41, uint8_t, ldu_array_deduction, ldu_array_deduction>(
-				&shared_control_data.master_status,
-				&coil_t[0], &coil_t[1], &coil_t[2], &coil_t[3], &coil_t[4], &coil_t[5], &coil_t[6], &coil_t[7], &coil_t[8], &coil_t[9],
-				&lpu_t[0], &lpu_t[1], &lpu_t[2], &lpu_t[3], &lpu_t[4], &lpu_t[5], &lpu_t[6], &lpu_t[7], &lpu_t[8], &lpu_t[9]
-		);
-		SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2+1] = new SPIPacket<59, uint8_t, ldu_array_deduction, ldu_array_deduction, airgap_array_deduction>(
-				&shared_control_data.slave_status,
-				coil_I[0], coil_I[1], coil_I[2], coil_I[3], coil_I[4], coil_I[5], coil_I[6], coil_I[7], coil_I[8], coil_I[9],
-				bat_V[0], bat_V[1], bat_V[2], bat_V[3], bat_V[4], bat_V[5], bat_V[6], bat_V[7], bat_V[8], bat_V[9],
-				airgap[0], airgap[1], airgap[2], airgap[3], airgap[4], airgap[5], airgap[6], airgap[7]
-		);
-		SPIOrders[MASTER_SLAVE_DATA_ORDER_INDEX] = new SPIStackOrder(MASTER_SLAVE_DATA_ORDER_ID, *SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2], *SPIPackets[MASTER_SLAVE_DATA_ORDER_INDEX*2+1]);
-
-
-		SPIPackets[TEST_PWM_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &duty_to_change);
-		SPIPackets[TEST_PWM_ORDER_INDEX*2+1] = new SPIPacket<0>;
-		SPIOrders[TEST_PWM_ORDER_INDEX] = new SPIStackOrder(TEST_PWM_ORDER_ID, *SPIPackets[TEST_PWM_ORDER_INDEX*2], *SPIPackets[TEST_PWM_ORDER_INDEX*2+1]);
-
-
-		SPIPackets[TEST_VBAT_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &data_to_change);
-		SPIPackets[TEST_VBAT_ORDER_INDEX*2+1] = new SPIPacket<0>;
-		SPIOrders[TEST_VBAT_ORDER_INDEX] = new SPIStackOrder(TEST_VBAT_ORDER_ID, *SPIPackets[TEST_VBAT_ORDER_INDEX*2], *SPIPackets[TEST_VBAT_ORDER_INDEX*2+1]);
-
-		SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2] = new SPIPacket<4,float>(&data_to_change);
-		SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2+1] = new SPIPacket<0>;
-		SPIOrders[START_LEVITATION_CONTROL_ORDER_INDEX] = new SPIStackOrder(START_LEVITATION_CONTROL_ORDER_ID, *SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2], *SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2+1]);
-
-
-		SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &data_to_change);
-		SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2+1] = new SPIPacket<0>;
-		SPIOrders[TEST_DESIRED_CURRENT_ORDER_INDEX] = new SPIStackOrder(TEST_DESIRED_CURRENT_ORDER_ID, *SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2], *SPIPackets[TEST_VBAT_ORDER_INDEX*2+1]);
 	}
 
 	static void start(){
@@ -100,13 +52,21 @@ public:
 	static void start_ethernet(){
 		gui_connection = new ServerSocket(MASTER_IP, TCP_SERVER_PORT);
 		udp_connection = new DatagramSocket(MASTER_IP, UDP_PORT, BACKEND, UDP_PORT);
-		EthernetPackets[SEND_LPU_TEMPERATURES_TCP_PACKET_INDEX] = new StackPacket(SEND_LPU_TEMPERATURES_TCP_PACKET_ID,
-				&shared_control_data.float_lpu_temperature[0],&shared_control_data.float_lpu_temperature[1],&shared_control_data.float_lpu_temperature[2],
-				&shared_control_data.float_lpu_temperature[3],&shared_control_data.float_lpu_temperature[4],&shared_control_data.float_lpu_temperature[5],
-				&shared_control_data.float_lpu_temperature[6],&shared_control_data.float_lpu_temperature[7],&shared_control_data.float_lpu_temperature[8],
-				&shared_control_data.float_lpu_temperature[9]);
+		EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LEVITATION_DATA_TCP_PACKET_ID,
+			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
+			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2],
+			shared_control_data.float_current_ref[3], shared_control_data.float_current_ref[4], shared_control_data.float_current_ref[5],
+			shared_control_data.float_current_ref[6], shared_control_data.float_current_ref[7], shared_control_data.float_current_ref[8],
+			shared_control_data.float_current_ref[9],
+			shared_control_data.float_airgap_to_pos[0], shared_control_data.float_airgap_to_pos_der[0], shared_control_data.float_airgap_to_pos_in[0],
+			shared_control_data.float_airgap_to_pos[1], shared_control_data.float_airgap_to_pos_der[1], shared_control_data.float_airgap_to_pos_in[1],
+			shared_control_data.float_airgap_to_pos[2], shared_control_data.float_airgap_to_pos_der[2], shared_control_data.float_airgap_to_pos_in[2],
+			shared_control_data.float_airgap_to_pos[3], shared_control_data.float_airgap_to_pos_der[3], shared_control_data.float_airgap_to_pos_in[3],
+			shared_control_data.float_airgap_to_pos[4], shared_control_data.float_airgap_to_pos_der[4], shared_control_data.float_airgap_to_pos_in[4]
+		);
 
 		EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LCU_DATA_TCP_PACKET_ID,
+				shared_control_data.master_status, shared_control_data.slave_status,
 				&shared_control_data.float_coil_temperature[0],&shared_control_data.float_coil_temperature[1],&shared_control_data.float_coil_temperature[2],
 				&shared_control_data.float_coil_temperature[3],&shared_control_data.float_coil_temperature[4],&shared_control_data.float_coil_temperature[5],
 				&shared_control_data.float_coil_temperature[6],&shared_control_data.float_coil_temperature[7],&shared_control_data.float_coil_temperature[8],
@@ -135,6 +95,66 @@ public:
 		EthernetOrders[TEST_STOP_RESET_TCP_ORDER_INDEX] = new StackOrder<2,uint16_t>(TEST_STOP_RESET_TCP_ORDER_ID, fix_buffer_reset_low, &ldu_number_to_change);
 	}
 
+
+	void define_packets(){
+		define_shared_data();
+
+		SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2] = new SPIPacket<2, uint8_t, uint8_t>(shared_control_data.master_status, shared_control_data.master_running_mode);
+		SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2+1] = new SPIPacket<43, uint8_t, uint8_t, uint8_t, float_ldu_array_deduction>(
+			shared_control_data.slave_status, shared_control_data.slave_running_mode, shared_control_data.slave_secondary_status,
+			shared_control_data.shunt_zeroing_offset[0],shared_control_data.shunt_zeroing_offset[1],shared_control_data.shunt_zeroing_offset[2],
+			shared_control_data.shunt_zeroing_offset[3],shared_control_data.shunt_zeroing_offset[4],shared_control_data.shunt_zeroing_offset[5],
+			shared_control_data.shunt_zeroing_offset[6],shared_control_data.shunt_zeroing_offset[7],shared_control_data.shunt_zeroing_offset[8],
+			shared_control_data.shunt_zeroing_offset[9]);
+		SPIOrders[MASTER_SLAVE_INITIAL_ORDER_INDEX] = new SPIStackOrder(MASTER_SLAVE_INITIAL_ORDER_ID, *SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2], *SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2+1]);
+		SPIOrders[MASTER_SLAVE_INITIAL_ORDER_INDEX]->set_callback(initial_order_callback);
+
+
+		SPIPackets[SENSOR_DATA_ORDER_INDEX*2] = new SPIPacket<42, uint8_t, uint8_t, ldu_array_deduction, ldu_array_deduction>(
+			shared_control_data.master_status, shared_control_data.master_secondary_status,
+			&coil_t[0], &coil_t[1], &coil_t[2], &coil_t[3], &coil_t[4], &coil_t[5], &coil_t[6], &coil_t[7], &coil_t[8], &coil_t[9],
+			&lpu_t[0], &lpu_t[1], &lpu_t[2], &lpu_t[3], &lpu_t[4], &lpu_t[5], &lpu_t[6], &lpu_t[7], &lpu_t[8], &lpu_t[9]
+		);
+		SPIPackets[SENSOR_DATA_ORDER_INDEX*2+1] = new SPIPacket<60, uint8_t, uint8_t, ldu_array_deduction, ldu_array_deduction, airgap_array_deduction>(
+			shared_control_data.slave_status, shared_control_data.slave_secondary_status,
+			coil_I[0], coil_I[1], coil_I[2], coil_I[3], coil_I[4], coil_I[5], coil_I[6], coil_I[7], coil_I[8], coil_I[9],
+			bat_V[0], bat_V[1], bat_V[2], bat_V[3], bat_V[4], bat_V[5], bat_V[6], bat_V[7], bat_V[8], bat_V[9],
+			airgap[0], airgap[1], airgap[2], airgap[3], airgap[4], airgap[5], airgap[6], airgap[7]
+		);
+		SPIOrders[SENSOR_DATA_ORDER_INDEX] = new SPIStackOrder(SENSOR_DATA_ORDER_ID, *SPIPackets[SENSOR_DATA_ORDER_INDEX*2], *SPIPackets[SENSOR_DATA_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[LEVITATION_DATA_ORDER_INDEX*2] = new SPIPacket<0>();
+		SPIPackets[LEVITATION_DATA_ORDER_INDEX*2+1] = new SPIPacket<60, uint32_t, uint32_t, float, float, float, float, float, float, float, float, float, float, float, float, float>(
+			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
+			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2], shared_control_data.float_current_ref[3],
+			shared_control_data.float_airgap_to_pos[1], shared_control_data.float_airgap_to_pos[2], shared_control_data.float_airgap_to_pos[3],
+			shared_control_data.float_airgap_to_pos_der[1], shared_control_data.float_airgap_to_pos_der[2], shared_control_data.float_airgap_to_pos_der[3],
+			shared_control_data.float_airgap_to_pos_in[1], shared_control_data.float_airgap_to_pos_in[2], shared_control_data.float_airgap_to_pos_in[3]
+		);
+		SPIOrders[LEVITATION_DATA_ORDER_INDEX] = new SPIStackOrder(LEVITATION_DATA_ORDER_ID, *SPIPackets[LEVITATION_DATA_ORDER_INDEX*2], *SPIPackets[LEVITATION_DATA_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[TEST_PWM_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &duty_to_change);
+		SPIPackets[TEST_PWM_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[TEST_PWM_ORDER_INDEX] = new SPIStackOrder(TEST_PWM_ORDER_ID, *SPIPackets[TEST_PWM_ORDER_INDEX*2], *SPIPackets[TEST_PWM_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[TEST_VBAT_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &data_to_change);
+		SPIPackets[TEST_VBAT_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[TEST_VBAT_ORDER_INDEX] = new SPIStackOrder(TEST_VBAT_ORDER_ID, *SPIPackets[TEST_VBAT_ORDER_INDEX*2], *SPIPackets[TEST_VBAT_ORDER_INDEX*2+1]);
+
+		SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2] = new SPIPacket<4,float>(&data_to_change);
+		SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[START_LEVITATION_CONTROL_ORDER_INDEX] = new SPIStackOrder(START_LEVITATION_CONTROL_ORDER_ID, *SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2], *SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &data_to_change);
+		SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[TEST_DESIRED_CURRENT_ORDER_INDEX] = new SPIStackOrder(TEST_DESIRED_CURRENT_ORDER_ID, *SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2], *SPIPackets[TEST_VBAT_ORDER_INDEX*2+1]);
+	}
+
+
 	static void update(){
 if constexpr(USING_1DOF){
 		for(int i = 0; i < AIRGAP_COUNT; i++){
@@ -151,7 +171,7 @@ if constexpr(USING_5DOF){
 			*shared_control_data.float_airgap_distance[i+AIRGAP_COUNT/2] = EMS_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i+AIRGAP_COUNT/2])*1000;
 		}
 		for(int i = 0; i < LDU_COUNT; i++){
-			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]);
+			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]) - *shared_control_data.shunt_zeroing_offset[i];
 			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
 		}
 }
@@ -163,17 +183,20 @@ if constexpr(USING_5DOF){
 		udp_connection->send_packet(*EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX]);
 	}
 
+	static void send_levitation_data_to_backend(){
+		udp_connection->send_packet(*EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX]);
+	}
+
 	static void lcu_data_transaction(){
-		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[MASTER_SLAVE_DATA_ORDER_ID]);
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[SENSOR_DATA_ORDER_ID]);
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[LEVITATION_DATA_ORDER_ID]);
+	}
+
+	static void lcu_initial_transaction(){
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[MASTER_SLAVE_INITIAL_ORDER_ID]);
 	}
 
 	//#####################  SPI ORDERS CALLBACKS #######################
-
-	static inline void end_first_spi_transaction(){
-		flags.SPIStart = true;
-	}
-
-
 
 	static inline float coil_current_calculation(uint16_t coil_current){
 		return coil_current / MAX_16BIT * ADC_MAX_VOLTAGE; //TODO: calculate in correct units

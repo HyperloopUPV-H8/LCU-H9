@@ -12,10 +12,15 @@
 #define USING_5DOF (RUNNING_MODE != DOF1)
 #define IS_HIL (RUNNING_MODE == DOF5_HIL)
 
-static constexpr double MAXIMUM_DESIRED_CURRENT = 40.0;
+constexpr float MAXIMUM_DESIRED_CURRENT = 38.0;
+constexpr float MAXIMUM_PEAK_CURRENT = 45.0;
+constexpr float MAXIMUM_EXTENDED_CURRENT = 25.0;
+constexpr float MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS = 4.0;
 
 #define DOF1_USED_LDU_INDEX 9
 #define DOF1_USED_AIRGAP_INDEX 0
+
+extern control_data shared_control_data;
 
 /*  ##############################################################
  *  ###################  SHARED_CONTROL_DATA  ####################
@@ -31,6 +36,7 @@ static struct periph_pointers{
  *  ################  STATIC FUNCTIONS DECLARATION  #################
  *  #################################################################
  */
+inline void LDUs_zeroing();
 
 inline void DOF5_update_airgap_data();
 inline void DOF5_update_shunt_data();
@@ -42,6 +48,8 @@ inline void DOF1_update_vbat_data();
 inline void rise_current_PI_flag();
 inline void rise_levitation_control_flag();
 inline void rise_rise_housekeeping_tasks_flag();
+inline void enable_all_current_controls();
+inline void disable_all_current_controls();
 
 inline void update_desired_current_LDU();
 inline void run_current_PI();
@@ -51,6 +59,8 @@ inline void start_levitation_control();
 inline void set_desired_current_on_LDU();
 inline void initial_order_callback();
 inline void test_pwm_order_callback();
+
+inline void define_shared_data();
 
 inline void send_to_fault();
 inline void shutdown();
@@ -81,8 +91,8 @@ inline void shutdown();
 #define VBAT_PIN_4 		PF6
 #define SHUNT_PIN_4 	PA1
 
-#define PWM_PIN_5_1		PD15
-#define PWM_PIN_5_2		PD14
+#define PWM_PIN_5_1		PD15 //PD14
+#define PWM_PIN_5_2		PD14 //PD15
 #define VBAT_PIN_5 		PF8
 #define SHUNT_PIN_5 	PA2
 

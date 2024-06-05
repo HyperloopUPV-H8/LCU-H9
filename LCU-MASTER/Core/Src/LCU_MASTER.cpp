@@ -1,6 +1,9 @@
 #include "LCU_MASTER.hpp"
 
+LCU *lcu_instance = nullptr;
+
 LCU::LCU() : generalStateMachine(INITIAL){
+	lcu_instance = this;
 	sensors_inscribe();
 	state_machine_definition();
 	Communication::init();
@@ -10,7 +13,9 @@ LCU::LCU() : generalStateMachine(INITIAL){
 		ADC::turn_on(coil_temperature_adc_id[i]);
 		ADC::turn_on(lpu_temperature_adc_id[i]);
 	}
+	communication.define_packets();
 	Communication::start();
+
 }
 
 
@@ -63,9 +68,13 @@ void LCU::state_machine_definition(){
 	generalStateMachine.add_state(FAULT);
 
 	generalStateMachine.add_transition(INITIAL, OPERATIONAL, initial_to_operational_transition);
+	generalStateMachine.add_transition(OPERATIONAL, FAULT, operational_to_fault_transition);
 
-	generalStateMachine.add_low_precision_cyclic_action(Communication::send_lcu_data_to_backend, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), OPERATIONAL);
-	generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_data_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), OPERATIONAL);
+	generalStateMachine.add_low_precision_cyclic_action(Communication::send_lcu_data_to_backend, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
+	generalStateMachine.add_low_precision_cyclic_action(Communication::send_levitation_data_to_backend, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
+	generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_initial_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), INITIAL);
+	generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_data_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
+	generalStateMachine.add_enter_action(general_enter_operational, OPERATIONAL);
 	generalStateMachine.add_enter_action(general_enter_fault, FAULT);
 }
 

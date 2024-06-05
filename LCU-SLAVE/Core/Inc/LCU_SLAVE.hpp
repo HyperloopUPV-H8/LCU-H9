@@ -19,16 +19,19 @@ public:
 	Control<running_mode, arithmetic_number_type> levitationControl;
 	StateMachine generalStateMachine;
 	PWM_Buffer ldu_buffers;
+	LDU<RUNNING_MODE, ARITHMETIC_MODE> ldu_array[LDU_COUNT];
 
 	bool PendingCurrentPI = false;
 	bool PendingLevitationControl = false;
 	bool PendingHousekeepingTasks = false;
+	bool CalibrationCompleted = false;
+	bool DefinitionCompleted = false;
 
 
-	uint64_t LevitationControlCount = 0;
-	uint64_t CurrentPICount = 0;
+	uint32_t LevitationControlCount = 0;
+	uint32_t CurrentPICount = 0;
 
-	LCU() : generalStateMachine(INITIAL){
+	LCU() : generalStateMachine(DEFINING){
 		if(lcu_instance == nullptr){	lcu_instance = this;
 		}else{		ErrorHandler("tried to set a second lcu");		}
 		setup_configuration();
@@ -36,8 +39,10 @@ public:
 
 	void update(){
 		generalStateMachine.check_transitions();
-		//ProtectionManager::check_protections();
 		Communication::update();
+if constexpr(!IS_HIL){
+		ProtectionManager::check_protections();
+}
 
 if constexpr(USING_1DOF){
 		DOF1_update();
@@ -47,14 +52,25 @@ if constexpr(USING_5DOF){
 }
 	}
 
+	void update_desired_current_control(){
+		for(int i = 0; i < LDU_COUNT; i++){
+			if(levitationControl.desired_current_vector[i] > MAXIMUM_DESIRED_CURRENT){
+				ldu_array[i].desired_current = MAXIMUM_DESIRED_CURRENT;
+			}else if(levitationControl.desired_current_vector[i] < -MAXIMUM_DESIRED_CURRENT){
+				ldu_array[i].desired_current = -MAXIMUM_DESIRED_CURRENT;
+			}else{
+				ldu_array[i].desired_current = levitationControl.desired_current_vector[i]; //the k multiplications of the matrix are negative, so we put a minus on the result
+			}
+		}
+	}
 
 	void DOF5_update(){
 		if(PendingLevitationControl){
-
+			LevitationControlCount++;
+			levitationControl.airgap_to_pos();
 			if(status_flags.enable_levitation_control){
-				LevitationControlCount++;
 				levitationControl.DOF5_control_loop();
-				levitationControl.update_desired_current_control();
+				update_desired_current_control();
 			}
 			PendingLevitationControl = false;
 		}
@@ -110,7 +126,7 @@ if constexpr(USING_5DOF){
 		ldu_array[9] = LDU<running_mode, arithmetic_number_type>(9, PWM_PIN_10_1, PWM_PIN_10_2, VBAT_PIN_10, SHUNT_PIN_10, KP_EMS_CURRENT_TO_DUTY, KI_EMS_CURRENT_TO_DUTY);
 }
 		state_machine_initialization();
-		//protections_inscribe();
+		protections_inscribe();
 		Airgaps::inscribe();
 		Communication::init();
 
@@ -122,7 +138,8 @@ if constexpr(USING_5DOF){
 			ldu_array[i].start();
 		}
 
-		communication.define_packets();
+		communication.define_packets(); //packets need to be defined after everything so they can pull the pointers to the variables
+		DefinitionCompleted = true;
 	}
 
 
@@ -134,27 +151,30 @@ if constexpr(USING_5DOF){
 
 	void state_machine_initialization(){
 		//################  ADDING ALL THE STATES  ##########################
+		generalStateMachine.add_state(INITIAL);
 		generalStateMachine.add_state(OPERATIONAL);
 		generalStateMachine.add_state(FAULT);
 
 		//################# ADDING ALL TRANSITIONS ##########################
+		generalStateMachine.add_transition(DEFINING, INITIAL, general_transition_defining_to_initial);
 		generalStateMachine.add_transition(INITIAL, OPERATIONAL, general_transition_initial_to_operational);
 		generalStateMachine.add_transition(INITIAL, FAULT, general_transition_initial_to_fault);
 		generalStateMachine.add_transition(OPERATIONAL, FAULT, general_transition_operational_to_fault);
 
 		//################# ADDING ALL CYCLIC ACTIONS #######################
 if constexpr(USING_5DOF){
-		generalStateMachine.add_high_precision_cyclic_action(DOF5_update_shunt_data, std::chrono::microseconds((int) (CURRENT_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
-		generalStateMachine.add_high_precision_cyclic_action(DOF5_update_airgap_data, std::chrono::microseconds((int) (AIRGAP_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
-		generalStateMachine.add_low_precision_cyclic_action(DOF5_update_vbat_data, std::chrono::microseconds((int) (VBAT_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
+		generalStateMachine.add_high_precision_cyclic_action(DOF5_update_shunt_data, std::chrono::microseconds((int) (CURRENT_UPDATE_PERIOD_SECONDS*1000000)), {INITIAL, OPERATIONAL, FAULT});
+		generalStateMachine.add_high_precision_cyclic_action(DOF5_update_airgap_data, std::chrono::microseconds((int) (AIRGAP_UPDATE_PERIOD_SECONDS*1000000)), {INITIAL, OPERATIONAL, FAULT});
+		generalStateMachine.add_low_precision_cyclic_action(DOF5_update_vbat_data, std::chrono::microseconds((int) (VBAT_UPDATE_PERIOD_SECONDS*1000000)), {INITIAL, OPERATIONAL, FAULT});
 }
 if constexpr(USING_1DOF){
-		generalStateMachine.add_high_precision_cyclic_action(DOF1_update_shunt_data, std::chrono::microseconds((int) (CURRENT_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
-		generalStateMachine.add_high_precision_cyclic_action(DOF1_update_airgap_data, std::chrono::microseconds((int) (AIRGAP_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
-		generalStateMachine.add_low_precision_cyclic_action(DOF1_update_vbat_data, std::chrono::microseconds((int) (VBAT_UPDATE_PERIOD_SECONDS*1000000)), OPERATIONAL);
+		generalStateMachine.add_high_precision_cyclic_action(DOF1_update_shunt_data, std::chrono::microseconds((int) (CURRENT_UPDATE_PERIOD_SECONDS*1000000)), {INITIAL, OPERATIONAL, FAULT});
+		generalStateMachine.add_high_precision_cyclic_action(DOF1_update_airgap_data, std::chrono::microseconds((int) (AIRGAP_UPDATE_PERIOD_SECONDS*1000000)), {INITIAL, OPERATIONAL, FAULT});
+		generalStateMachine.add_low_precision_cyclic_action(DOF1_update_vbat_data, std::chrono::microseconds((int) (VBAT_UPDATE_PERIOD_SECONDS*1000000)), {INITIAL, OPERATIONAL, FAULT});
 }
 		generalStateMachine.add_mid_precision_cyclic_action(rise_current_PI_flag, std::chrono::microseconds((int) (CURRENT_CONTROL_PERIOD_SECONDS*1000000)), OPERATIONAL);
 		generalStateMachine.add_low_precision_cyclic_action(rise_levitation_control_flag,  std::chrono::microseconds((int) (LEVITATION_CONTROL_PERIOD_SECONDS*1000000)), OPERATIONAL);
+		generalStateMachine.add_mid_precision_cyclic_action(LDUs_zeroing, std::chrono::microseconds((int) (CURRENT_ZEROING_SAMPLING_PERIOD_SECONDS*1000000)), INITIAL);
 
 		//###############  ADDING ALL TRANSITION CALLBACKS  ###################
 		generalStateMachine.add_enter_action(general_enter_operational, OPERATIONAL);
@@ -162,11 +182,20 @@ if constexpr(USING_1DOF){
 	}
 
 	void protections_inscribe(){
-		//ProtectionManager::link_state_machine(generalStateMachine, FAULT);
+		ProtectionManager::link_state_machine(generalStateMachine, FAULT);
+if constexpr(!IS_HIL){
+		for(int i = 0; i < LDU_COUNT; i++){
+			ldu_array[i].add_ldu_protection();
+		}
+}
+	}
+
+	static bool general_transition_defining_to_initial(){
+		return lcu_instance->DefinitionCompleted;
 	}
 
 	static bool general_transition_initial_to_operational(){
-		return true;
+		return lcu_instance->CalibrationCompleted;
 	}
 
 	static bool general_transition_initial_to_fault(){
@@ -174,7 +203,7 @@ if constexpr(USING_1DOF){
 	}
 
 	static bool general_transition_operational_to_fault(){
-		return status_flags.fault_flag;
+		return status_flags.fault_flag || *shared_control_data.master_status == (uint8_t) FAULT;
 	}
 
 	static void general_enter_operational(){
@@ -195,7 +224,7 @@ if constexpr(USING_1DOF){
 	}
 
 	void start_control(){
-		status_flags.enable_current_control = true;
+		enable_all_current_controls();
 		levitationControl.start();
 	}
 

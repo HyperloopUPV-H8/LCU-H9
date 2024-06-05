@@ -21,19 +21,29 @@ public:
 	IntegerMovingAverage<uint16_t, uint16_t, 0, VBAT_MOVING_AVERAGE_SIZE> binary_average_battery_voltage;
 	float battery_voltage = 0.0;
 
+	uint16_t* binary_current_shunt_pointer = nullptr;
 	uint16_t binary_current_shunt = 0;
 	IntegerMovingAverage<uint16_t, uint16_t, 0, CURRENT_MOVING_AVERAGE_SIZE> binary_average_current_shunt;
 	float current_shunt = 0.0;
 
+	MovingAverage<CURRENT_ZEROING_SAMPLE_AMOUNT> average_current_for_zeroing;
+	uint32_t zeroing_sample_count = 0;
+	float shunt_zeroing_offset = 0.0;
+
+	Boundary<decltype(current_shunt), TIME_ACCUMULATION> *extended_current_protection;
+
 
 	struct LDU_flags{
 		bool fixed_vbat = false;
+		bool enable_current_control = false;
 		bool fixed_desired_current = false;
+		bool finished_zeroing = false;
 	}flags;
 
 
 	LDU() = default;
-	LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin, float current_kp, float current_ki) : index(index), Voltage_by_current_PI{current_kp, current_ki, CURRENT_CONTROL_PERIOD_SECONDS}{
+	LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin, float current_kp, float current_ki) :
+		index(index), Voltage_by_current_PI{current_kp, current_ki, CURRENT_CONTROL_PERIOD_SECONDS}{
 		pwm1 = new PWM(pwm1_pin);
 		slave_periph_pointers.ldu_pwms[index][0] = pwm1;
 		pwm2 = new PWM(pwm2_pin);
@@ -44,12 +54,11 @@ public:
 
 
 	void start(){
-		shared_control_data.fixed_coil_current[index] = &binary_current_shunt;
-		shared_control_data.fixed_battery_voltage[index] = &binary_battery_voltage;
 		pwm1->turn_on();
 		pwm2->turn_on();
 		ADC::turn_on(vbat_id);
 		ADC::turn_on(shunt_id);
+		binary_current_shunt_pointer = ADC::get_value_pointer(shunt_id);
 		change_pwm1_freq(PWM_FREQ_HZ);
 		change_pwm2_freq(PWM_FREQ_HZ);
 	}
@@ -89,8 +98,10 @@ if constexpr(IS_HIL){
 
 	//################  DATA STORING, PROCESSING AND PARSING  ###################
 	void update_vbat_value(){
-		binary_battery_voltage = ADC::get_int_value(vbat_id);
-		binary_average_battery_voltage.compute(binary_battery_voltage);
+		if(!flags.fixed_vbat){
+			binary_battery_voltage = ADC::get_int_value(vbat_id);
+			binary_average_battery_voltage.compute(binary_battery_voltage);
+		}
 	}
 
 	float get_vbat_data(){
@@ -103,7 +114,7 @@ else{
 	}
 
 	void update_shunt_value(){
-		binary_current_shunt = ADC::get_int_value(shunt_id);
+		binary_current_shunt = *binary_current_shunt_pointer;
 		binary_average_current_shunt.compute(binary_current_shunt);
 	}
 
@@ -111,7 +122,7 @@ else{
 		if constexpr(IS_HIL){
 			return coil_current_binary_to_real_HIL(binary_average_current_shunt.output_value);
 		}else{
-			return coil_current_binary_to_real(index, binary_average_current_shunt.output_value);
+			return (coil_current_binary_to_real(index, binary_average_current_shunt.output_value) - shunt_zeroing_offset);
 		}
 	}
 
@@ -119,14 +130,22 @@ else{
 	//#################  CURRENT CONTROL  #########################
 	void PI_current_to_duty_cycle(){
 		current_shunt = get_shunt_data();
-		if(!status_flags.enable_current_control){
+		if(!flags.fixed_vbat){ //fixed VBAT is used to clamp value when levitating
+			battery_voltage = get_vbat_data();
+		}
+		if(!flags.enable_current_control){
 			change_pwms_duty(LDU_duty_cycle);
 			return;
 		}
 if constexpr(!IS_HIL){
-		if(current_shunt > 50.0 || current_shunt < -50.0){
+		if(current_shunt > MAXIMUM_PEAK_CURRENT || current_shunt < -MAXIMUM_PEAK_CURRENT){
 			send_to_fault();
 		}
+
+		//extended_current_protection->check_accumulation(current_shunt);
+		//if(extended_current_protection->still_good == Protections::FAULT){
+		//	send_to_fault();
+		//}
 }
 		Voltage_by_current_PI.input(desired_current - current_shunt);
 		Voltage_by_current_PI.execute();
@@ -142,14 +161,10 @@ if constexpr(!IS_HIL){
 	}
 
 	float calculate_duty_by_voltage(float voltage){
-		if(!flags.fixed_vbat){
-			battery_voltage = get_vbat_data();
-		}
-
 		if(battery_voltage < 0.0001){
 			return 0;
 		}
-		if(battery_voltage > 252.5){ //TODO: check if we can do something with the noise here instead of saturating
+		if(battery_voltage > 252.5){ //TODO: check if we can remove this
 			battery_voltage = 252.5;
 		}
 
@@ -165,6 +180,20 @@ if constexpr(!IS_HIL){
 
 		return duty;
 	}
-};
 
-static LDU<RUNNING_MODE, ARITHMETIC_MODE> ldu_array[LDU_COUNT];
+	void add_ldu_protection(){
+		extended_current_protection = new Boundary<decltype(current_shunt), TIME_ACCUMULATION>(&current_shunt, MAXIMUM_PEAK_CURRENT, MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS, CURRENT_CONTROL_FREQ_HZ);
+		//add_protection(&current_shunt,*extended_current_protection); //TODO: doesn t work
+	}
+
+	void ldu_zeroing(){
+		if(flags.finished_zeroing){
+			return;
+		}
+		average_current_for_zeroing.compute(get_shunt_data() + shunt_zeroing_offset);
+		zeroing_sample_count++;
+		if(zeroing_sample_count > CURRENT_ZEROING_SAMPLE_AMOUNT){
+			flags.finished_zeroing = true;
+		}
+	}
+};

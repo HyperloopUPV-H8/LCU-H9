@@ -3,16 +3,19 @@
 #include "Tools/Tools.hpp"
 #include "SharedData.hpp"
 
-static constexpr uint32_t SPI_ORDER_COUNT = 5;
+static constexpr uint32_t SPI_ORDER_COUNT = 7;
 
 static constexpr uint16_t MASTER_SLAVE_INITIAL_ORDER_ID = 15;
 static constexpr uint16_t MASTER_SLAVE_INITIAL_ORDER_INDEX = 0;
 
-static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_ID = 85;
-static constexpr uint16_t MASTER_SLAVE_DATA_ORDER_INDEX = 1;
+static constexpr uint16_t SENSOR_DATA_ORDER_ID = 85;
+static constexpr uint16_t SENSOR_DATA_ORDER_INDEX = 1;
+
+static constexpr uint16_t LEVITATION_DATA_ORDER_ID = 86;
+static constexpr uint16_t LEVITATION_DATA_ORDER_INDEX = 2;
 
 
-static constexpr uint32_t FIRST_TESTING_ORDER_INDEX = 2;
+static constexpr uint32_t FIRST_TESTING_ORDER_INDEX = 3;
 
 static constexpr uint16_t TEST_PWM_ORDER_ID = 1001;
 static constexpr uint16_t TEST_PWM_ORDER_INDEX = FIRST_TESTING_ORDER_INDEX;
