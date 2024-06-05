@@ -25,6 +25,14 @@ struct control_data{
 	float *float_battery_voltage[LDU_COUNT]{nullptr};
 	float *float_airgap_distance[AIRGAP_COUNT]{nullptr};
 	float *shunt_zeroing_offset[LDU_COUNT]{nullptr};
+
+	uint32_t *current_control_count = nullptr;
+	uint32_t *levitation_control_count = nullptr;
+
+	float *float_current_ref[LDU_COUNT]{nullptr};
+	float *float_airgap_to_pos[5]{nullptr};
+	float *float_airgap_to_pos_der[5]{nullptr};
+	float *float_airgap_to_pos_in[5]{nullptr};
 };
 
 static uint16_t ldu_to_change = 0;

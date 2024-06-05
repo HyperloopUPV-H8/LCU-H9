@@ -16,22 +16,30 @@ void fix_buffer_reset_low(){
 
 void define_shared_data(){
 	shared_control_data.master_status = (uint8_t*) &(lcu_instance->generalStateMachine.current_state);
-	shared_control_data.master_secondary_status = new uint8_t;
+	shared_control_data.master_secondary_status = new uint8_t{0};
 	shared_control_data.master_running_mode = new uint8_t{(uint8_t)RUNNING_MODE};
-	shared_control_data.slave_status = new uint8_t;
-	shared_control_data.slave_secondary_status = new uint8_t;
+	shared_control_data.slave_status = new uint8_t{0};
+	shared_control_data.slave_secondary_status = new uint8_t{0};
 	shared_control_data.slave_running_mode = new uint8_t{255};
+	shared_control_data.current_control_count = new uint32_t{0};
+	shared_control_data.levitation_control_count = new uint32_t{0};
 
 	for(int i = 0;  i < LDU_COUNT; i++){
-		shared_control_data.fixed_battery_voltage[i] = new uint16_t;
-		shared_control_data.float_battery_voltage[i] = new float;
-		shared_control_data.fixed_coil_current[i] = new uint16_t;
-		shared_control_data.float_coil_current[i] = new float;
-		shared_control_data.shunt_zeroing_offset[i] = new float;
+		shared_control_data.fixed_battery_voltage[i] = new uint16_t{0};
+		shared_control_data.float_battery_voltage[i] = new float{0.0};
+		shared_control_data.fixed_coil_current[i] = new uint16_t{0};
+		shared_control_data.float_coil_current[i] = new float{0.0};
+		shared_control_data.shunt_zeroing_offset[i] = new float{0.0};
+		shared_control_data.float_current_ref[i] = new float{0.0};
+	}
+	for(int i = 0; i < 5; i++){
+		shared_control_data.float_airgap_to_pos[i] = new float{0.0};
+		shared_control_data.float_airgap_to_pos_der[i] = new float{0.0};
+		shared_control_data.float_airgap_to_pos_in[i] = new float{0.0};
 	}
 	for(int i = 0;  i < AIRGAP_COUNT; i++){
-		shared_control_data.fixed_airgap_distance[i] = new uint16_t;
-		shared_control_data.float_airgap_distance[i] = new float;
+		shared_control_data.fixed_airgap_distance[i] = new uint16_t{0};
+		shared_control_data.float_airgap_distance[i] = new float{0.0};
 	}
 }
 

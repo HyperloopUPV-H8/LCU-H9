@@ -103,5 +103,5 @@ void initial_order_callback();
 #define LCU_BUFFER_FAULT_PIN_10 PE11
 #define LCU_BUFFER_READY_PIN_10 PE10
 
-#define OPERATIONAL_LED_PIN 	PG5
-#define FAULT_LED_PIN			PG7
+#define OPERATIONAL_LED_PIN 	PG8
+#define FAULT_LED_PIN			PG6

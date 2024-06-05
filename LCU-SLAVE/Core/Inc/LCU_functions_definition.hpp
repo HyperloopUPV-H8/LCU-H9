@@ -1,6 +1,14 @@
 #include "LCU_SLAVE.hpp"
 
 void LDUs_zeroing(){
+if constexpr(IS_HIL){
+		for(int i = 0; i < LDU_COUNT; i++){
+			lcu_instance->ldu_array[i].shunt_zeroing_offset = 0.0;
+		}
+		lcu_instance->CalibrationCompleted = true;
+		*shared_control_data.slave_secondary_status |= 1;
+		return;
+}
 	bool zeroing_complete = true;
 	for(int i = 0; i < LDU_COUNT; i++){
 		lcu_instance->ldu_array[i].ldu_zeroing();
@@ -130,13 +138,22 @@ void define_shared_data(){
 	shared_control_data.slave_status = (uint8_t*) &lcu_instance->generalStateMachine.current_state;
 	shared_control_data.slave_secondary_status = new uint8_t{0};
 	shared_control_data.slave_running_mode = new uint8_t{(uint8_t)RUNNING_MODE};
+	shared_control_data.current_control_count = &lcu_instance->CurrentPICount;
+	shared_control_data.levitation_control_count = &lcu_instance->LevitationControlCount;
 	for(int i = 0; i < LDU_COUNT; i++){
-		shared_control_data.fixed_coil_current[i] = &(lcu_instance->ldu_array[i].binary_current_shunt);
-		shared_control_data.fixed_battery_voltage[i] = &(lcu_instance->ldu_array[i].binary_battery_voltage);
+		shared_control_data.fixed_coil_current[i] = &(lcu_instance->ldu_array[i].binary_average_current_shunt.output_value);
+		shared_control_data.fixed_battery_voltage[i] = &(lcu_instance->ldu_array[i].binary_average_battery_voltage.output_value);
 		shared_control_data.shunt_zeroing_offset[i] = &(lcu_instance->ldu_array[i].shunt_zeroing_offset);
+		shared_control_data.float_current_ref[i] =  &(lcu_instance->ldu_array[i].desired_current);
 	}
+	for(int i = 0; i < 5; i++){
+		shared_control_data.float_airgap_to_pos[i] = &(lcu_instance->levitationControl.position_error_data[i]);
+		shared_control_data.float_airgap_to_pos_der[i] = &(lcu_instance->levitationControl.position_error_data_derivative[i].output_value);
+		shared_control_data.float_airgap_to_pos_in[i] = &(lcu_instance->levitationControl.position_error_data_integral[i].output_value);
+	}
+	shared_control_data.float_airgap_to_pos[Z_POSITION_INDEX] = &(lcu_instance->levitationControl.position_z); //overwrites to use the position instead of the position error
 	for(int i = 0;  i < AIRGAP_COUNT; i++){
-		shared_control_data.fixed_airgap_distance[i] = &Airgaps::airgaps_binary_data_array[i];
+		shared_control_data.fixed_airgap_distance[i] = &(Airgaps::airgaps_average_binary_data_array[i].output_value);
 		shared_control_data.float_airgap_distance[i] = &Airgaps::airgaps_data_array[i];
 	}
 }

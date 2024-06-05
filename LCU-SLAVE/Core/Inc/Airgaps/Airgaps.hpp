@@ -8,6 +8,7 @@
 class Airgaps{
 public:
 	static uint8_t airgaps_index_array[AIRGAP_COUNT];
+	static uint16_t* airgaps_binary_data_pointer_array[AIRGAP_COUNT];
 	static uint16_t airgaps_binary_data_array[AIRGAP_COUNT];
 	static IntegerMovingAverage<uint16_t, uint16_t, 0, 10> airgaps_average_binary_data_array[AIRGAP_COUNT];
 	static float airgaps_data_array[AIRGAP_COUNT];
@@ -26,12 +27,13 @@ public:
 	static inline void start(){
 		for(int i = 0; i < AIRGAP_COUNT; i++){
 			ADC::turn_on(airgaps_index_array[i]);
+			airgaps_binary_data_pointer_array[i] = ADC::get_value_pointer(airgaps_index_array[i]);
 		}
 	}
 
 	static inline void update_binary(){
 		for(int i = 0; i < AIRGAP_COUNT; i++){
-			airgaps_binary_data_array[i] = ADC::get_int_value(airgaps_index_array[i]);
+			airgaps_binary_data_array[i] = *airgaps_binary_data_pointer_array[i];
 			airgaps_average_binary_data_array[i].compute(airgaps_binary_data_array[i]);
 		}
 	}
@@ -42,10 +44,16 @@ if constexpr(USING_1DOF){
 			airgaps_data_array[i] = airgaps_average_binary_data_array[i].output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_1DOF_AIRGAP_SLOPE + FLOAT_1DOF_AIRGAP_OFFSET;
 		}
 }
-if constexpr(USING_5DOF){
+if constexpr(USING_5DOF && !IS_HIL){
 		for(int i = 0; i < AIRGAP_COUNT/2; i++){
 			airgaps_data_array[i] = airgaps_average_binary_data_array[i].output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_HEMS_AIRGAP_SLOPE + FLOAT_HEMS_AIRGAP_OFFSET;
 			airgaps_data_array[i+AIRGAP_COUNT/2] = airgaps_average_binary_data_array[i+AIRGAP_COUNT/2].output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_EMS_AIRGAP_SLOPE + FLOAT_EMS_AIRGAP_OFFSET;
+		}
+}
+if constexpr(IS_HIL){
+		for(int i = 0; i < AIRGAP_COUNT/2; i++){
+			airgaps_data_array[i] = airgaps_average_binary_data_array[i].output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_HEMS_HIL_AIRGAP_SLOPE + FLOAT_HEMS_HIL_AIRGAP_OFFSET;
+			airgaps_data_array[i+AIRGAP_COUNT/2] = airgaps_average_binary_data_array[i].output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_EMS_HIL_AIRGAP_SLOPE + FLOAT_EMS_HIL_AIRGAP_OFFSET;
 		}
 }
 	}
