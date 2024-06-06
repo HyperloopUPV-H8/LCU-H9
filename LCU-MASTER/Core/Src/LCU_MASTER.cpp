@@ -6,8 +6,9 @@ LCU::LCU() : generalStateMachine(INITIAL){
 	lcu_instance = this;
 	sensors_inscribe();
 	state_machine_definition();
+	ProtectionManager::link_state_machine(generalStateMachine, FAULT);
 	Communication::init();
-	STLIB::start(MASTER_IP.string_address);
+	STLIB::start(LCU_IP.string_address);
 
 	for(uint8_t i = 0; i < LDU_COUNT; i++){
 		ADC::turn_on(coil_temperature_adc_id[i]);
@@ -23,6 +24,7 @@ void LCU::update(){
 	STLIB::update();
 	SPI::Order_update();
 	generalStateMachine.check_transitions();
+	ProtectionManager::check_protections();
 	Communication::update();
 	LDU_Buffer::update_buffers();
 	for(int i = 0; i < LDU_COUNT; i++){ //TODO: abstract these sensors

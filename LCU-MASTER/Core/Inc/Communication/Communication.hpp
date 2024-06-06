@@ -15,8 +15,10 @@
 class Communication{
 public:
 	static uint8_t spi_id;
-	static ServerSocket *gui_connection;
-	static DatagramSocket *udp_connection;
+	static ServerSocket *gui_connection; //TODO: remove this for good
+	static ServerSocket *vcu_connection;
+	static DatagramSocket *upd_gui;
+	//static DatagramSocket *udp_vcu; TODO: ask if necessary
 	static DigitalOutput* test_order_received;
 
 	static Order* EthernetOrders[ETH_ORDER_COUNT];
@@ -50,8 +52,9 @@ public:
 	}
 
 	static void start_ethernet(){
-		gui_connection = new ServerSocket(MASTER_IP, TCP_SERVER_PORT);
-		udp_connection = new DatagramSocket(MASTER_IP, UDP_PORT, BACKEND, UDP_PORT);
+		gui_connection = new ServerSocket(LCU_IP, TCP_SERVER_PORT);
+		vcu_connection = new ServerSocket(LCU_IP, TCP_VCU_PORT);
+		upd_gui = new DatagramSocket(LCU_IP, UDP_PORT, BACKEND, UDP_PORT);
 		EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LEVITATION_DATA_TCP_PACKET_ID,
 			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
 			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2],
@@ -180,11 +183,11 @@ if constexpr(USING_5DOF){
 	//###################  PERIODIC FUNCTIONS  #########################
 
 	static void send_lcu_data_to_backend(){
-		udp_connection->send_packet(*EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX]);
+		upd_gui->send_packet(*EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX]);
 	}
 
 	static void send_levitation_data_to_backend(){
-		udp_connection->send_packet(*EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX]);
+		upd_gui->send_packet(*EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX]);
 	}
 
 	static void lcu_data_transaction(){
