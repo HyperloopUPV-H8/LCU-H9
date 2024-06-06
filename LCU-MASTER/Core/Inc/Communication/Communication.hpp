@@ -95,9 +95,9 @@ public:
 		EthernetOrders[TEST_STOP_RESET_TCP_ORDER_INDEX] = new StackOrder<2,uint16_t>(TEST_STOP_RESET_TCP_ORDER_ID, fix_buffer_reset_low, &ldu_number_to_change);
 
 		EthernetOrders[START_VERTICAL_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(START_VERTICAL_LEVITATION_TCP_ORDER_ID, start_slave_vertical_levitation, &data_from_backend);
-		EthernetOrders[STOP_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(STOP_LEVITATION_TCP_ORDER_ID, stop_slave_levitation);
-		EthernetOrders[STICK_DOWN_TCP_ORDER_INDEX] = new StackOrder(STICK_DOWN_TCP_ORDER_ID, stick_down_slave);
-		EthernetOrders[LANDING_TCP_ORDER_INDEX] = new StackOrder(LANDING_TCP_ORDER_ID, landing_slave);
+		//EthernetOrders[STOP_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(STOP_LEVITATION_TCP_ORDER_ID, stop_slave_levitation);
+		//EthernetOrders[STICK_DOWN_TCP_ORDER_INDEX] = new StackOrder(STICK_DOWN_TCP_ORDER_ID, stick_down_slave);
+		//EthernetOrders[LANDING_TCP_ORDER_INDEX] = new StackOrder(LANDING_TCP_ORDER_ID, landing_slave);
 		EthernetOrders[START_HORIZONTAL_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(START_HORIZONTAL_LEVITATION_TCP_ORDER_ID, start_slave_horizontal_levitation);
 	}
 
@@ -239,6 +239,26 @@ if constexpr(USING_5DOF){
 		ldu_index_to_change = ldu_number_to_change - 1;
 		data_to_change = (float) data_from_backend;
 		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[TEST_DESIRED_CURRENT_ORDER_ID]);
+	}
+
+	static void start_slave_vertical_levitation(){
+
+	}
+
+	static void stop_slave_levitation(){
+
+	}
+
+	static void stick_down_slave(){
+
+	}
+
+	static void landing_slave(){
+
+	}
+
+	static void start_slave_horizontal_levitation(){
+
 	}
 
 	static void set_new_slave_data_ready(){new_slave_data = true;}
