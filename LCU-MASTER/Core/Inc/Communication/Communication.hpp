@@ -102,6 +102,9 @@ public:
 		EthernetOrders[STICK_DOWN_TCP_ORDER_INDEX] = new StackOrder(STICK_DOWN_TCP_ORDER_ID, stick_down_slave);
 		EthernetOrders[LANDING_TCP_ORDER_INDEX] = new StackOrder(LANDING_TCP_ORDER_ID, landing_slave);
 		EthernetOrders[START_HORIZONTAL_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(START_HORIZONTAL_LEVITATION_TCP_ORDER_ID, start_slave_horizontal_levitation);
+
+		EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX] = new StackOrder(STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_ID, nullptr);
+		EthernetOrders[LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_INDEX] = new StackOrder(LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_ID, nullptr);
 	}
 
 
@@ -258,6 +261,7 @@ if constexpr(USING_5DOF){
 	static void start_slave_vertical_levitation(){
 		data_to_change = (float) data_from_backend;
 		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[START_VERTICAL_LEVITATION_ORDER_ID]);
+		vcu_connection->send_order(*EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX]);
 	}
 
 	static void stop_slave_levitation(){
@@ -269,7 +273,7 @@ if constexpr(USING_5DOF){
 	}
 
 	static void landing_slave(){
-
+		vcu_connection->send_order(*EthernetOrders[LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_INDEX]);
 	}
 
 	static void start_slave_horizontal_levitation(){
