@@ -99,6 +99,15 @@ void start_levitation_control(){
 	lcu_instance->start_control();
 }
 
+void start_vertical_levitation(){
+	lcu_instance->set_desired_airgap_distance(data_to_change);
+	lcu_instance->start_vertical_control();
+}
+
+void start_horizontal_levitation(){
+	lcu_instance->start_horizontal_control();
+}
+
 
 void set_desired_current_on_LDU(){
 	lcu_instance->ldu_array[ldu_to_change].desired_current = data_to_change;

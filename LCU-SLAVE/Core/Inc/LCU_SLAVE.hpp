@@ -228,6 +228,15 @@ if constexpr(!IS_HIL){
 		levitationControl.start();
 	}
 
+	void start_vertical_control(){
+		enable_all_current_controls();
+		levitationControl.start_vertical();
+	}
+
+	void start_horizontal_control(){
+		levitationControl.start_horizontal();
+	}
+
 	void stop_control(){
 		shutdown();
 		status_flags.enable_levitation_control = false;
