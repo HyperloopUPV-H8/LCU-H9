@@ -18,12 +18,13 @@ public:
 	Communication communication;
 	Control<running_mode, arithmetic_number_type> levitationControl;
 	StateMachine generalStateMachine;
+	StateMachine levitationStateMachine;
 	PWM_Buffer ldu_buffers;
 	LDU<RUNNING_MODE, ARITHMETIC_MODE> ldu_array[LDU_COUNT];
 
 	bool PendingCurrentPI = false;
 	bool PendingLevitationControl = false;
-	bool PendingHousekeepingTasks = false;
+	bool PendingLevitationStabilityCheck = false;
 	bool CalibrationCompleted = false;
 	bool DefinitionCompleted = false;
 
@@ -31,7 +32,7 @@ public:
 	uint32_t LevitationControlCount = 0;
 	uint32_t CurrentPICount = 0;
 
-	LCU() : generalStateMachine(DEFINING){
+	LCU() : generalStateMachine(DEFINING), levitationStateMachine(IDLE){
 		if(lcu_instance == nullptr){	lcu_instance = this;
 		}else{		ErrorHandler("tried to set a second lcu");		}
 		setup_configuration();
@@ -73,6 +74,11 @@ if constexpr(USING_5DOF){
 				update_desired_current_control();
 			}
 			PendingLevitationControl = false;
+		}
+
+		if(PendingLevitationStabilityCheck){
+			levitationControl.calculate_levitation_stability();
+			PendingLevitationStabilityCheck = false;
 		}
 
 		if(PendingCurrentPI){
@@ -155,6 +161,13 @@ if constexpr(USING_5DOF){
 		generalStateMachine.add_state(OPERATIONAL);
 		generalStateMachine.add_state(FAULT);
 
+		levitationStateMachine.add_state(TAKING_OFF);
+		levitationStateMachine.add_state(DOF3_STABLE);
+		levitationStateMachine.add_state(DOF5_STABLE);
+		levitationStateMachine.add_state(BOOSTER);
+		levitationStateMachine.add_state(LANDING);
+
+		generalStateMachine.add_state_machine(levitationStateMachine, OPERATIONAL);
 		//################# ADDING ALL TRANSITIONS ##########################
 		generalStateMachine.add_transition(DEFINING, INITIAL, general_transition_defining_to_initial);
 		generalStateMachine.add_transition(INITIAL, OPERATIONAL, general_transition_initial_to_operational);
@@ -173,9 +186,10 @@ if constexpr(USING_1DOF){
 		generalStateMachine.add_low_precision_cyclic_action(DOF1_update_vbat_data, std::chrono::microseconds((int) (VBAT_UPDATE_PERIOD_SECONDS*1000000)), {INITIAL, OPERATIONAL, FAULT});
 }
 		generalStateMachine.add_mid_precision_cyclic_action(rise_current_PI_flag, std::chrono::microseconds((int) (CURRENT_CONTROL_PERIOD_SECONDS*1000000)), OPERATIONAL);
-		generalStateMachine.add_low_precision_cyclic_action(rise_levitation_control_flag,  std::chrono::microseconds((int) (LEVITATION_CONTROL_PERIOD_SECONDS*1000000)), OPERATIONAL);
+		levitationStateMachine.add_low_precision_cyclic_action(rise_levitation_control_flag,  std::chrono::microseconds((int) (LEVITATION_CONTROL_PERIOD_SECONDS*1000000)), {TAKING_OFF,DOF3_STABLE,DOF5_STABLE,BOOSTER,LANDING});
 		generalStateMachine.add_mid_precision_cyclic_action(LDUs_zeroing, std::chrono::microseconds((int) (CURRENT_ZEROING_SAMPLING_PERIOD_SECONDS*1000000)), INITIAL);
 
+		levitationStateMachine.add_low_precision_cyclic_action(rise_levitation_stability_check_flag, std::chrono::microseconds((int) (LEVITATION_STABILITY_CHECK_PERIOD_SECONDS*1000000)), {TAKING_OFF,DOF3_STABLE,DOF5_STABLE,BOOSTER,LANDING});
 		//###############  ADDING ALL TRANSITION CALLBACKS  ###################
 		generalStateMachine.add_enter_action(general_enter_operational, OPERATIONAL);
 		generalStateMachine.add_enter_action(general_enter_fault, FAULT);
@@ -224,12 +238,14 @@ if constexpr(!IS_HIL){
 	}
 
 	void start_control(){
+		levitationStateMachine.force_change_state(TAKING_OFF);
 		lcu_instance->ldu_buffers.turn_on();
 		enable_all_current_controls();
 		levitationControl.start();
 	}
 
 	void start_vertical_control(){
+		levitationStateMachine.force_change_state(TAKING_OFF);
 		lcu_instance->ldu_buffers.turn_on_hems();
 		enable_all_current_controls();
 		levitationControl.start_vertical();
@@ -240,7 +256,8 @@ if constexpr(!IS_HIL){
 		levitationControl.start_horizontal();
 	}
 
-	void stop_control(){
+	void stop_all_control(){
+		levitationStateMachine.force_change_state(IDLE);
 		shutdown();
 		for(int i = 0; i < LDU_COUNT; i++){
 			ldu_array[i].Voltage_by_current_PI.reset();

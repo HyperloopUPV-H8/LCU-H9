@@ -110,7 +110,7 @@ public:
 		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2] = new SPIPacket<0>;
 		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[STOP_LEVITATION_ORDER_INDEX] = new SPIStackOrder(STOP_LEVITATION_ORDER_ID, *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2], *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1]);
-		SPIOrders[STOP_LEVITATION_ORDER_INDEX]->set_callback(shutdown);
+		SPIOrders[STOP_LEVITATION_ORDER_INDEX]->set_callback(stop_control);
 	}
 
 	static void start(){

@@ -34,10 +34,27 @@ public:
 	float desired_current_vector[LDU_COUNT];
 	MatrixMultiplier<10,15,1> KID_calculator;
 
+	//stability calculator struct
+	MovingAverage<LEVITATION_STABILITY_CHECK_CALCULATION_SPAN> levitation_stability_check_moving_average[5]{};
+	RingBuffer<bool, LEVITATION_STABILITY_CHECK_CALCULATION_SPAN> outside_maximum_range[5];
+	uint8_t outside_maximum_range_count[5]{0,0,0,0,0};
+	bool stable_position_flag[5];
+
 
 	Control() : Levitation_control_PID{KP_DOF1_AIRGAP_TO_CURRENT, KI_DOF1_AIRGAP_TO_CURRENT, KD_DOF1_AIRGAP_TO_CURRENT, LEVITATION_CONTROL_PERIOD_SECONDS},
 				KID_calculator(KID_MATRIX, levitation_data_vector, desired_current_vector){
 		update_levitation_constants(initial_levitation_control_constants);
+		for(int i = 0; i < (int)LEVITATION_STABILITY_CHECK_CALCULATION_SPAN; i++){
+			for(int j = 0; j < 5; j++){
+				levitation_stability_check_moving_average[j].compute(MAXIMUM_PEAK_LEVITATION_DEVIATION[j]*2);
+				bool unused_variable = outside_maximum_range[j].push(true);UNUSED(unused_variable);
+				outside_maximum_range_count[j] =outside_maximum_range_count[j]+1;
+			}
+		}
+		for(int j = 0; j < 5; j++){
+			levitation_stability_check_moving_average[j].compute(MAXIMUM_PEAK_LEVITATION_DEVIATION[j]*2);
+			stable_position_flag[j] = false;
+		}
 	}
 
 	void DOF1_control_loop(){
@@ -161,6 +178,26 @@ public:
 		position_error_data_integral[Z_ROTATION_INDEX].reset();
 		position_error_data_derivative[Y_POSITION_INDEX].reset();
 		position_error_data_integral[Y_POSITION_INDEX].reset();
+	}
+
+	void calculate_levitation_stability(){
+		for(int j = 0; j < 5; j++){
+			levitation_stability_check_moving_average[j].compute(position_error_data[j]);
+			bool is_outside_maximum_range = abs(position_error_data[j]) > MAXIMUM_PEAK_LEVITATION_DEVIATION[j];
+			if(outside_maximum_range[j].pop()){
+				outside_maximum_range_count[j] =outside_maximum_range_count[j]-1;
+			}
+			if(is_outside_maximum_range){
+				outside_maximum_range_count[j] =outside_maximum_range_count[j]+1;
+			}
+			bool unused_variable = outside_maximum_range[j].push(is_outside_maximum_range);UNUSED(unused_variable);
+			if(abs(levitation_stability_check_moving_average[j].output_value) < MAXIMUM_AVERAGE_LEVITATION_DEVIATION[j] && outside_maximum_range_count[j] == 0){
+				stable_position_flag[j] = true;
+			}else{
+				stable_position_flag[j] = false;
+			}
+		}
+
 	}
 
 };

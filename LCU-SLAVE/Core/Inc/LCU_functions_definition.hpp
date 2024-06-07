@@ -60,8 +60,8 @@ void rise_levitation_control_flag(){
 	lcu_instance->PendingLevitationControl = true;
 }
 
-void rise_housekeeping_tasks_flag(){
-	lcu_instance->PendingHousekeepingTasks = true;
+void rise_levitation_stability_check_flag(){
+	lcu_instance->PendingLevitationStabilityCheck = true;
 }
 
 void enable_all_current_controls(){
@@ -129,7 +129,7 @@ void initial_order_callback(){
 }
 
 void test_pwm_order_callback(){
-	lcu_instance->stop_control();
+	shutdown();
 	if(ldu_to_change >= LDU_COUNT){return;}
 	lcu_instance->ldu_array[ldu_to_change].set_pwms_duty(duty_to_change);
 	lcu_instance->ldu_array[ldu_to_change].desired_current = 0;
@@ -171,4 +171,8 @@ void shutdown(){
 	lcu_instance->ldu_buffers.turn_off();
 	lcu_instance->levitationControl.stop();
 	disable_all_current_controls();
+}
+
+void stop_control(){
+	lcu_instance->stop_all_control();
 }

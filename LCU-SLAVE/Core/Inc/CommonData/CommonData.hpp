@@ -47,7 +47,7 @@ inline void DOF1_update_vbat_data();
 
 inline void rise_current_PI_flag();
 inline void rise_levitation_control_flag();
-inline void rise_rise_housekeeping_tasks_flag();
+inline void rise_levitation_stability_check_flag();
 inline void enable_all_current_controls();
 inline void disable_all_current_controls();
 
@@ -67,6 +67,7 @@ inline void initial_order_callback();
 
 inline void send_to_fault();
 inline void shutdown(); //stops all controls and sets PWM to 0
+inline void stop_control();
 
 /* #################################################################
  * #####################  PINOUT DISTRIBUTION  #####################
