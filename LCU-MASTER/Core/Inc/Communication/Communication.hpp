@@ -95,7 +95,7 @@ public:
 		EthernetOrders[TEST_STOP_RESET_TCP_ORDER_INDEX] = new StackOrder<2,uint16_t>(TEST_STOP_RESET_TCP_ORDER_ID, fix_buffer_reset_low, &ldu_number_to_change);
 
 		EthernetOrders[START_VERTICAL_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(START_VERTICAL_LEVITATION_TCP_ORDER_ID, start_slave_vertical_levitation, &data_from_backend);
-		//EthernetOrders[STOP_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(STOP_LEVITATION_TCP_ORDER_ID, stop_slave_levitation);
+		EthernetOrders[STOP_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(STOP_LEVITATION_TCP_ORDER_ID, stop_slave_levitation);
 		//EthernetOrders[STICK_DOWN_TCP_ORDER_INDEX] = new StackOrder(STICK_DOWN_TCP_ORDER_ID, stick_down_slave);
 		//EthernetOrders[LANDING_TCP_ORDER_INDEX] = new StackOrder(LANDING_TCP_ORDER_ID, landing_slave);
 		EthernetOrders[START_HORIZONTAL_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(START_HORIZONTAL_LEVITATION_TCP_ORDER_ID, start_slave_horizontal_levitation);
@@ -169,6 +169,11 @@ public:
 		SPIPackets[START_HORIZONTAL_LEVITATION_ORDER_INDEX*2] = new SPIPacket<0>;
 		SPIPackets[START_HORIZONTAL_LEVITATION_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[START_HORIZONTAL_LEVITATION_ORDER_INDEX] = new SPIStackOrder(START_HORIZONTAL_LEVITATION_ORDER_ID, *SPIPackets[START_HORIZONTAL_LEVITATION_ORDER_INDEX*2], *SPIPackets[START_HORIZONTAL_LEVITATION_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2] = new SPIPacket<0>;
+		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[STOP_LEVITATION_ORDER_INDEX] = new SPIStackOrder(STOP_LEVITATION_ORDER_ID, *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2], *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1]);
 	}
 
 
@@ -258,7 +263,7 @@ if constexpr(USING_5DOF){
 	}
 
 	static void stop_slave_levitation(){
-
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[STOP_LEVITATION_ORDER_ID]);
 	}
 
 	static void stick_down_slave(){
