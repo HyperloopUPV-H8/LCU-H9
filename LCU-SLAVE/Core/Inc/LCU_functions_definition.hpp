@@ -37,6 +37,7 @@ void DOF5_update_vbat_data(){
 	for(int i = 0; i < LDU_COUNT; i++){
 		lcu_instance->ldu_array[i].update_vbat_value();
 	}
+	lcu_instance->ldu_array[5].battery_voltage = lcu_instance->ldu_array[4].battery_voltage;
 }
 
 void DOF1_update_airgap_data(){
