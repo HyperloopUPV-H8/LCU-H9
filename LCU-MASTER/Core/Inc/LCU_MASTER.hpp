@@ -17,11 +17,16 @@ public:
 	StateMachine generalStateMachine;
 	LEDs leds;
 
+	struct CommFlags{
+		bool lcu_data_to_send = false;
+		bool levitation_data_to_send = false;
+	}commflags;
 
 	LCU();
 	void sensors_inscribe();
 	void state_machine_definition();
 	void update();
+	void check_communications();
 
 
 	static inline float coil_temperature_calculation(uint16_t fixed_coil_temperature){
