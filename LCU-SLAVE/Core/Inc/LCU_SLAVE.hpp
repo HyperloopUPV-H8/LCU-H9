@@ -224,25 +224,26 @@ if constexpr(!IS_HIL){
 	}
 
 	void start_control(){
+		lcu_instance->ldu_buffers.turn_on();
 		enable_all_current_controls();
 		levitationControl.start();
 	}
 
 	void start_vertical_control(){
+		lcu_instance->ldu_buffers.turn_on_hems();
 		enable_all_current_controls();
 		levitationControl.start_vertical();
 	}
 
 	void start_horizontal_control(){
+		lcu_instance->ldu_buffers.turn_on_ems();
 		levitationControl.start_horizontal();
 	}
 
 	void stop_control(){
 		shutdown();
-		status_flags.enable_levitation_control = false;
 		for(int i = 0; i < LDU_COUNT; i++){
 			ldu_array[i].Voltage_by_current_PI.reset();
 		}
-		levitationControl.stop();
 	}
 };

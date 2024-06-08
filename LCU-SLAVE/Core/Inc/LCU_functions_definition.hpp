@@ -73,10 +73,7 @@ void enable_all_current_controls(){
 
 void disable_all_current_controls(){
 	for(int i = 0; i < LDU_COUNT; i++){
-		lcu_instance->ldu_array[i].flags.enable_current_control = false;
-		lcu_instance->ldu_array[i].flags.fixed_vbat = false;
-		lcu_instance->ldu_array[i].Voltage_by_current_PI.reset();
-		lcu_instance->ldu_array[i].set_pwms_duty(0);
+		lcu_instance->ldu_array[i].disable_current_control();
 	}
 }
 
@@ -115,7 +112,6 @@ void set_desired_current_on_LDU(){
  	lcu_instance->ldu_array[ldu_to_change].flags.fixed_vbat = true;
  	lcu_instance->ldu_array[ldu_to_change].flags.enable_current_control = true;
 }
-
 
 void reset_desired_current_on_LDU(){//TODO: implement as order on GUI
 	for(int i = 0; i < LDU_COUNT; i++){
@@ -173,10 +169,6 @@ void send_to_fault(){
 
 void shutdown(){
 	lcu_instance->ldu_buffers.turn_off();
-	disable_all_current_controls();
-	for(int i = 0; i < LDU_COUNT; i++){
-		lcu_instance->ldu_array[i].Voltage_by_current_PI.reset();
-		lcu_instance->ldu_array[i].set_pwms_duty(0);
-	}
 	lcu_instance->levitationControl.stop();
+	disable_all_current_controls();
 }

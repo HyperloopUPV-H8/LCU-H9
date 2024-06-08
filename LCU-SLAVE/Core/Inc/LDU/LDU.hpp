@@ -196,4 +196,18 @@ if constexpr(!IS_HIL){
 			flags.finished_zeroing = true;
 		}
 	}
+
+	void enable_current_control(){
+		flags.enable_current_control = true;
+		flags.fixed_vbat = true;
+	}
+
+	void disable_current_control(){
+		flags.enable_current_control = false;
+		flags.fixed_vbat = false;
+		desired_current = 0.0;
+		Voltage_by_current_PI.reset();
+		set_pwms_duty(0);
+	}
 };
+
