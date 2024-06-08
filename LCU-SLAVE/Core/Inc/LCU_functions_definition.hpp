@@ -107,8 +107,8 @@ void start_horizontal_levitation(){
 
 
 void set_desired_current_on_LDU(){
-	lcu_instance->ldu_array[ldu_to_change].desired_current = data_to_change;
  	disable_all_current_controls();
+ 	lcu_instance->ldu_array[ldu_to_change].desired_current = data_to_change;
  	lcu_instance->ldu_array[ldu_to_change].flags.fixed_vbat = true;
  	lcu_instance->ldu_array[ldu_to_change].flags.enable_current_control = true;
 }
