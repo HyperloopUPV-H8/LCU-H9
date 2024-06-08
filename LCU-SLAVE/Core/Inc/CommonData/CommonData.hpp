@@ -56,14 +56,17 @@ inline void run_current_PI();
 
 inline void update_levitation_constants(float new_levitation_constants[LDU_COUNT][15]);
 inline void start_levitation_control();
+inline void start_vertical_levitation();
+inline void start_horizontal_levitation();
+
 inline void set_desired_current_on_LDU();
-inline void initial_order_callback();
 inline void test_pwm_order_callback();
 
 inline void define_shared_data();
+inline void initial_order_callback();
 
 inline void send_to_fault();
-inline void shutdown();
+inline void shutdown(); //stops all controls and sets PWM to 0
 
 /* #################################################################
  * #####################  PINOUT DISTRIBUTION  #####################

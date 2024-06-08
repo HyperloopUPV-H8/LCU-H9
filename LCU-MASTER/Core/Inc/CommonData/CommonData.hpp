@@ -13,13 +13,15 @@
 #define USING_5DOF (RUNNING_MODE != DOF1)
 #define IS_HIL (RUNNING_MODE == DOF5_HIL)
 
-static ip_addr_t master_ip_addr = IPADDR4_INIT_BYTES(MASTER_IP_B0,MASTER_IP_B1,MASTER_IP_B2,MASTER_IP_B3);
-static IPV4 MASTER_IP(master_ip_addr);
+static ip_addr_t master_ip_addr = IPADDR4_INIT_BYTES(LCU_IP_B0,LCU_IP_B1,LCU_IP_B2,LCU_IP_B3);
+static IPV4 LCU_IP(master_ip_addr);
+static IPV4 VCU_IP("192.168.1.3");
 static IPV4 BACKEND("192.168.0.9");
 
 
 static const uint32_t TCP_SERVER_PORT = 50500;
 static const uint32_t TCP_CLIENT_PORT = 50401;
+static const uint32_t TCP_VCU_PORT = 50304;
 static const uint32_t UDP_PORT = 50400;
 
 extern control_data shared_control_data;

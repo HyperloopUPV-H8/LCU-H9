@@ -15,8 +15,10 @@
 class Communication{
 public:
 	static uint8_t spi_id;
-	static ServerSocket *gui_connection;
-	static DatagramSocket *udp_connection;
+	static ServerSocket *gui_connection; //TODO: remove this for good
+	static ServerSocket *vcu_connection;
+	static DatagramSocket *upd_gui;
+	//static DatagramSocket *udp_vcu; TODO: ask if necessary
 	static DigitalOutput* test_order_received;
 
 	static Order* EthernetOrders[ETH_ORDER_COUNT];
@@ -50,8 +52,9 @@ public:
 	}
 
 	static void start_ethernet(){
-		gui_connection = new ServerSocket(MASTER_IP, TCP_SERVER_PORT);
-		udp_connection = new DatagramSocket(MASTER_IP, UDP_PORT, BACKEND, UDP_PORT);
+		gui_connection = new ServerSocket(LCU_IP, TCP_SERVER_PORT);
+		vcu_connection = new ServerSocket(LCU_IP, TCP_VCU_PORT);
+		upd_gui = new DatagramSocket(LCU_IP, UDP_PORT, BACKEND, UDP_PORT);
 		EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LEVITATION_DATA_TCP_PACKET_ID,
 			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
 			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2],
@@ -93,6 +96,15 @@ public:
 		EthernetOrders[TEST_DESIRED_CURRENT_TCP_ORDER_INDEX] = new StackOrder(TEST_DESIRED_CURRENT_TCP_ORDER_ID, send_desired_current_data_from_backend, &ldu_number_to_change, &data_from_backend);
 		EthernetOrders[TEST_START_RESET_TCP_ORDER_INDEX] = new StackOrder<2,uint16_t>(TEST_START_RESET_TCP_ORDER_ID, fix_buffer_reset_high, &ldu_number_to_change);
 		EthernetOrders[TEST_STOP_RESET_TCP_ORDER_INDEX] = new StackOrder<2,uint16_t>(TEST_STOP_RESET_TCP_ORDER_ID, fix_buffer_reset_low, &ldu_number_to_change);
+
+		EthernetOrders[START_VERTICAL_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(START_VERTICAL_LEVITATION_TCP_ORDER_ID, start_slave_vertical_levitation, &data_from_backend);
+		EthernetOrders[STOP_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(STOP_LEVITATION_TCP_ORDER_ID, stop_slave_levitation);
+		EthernetOrders[STICK_DOWN_TCP_ORDER_INDEX] = new StackOrder(STICK_DOWN_TCP_ORDER_ID, stick_down_slave);
+		EthernetOrders[LANDING_TCP_ORDER_INDEX] = new StackOrder(LANDING_TCP_ORDER_ID, landing_slave);
+		EthernetOrders[START_HORIZONTAL_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(START_HORIZONTAL_LEVITATION_TCP_ORDER_ID, start_slave_horizontal_levitation);
+
+		EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX] = new StackOrder(STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_ID, nullptr);
+		EthernetOrders[LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_INDEX] = new StackOrder(LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_ID, nullptr);
 	}
 
 
@@ -125,12 +137,12 @@ public:
 
 
 		SPIPackets[LEVITATION_DATA_ORDER_INDEX*2] = new SPIPacket<0>();
-		SPIPackets[LEVITATION_DATA_ORDER_INDEX*2+1] = new SPIPacket<60, uint32_t, uint32_t, float, float, float, float, float, float, float, float, float, float, float, float, float>(
-			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
-			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2], shared_control_data.float_current_ref[3],
-			shared_control_data.float_airgap_to_pos[1], shared_control_data.float_airgap_to_pos[2], shared_control_data.float_airgap_to_pos[3],
-			shared_control_data.float_airgap_to_pos_der[1], shared_control_data.float_airgap_to_pos_der[2], shared_control_data.float_airgap_to_pos_der[3],
-			shared_control_data.float_airgap_to_pos_in[1], shared_control_data.float_airgap_to_pos_in[2], shared_control_data.float_airgap_to_pos_in[3]
+		SPIPackets[LEVITATION_DATA_ORDER_INDEX*2+1] = new SPIPacket<100, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float>(
+			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2], shared_control_data.float_current_ref[3], shared_control_data.float_current_ref[4],
+			shared_control_data.float_current_ref[5], shared_control_data.float_current_ref[6], shared_control_data.float_current_ref[7], shared_control_data.float_current_ref[8], shared_control_data.float_current_ref[9],
+			shared_control_data.float_airgap_to_pos[0], shared_control_data.float_airgap_to_pos[1], shared_control_data.float_airgap_to_pos[2], shared_control_data.float_airgap_to_pos[3],shared_control_data.float_airgap_to_pos[4],
+			shared_control_data.float_airgap_to_pos_der[0],shared_control_data.float_airgap_to_pos_der[1], shared_control_data.float_airgap_to_pos_der[2], shared_control_data.float_airgap_to_pos_der[3],shared_control_data.float_airgap_to_pos_der[4],
+			shared_control_data.float_airgap_to_pos_in[0], shared_control_data.float_airgap_to_pos_in[1], shared_control_data.float_airgap_to_pos_in[2], shared_control_data.float_airgap_to_pos_in[3], shared_control_data.float_airgap_to_pos_in[4]
 		);
 		SPIOrders[LEVITATION_DATA_ORDER_INDEX] = new SPIStackOrder(LEVITATION_DATA_ORDER_ID, *SPIPackets[LEVITATION_DATA_ORDER_INDEX*2], *SPIPackets[LEVITATION_DATA_ORDER_INDEX*2+1]);
 
@@ -144,6 +156,7 @@ public:
 		SPIPackets[TEST_VBAT_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[TEST_VBAT_ORDER_INDEX] = new SPIStackOrder(TEST_VBAT_ORDER_ID, *SPIPackets[TEST_VBAT_ORDER_INDEX*2], *SPIPackets[TEST_VBAT_ORDER_INDEX*2+1]);
 
+
 		SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2] = new SPIPacket<4,float>(&data_to_change);
 		SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[START_LEVITATION_CONTROL_ORDER_INDEX] = new SPIStackOrder(START_LEVITATION_CONTROL_ORDER_ID, *SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2], *SPIPackets[START_LEVITATION_CONTROL_ORDER_INDEX*2+1]);
@@ -152,6 +165,21 @@ public:
 		SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2] = new SPIPacket<6,uint16_t,float>(&ldu_index_to_change, &data_to_change);
 		SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[TEST_DESIRED_CURRENT_ORDER_INDEX] = new SPIStackOrder(TEST_DESIRED_CURRENT_ORDER_ID, *SPIPackets[TEST_DESIRED_CURRENT_ORDER_INDEX*2], *SPIPackets[TEST_VBAT_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[START_VERTICAL_LEVITATION_ORDER_INDEX*2] = new SPIPacket<4,float>(&data_to_change);
+		SPIPackets[START_VERTICAL_LEVITATION_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[START_VERTICAL_LEVITATION_ORDER_INDEX] = new SPIStackOrder(START_VERTICAL_LEVITATION_ORDER_ID, *SPIPackets[START_VERTICAL_LEVITATION_ORDER_INDEX*2], *SPIPackets[START_VERTICAL_LEVITATION_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[START_HORIZONTAL_LEVITATION_ORDER_INDEX*2] = new SPIPacket<0>;
+		SPIPackets[START_HORIZONTAL_LEVITATION_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[START_HORIZONTAL_LEVITATION_ORDER_INDEX] = new SPIStackOrder(START_HORIZONTAL_LEVITATION_ORDER_ID, *SPIPackets[START_HORIZONTAL_LEVITATION_ORDER_INDEX*2], *SPIPackets[START_HORIZONTAL_LEVITATION_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2] = new SPIPacket<0>;
+		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[STOP_LEVITATION_ORDER_INDEX] = new SPIStackOrder(STOP_LEVITATION_ORDER_ID, *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2], *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1]);
 	}
 
 
@@ -180,11 +208,11 @@ if constexpr(USING_5DOF){
 	//###################  PERIODIC FUNCTIONS  #########################
 
 	static void send_lcu_data_to_backend(){
-		udp_connection->send_packet(*EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX]);
+		upd_gui->send_packet(*EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX]);
 	}
 
 	static void send_levitation_data_to_backend(){
-		udp_connection->send_packet(*EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX]);
+		upd_gui->send_packet(*EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX]);
 	}
 
 	static void lcu_data_transaction(){
@@ -233,6 +261,28 @@ if constexpr(USING_5DOF){
 		ldu_index_to_change = ldu_number_to_change - 1;
 		data_to_change = (float) data_from_backend;
 		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[TEST_DESIRED_CURRENT_ORDER_ID]);
+	}
+
+	static void start_slave_vertical_levitation(){
+		data_to_change = (float) data_from_backend;
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[START_VERTICAL_LEVITATION_ORDER_ID]);
+		vcu_connection->send_order(*EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX]);
+	}
+
+	static void stop_slave_levitation(){
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[STOP_LEVITATION_ORDER_ID]);
+	}
+
+	static void stick_down_slave(){
+
+	}
+
+	static void landing_slave(){
+		vcu_connection->send_order(*EthernetOrders[LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_INDEX]);
+	}
+
+	static void start_slave_horizontal_levitation(){
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[START_HORIZONTAL_LEVITATION_ORDER_ID]);
 	}
 
 	static void set_new_slave_data_ready(){new_slave_data = true;}

@@ -37,6 +37,7 @@ void DOF5_update_vbat_data(){
 	for(int i = 0; i < LDU_COUNT; i++){
 		lcu_instance->ldu_array[i].update_vbat_value();
 	}
+	lcu_instance->ldu_array[5].battery_voltage = lcu_instance->ldu_array[4].battery_voltage;
 }
 
 void DOF1_update_airgap_data(){
@@ -73,10 +74,7 @@ void enable_all_current_controls(){
 
 void disable_all_current_controls(){
 	for(int i = 0; i < LDU_COUNT; i++){
-		lcu_instance->ldu_array[i].flags.enable_current_control = false;
-		lcu_instance->ldu_array[i].flags.fixed_vbat = false;
-		lcu_instance->ldu_array[i].Voltage_by_current_PI.reset();
-		lcu_instance->ldu_array[i].set_pwms_duty(0);
+		lcu_instance->ldu_array[i].disable_current_control();
 	}
 }
 
@@ -99,14 +97,22 @@ void start_levitation_control(){
 	lcu_instance->start_control();
 }
 
+void start_vertical_levitation(){
+	lcu_instance->set_desired_airgap_distance(data_to_change);
+	lcu_instance->start_vertical_control();
+}
+
+void start_horizontal_levitation(){
+	lcu_instance->start_horizontal_control();
+}
+
 
 void set_desired_current_on_LDU(){
-	lcu_instance->ldu_array[ldu_to_change].desired_current = data_to_change;
  	disable_all_current_controls();
+ 	lcu_instance->ldu_array[ldu_to_change].desired_current = data_to_change;
  	lcu_instance->ldu_array[ldu_to_change].flags.fixed_vbat = true;
  	lcu_instance->ldu_array[ldu_to_change].flags.enable_current_control = true;
 }
-
 
 void reset_desired_current_on_LDU(){//TODO: implement as order on GUI
 	for(int i = 0; i < LDU_COUNT; i++){
@@ -164,10 +170,6 @@ void send_to_fault(){
 
 void shutdown(){
 	lcu_instance->ldu_buffers.turn_off();
-	disable_all_current_controls();
-	for(int i = 0; i < LDU_COUNT; i++){
-		lcu_instance->ldu_array[i].Voltage_by_current_PI.reset();
-		lcu_instance->ldu_array[i].set_pwms_duty(0);
-	}
 	lcu_instance->levitationControl.stop();
+	disable_all_current_controls();
 }
