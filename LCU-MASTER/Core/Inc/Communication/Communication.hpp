@@ -18,7 +18,7 @@ public:
 	static ServerSocket *gui_connection; //TODO: remove this for good
 	static ServerSocket *vcu_connection;
 	static DatagramSocket *upd_gui;
-	//static DatagramSocket *udp_vcu; TODO: ask if necessary
+	static DatagramSocket *udp_vcu;
 	static DigitalOutput* test_order_received;
 
 	static Order* EthernetOrders[ETH_ORDER_COUNT];
@@ -55,6 +55,7 @@ public:
 		gui_connection = new ServerSocket(LCU_IP, TCP_SERVER_PORT);
 		vcu_connection = new ServerSocket(LCU_IP, TCP_VCU_PORT);
 		upd_gui = new DatagramSocket(LCU_IP, UDP_PORT, BACKEND, UDP_PORT);
+		udp_vcu = new DatagramSocket(LCU_IP, UDP_PORT, VCU_IP, UDP_PORT);
 		EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LEVITATION_DATA_TCP_PACKET_ID,
 			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
 			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2],
@@ -69,27 +70,34 @@ public:
 		);
 
 		EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LCU_DATA_TCP_PACKET_ID,
-				shared_control_data.master_status, shared_control_data.slave_status,
-				&shared_control_data.float_coil_temperature[0],&shared_control_data.float_coil_temperature[1],&shared_control_data.float_coil_temperature[2],
-				&shared_control_data.float_coil_temperature[3],&shared_control_data.float_coil_temperature[4],&shared_control_data.float_coil_temperature[5],
-				&shared_control_data.float_coil_temperature[6],&shared_control_data.float_coil_temperature[7],&shared_control_data.float_coil_temperature[8],
-				&shared_control_data.float_coil_temperature[9],
-				&shared_control_data.float_lpu_temperature[0],&shared_control_data.float_lpu_temperature[1],&shared_control_data.float_lpu_temperature[2],
-				&shared_control_data.float_lpu_temperature[3],&shared_control_data.float_lpu_temperature[4],&shared_control_data.float_lpu_temperature[5],
-				&shared_control_data.float_lpu_temperature[6],&shared_control_data.float_lpu_temperature[7],&shared_control_data.float_lpu_temperature[8],
-				&shared_control_data.float_lpu_temperature[9],
-				shared_control_data.float_coil_current[0],shared_control_data.float_coil_current[1],shared_control_data.float_coil_current[2],
-				shared_control_data.float_coil_current[3],shared_control_data.float_coil_current[4],shared_control_data.float_coil_current[5],
-				shared_control_data.float_coil_current[6],shared_control_data.float_coil_current[7],shared_control_data.float_coil_current[8],
-				shared_control_data.float_coil_current[9],
-				shared_control_data.float_battery_voltage[0],shared_control_data.float_battery_voltage[1],shared_control_data.float_battery_voltage[2],
-				shared_control_data.float_battery_voltage[3],shared_control_data.float_battery_voltage[4],shared_control_data.float_battery_voltage[5],
-				shared_control_data.float_battery_voltage[6],shared_control_data.float_battery_voltage[7],shared_control_data.float_battery_voltage[8],
-				shared_control_data.float_battery_voltage[9],
-				shared_control_data.float_airgap_distance[0],shared_control_data.float_airgap_distance[1],shared_control_data.float_airgap_distance[2],
-				shared_control_data.float_airgap_distance[3],shared_control_data.float_airgap_distance[4],shared_control_data.float_airgap_distance[5],
-				shared_control_data.float_airgap_distance[6],shared_control_data.float_airgap_distance[7]
-				);
+			shared_control_data.master_status, shared_control_data.slave_status,
+			&shared_control_data.float_coil_temperature[0],&shared_control_data.float_coil_temperature[1],&shared_control_data.float_coil_temperature[2],
+			&shared_control_data.float_coil_temperature[3],&shared_control_data.float_coil_temperature[4],&shared_control_data.float_coil_temperature[5],
+			&shared_control_data.float_coil_temperature[6],&shared_control_data.float_coil_temperature[7],&shared_control_data.float_coil_temperature[8],
+			&shared_control_data.float_coil_temperature[9],
+			&shared_control_data.float_lpu_temperature[0],&shared_control_data.float_lpu_temperature[1],&shared_control_data.float_lpu_temperature[2],
+			&shared_control_data.float_lpu_temperature[3],&shared_control_data.float_lpu_temperature[4],&shared_control_data.float_lpu_temperature[5],
+			&shared_control_data.float_lpu_temperature[6],&shared_control_data.float_lpu_temperature[7],&shared_control_data.float_lpu_temperature[8],
+			&shared_control_data.float_lpu_temperature[9],
+			shared_control_data.float_coil_current[0],shared_control_data.float_coil_current[1],shared_control_data.float_coil_current[2],
+			shared_control_data.float_coil_current[3],shared_control_data.float_coil_current[4],shared_control_data.float_coil_current[5],
+			shared_control_data.float_coil_current[6],shared_control_data.float_coil_current[7],shared_control_data.float_coil_current[8],
+			shared_control_data.float_coil_current[9],
+			shared_control_data.float_battery_voltage[0],shared_control_data.float_battery_voltage[1],shared_control_data.float_battery_voltage[2],
+			shared_control_data.float_battery_voltage[3],shared_control_data.float_battery_voltage[4],shared_control_data.float_battery_voltage[5],
+			shared_control_data.float_battery_voltage[6],shared_control_data.float_battery_voltage[7],shared_control_data.float_battery_voltage[8],
+			shared_control_data.float_battery_voltage[9],
+			shared_control_data.float_airgap_distance[0],shared_control_data.float_airgap_distance[1],shared_control_data.float_airgap_distance[2],
+			shared_control_data.float_airgap_distance[3],shared_control_data.float_airgap_distance[4],shared_control_data.float_airgap_distance[5],
+			shared_control_data.float_airgap_distance[6],shared_control_data.float_airgap_distance[7]
+		);
+
+		EthernetPackets[LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_INDEX] = new StackPacket(LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_ID,
+			&shared_pod_data.integer_lpu_voltage[0], &shared_pod_data.integer_lpu_voltage[1], &shared_pod_data.integer_lpu_voltage[2],
+			&shared_pod_data.integer_lpu_voltage[3], &shared_pod_data.integer_lpu_voltage[4], &shared_pod_data.integer_lpu_voltage[5],
+			&shared_pod_data.integer_lpu_voltage[6], &shared_pod_data.integer_lpu_voltage[7], &shared_pod_data.integer_lpu_voltage[8],
+			&shared_pod_data.integer_lpu_voltage[9]
+		);
 
 		EthernetOrders[TEST_PWM_TCP_ORDER_INDEX] = new StackOrder(TEST_PWM_TCP_ORDER_ID, send_pwm_data_from_backend, &ldu_number_to_change, &duty_to_change);
 		EthernetOrders[START_LEVITATION_CONTROL_TCP_ORDER_INDEX] = new StackOrder(START_LEVITATION_CONTROL_TCP_ORDER_ID, start_slave_levitation_control, &data_from_backend);
@@ -201,6 +209,7 @@ if constexpr(USING_5DOF){
 		for(int i = 0; i < LDU_COUNT; i++){
 			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]) - *shared_control_data.shunt_zeroing_offset[i];
 			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
+			shared_pod_data.integer_lpu_voltage[i] = battery_voltage_binary_to_OBCCU(*shared_control_data.fixed_battery_voltage[i]);
 		}
 }
 	}
@@ -213,6 +222,10 @@ if constexpr(USING_5DOF){
 
 	static void send_levitation_data_to_backend(){
 		upd_gui->send_packet(*EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX]);
+	}
+
+	static void send_voltage_data_to_OBCCU(){
+		udp_vcu->send_packet(*EthernetPackets[LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_INDEX]);
 	}
 
 	static void lcu_data_transaction(){

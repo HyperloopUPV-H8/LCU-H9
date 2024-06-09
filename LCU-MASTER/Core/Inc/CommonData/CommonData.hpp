@@ -26,6 +26,11 @@ static const uint32_t UDP_PORT = 50400;
 
 extern control_data shared_control_data;
 
+struct pod_data{
+	uint16_t integer_lpu_voltage[LDU_COUNT]{0};
+};
+extern pod_data shared_pod_data;
+
 /*  #################################################################
  *  ################  STATIC FUNCTIONS DECLARATION  #################
  *  #################################################################

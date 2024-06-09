@@ -25,3 +25,11 @@ inline float coil_current_binary_to_real_HIL(uint16_t binary_value){
 inline float battery_voltage_binary_to_real(uint16_t binary_value){
 	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * FLOAT_VBAT_SLOPE + FLOAT_VBAT_OFFSET;
 }
+
+inline uint16_t battery_voltage_binary_to_OBCCU(uint16_t binary_value){
+	int result = ((int)binary_value)*((int)FLOAT_VBAT_SLOPE)/INT_ADC_BINARY_TO_VOLTAGE_BY_DIVISION + ((int)FLOAT_VBAT_OFFSET);
+	if(result < 0){
+		return 0;
+	}
+	return (uint16_t)result;
+}

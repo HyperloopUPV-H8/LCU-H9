@@ -74,9 +74,11 @@ void LCU::state_machine_definition(){
 	generalStateMachine.add_transition(OPERATIONAL, FAULT, operational_to_fault_transition);
 
 	generalStateMachine.add_low_precision_cyclic_action([&](){lcu_instance->commflags.lcu_data_to_send = true;}, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
+	generalStateMachine.add_low_precision_cyclic_action([&](){lcu_instance->commflags.voltage_data_OBCCU_to_send = true;}, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
 	generalStateMachine.add_low_precision_cyclic_action([&](){lcu_instance->commflags.levitation_data_to_send = true;}, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
 	generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_initial_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), INITIAL);
 	generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_data_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
+
 	generalStateMachine.add_enter_action(general_enter_operational, OPERATIONAL);
 	generalStateMachine.add_enter_action(general_enter_fault, FAULT);
 }
@@ -89,5 +91,9 @@ void LCU::check_communications(){
 	if(commflags.levitation_data_to_send){
 		Communication::send_levitation_data_to_backend();
 		commflags.levitation_data_to_send = false;
+	}
+	if(commflags.voltage_data_OBCCU_to_send){
+		Communication::send_voltage_data_to_OBCCU();
+		commflags.voltage_data_OBCCU_to_send = false;
 	}
 }
