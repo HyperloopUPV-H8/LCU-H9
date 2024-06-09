@@ -92,12 +92,7 @@ public:
 			shared_control_data.float_airgap_distance[6],shared_control_data.float_airgap_distance[7]
 		);
 
-		EthernetPackets[LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_INDEX] = new StackPacket(LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_ID,
-			&shared_pod_data.integer_lpu_voltage[0], &shared_pod_data.integer_lpu_voltage[1], &shared_pod_data.integer_lpu_voltage[2],
-			&shared_pod_data.integer_lpu_voltage[3], &shared_pod_data.integer_lpu_voltage[4], &shared_pod_data.integer_lpu_voltage[5],
-			&shared_pod_data.integer_lpu_voltage[6], &shared_pod_data.integer_lpu_voltage[7], &shared_pod_data.integer_lpu_voltage[8],
-			&shared_pod_data.integer_lpu_voltage[9]
-		);
+		EthernetPackets[LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_INDEX] = new StackPacket(LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_ID, &shared_pod_data.average_integer_lpu_voltage);
 
 		EthernetOrders[TEST_PWM_TCP_ORDER_INDEX] = new StackOrder(TEST_PWM_TCP_ORDER_ID, send_pwm_data_from_backend, &ldu_number_to_change, &duty_to_change);
 		EthernetOrders[START_LEVITATION_CONTROL_TCP_ORDER_INDEX] = new StackOrder(START_LEVITATION_CONTROL_TCP_ORDER_ID, start_slave_levitation_control, &data_from_backend);
@@ -202,6 +197,7 @@ if constexpr(USING_1DOF){
 		}
 }
 if constexpr(USING_5DOF){
+	shared_pod_data.average_integer_lpu_voltage = 0;
 		for(int i = 0; i < AIRGAP_COUNT/2; i++){
 			*shared_control_data.float_airgap_distance[i] = HEMS_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i])*1000;
 			*shared_control_data.float_airgap_distance[i+AIRGAP_COUNT/2] = EMS_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i+AIRGAP_COUNT/2])*1000;
@@ -210,7 +206,9 @@ if constexpr(USING_5DOF){
 			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]) - *shared_control_data.shunt_zeroing_offset[i];
 			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
 			shared_pod_data.integer_lpu_voltage[i] = battery_voltage_binary_to_OBCCU(*shared_control_data.fixed_battery_voltage[i]);
+			shared_pod_data.average_integer_lpu_voltage += shared_pod_data.integer_lpu_voltage[i];
 		}
+		shared_pod_data.average_integer_lpu_voltage /= LDU_COUNT;
 }
 	}
 

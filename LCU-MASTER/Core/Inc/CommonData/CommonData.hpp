@@ -28,6 +28,7 @@ extern control_data shared_control_data;
 
 struct pod_data{
 	uint16_t integer_lpu_voltage[LDU_COUNT]{0};
+	uint16_t average_integer_lpu_voltage = 0;
 };
 extern pod_data shared_pod_data;
 
