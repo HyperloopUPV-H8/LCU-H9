@@ -34,12 +34,16 @@ public:
 	float desired_current_vector[LDU_COUNT];
 	MatrixMultiplier<10,15,1> KID_calculator;
 
+	struct levitation_control_flags{
+		bool stable_vertical_levitation = false;
+		bool stable_horizontal_levitation = false;
+	}flags;
+
 	//stability calculator struct
 	MovingAverage<LEVITATION_STABILITY_CHECK_CALCULATION_SPAN> levitation_stability_check_moving_average[5]{};
 	RingBuffer<bool, LEVITATION_STABILITY_CHECK_CALCULATION_SPAN> outside_maximum_range[5];
 	uint8_t outside_maximum_range_count[5]{0,0,0,0,0};
 	bool stable_position_flag[5];
-
 
 	Control() : Levitation_control_PID{KP_DOF1_AIRGAP_TO_CURRENT, KI_DOF1_AIRGAP_TO_CURRENT, KD_DOF1_AIRGAP_TO_CURRENT, LEVITATION_CONTROL_PERIOD_SECONDS},
 				KID_calculator(KID_MATRIX, levitation_data_vector, desired_current_vector){
@@ -197,7 +201,8 @@ public:
 				stable_position_flag[j] = false;
 			}
 		}
-
+		flags.stable_vertical_levitation = stable_position_flag[Z_POSITION_INDEX] && stable_position_flag[X_ROTATION_INDEX] && stable_position_flag[Y_ROTATION_INDEX];
+		flags.stable_horizontal_levitation = stable_position_flag[Y_POSITION_INDEX] && stable_position_flag[Z_ROTATION_INDEX];
 	}
 
 };
