@@ -6,6 +6,10 @@ inline float DOF1_airgap_distance_binary_to_float(uint16_t binary_value){
 	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * FLOAT_1DOF_AIRGAP_SLOPE + FLOAT_1DOF_AIRGAP_OFFSET;
 }
 
+inline float airgap_distance_binary_to_float(uint8_t id, uint16_t binary_value){
+	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * FLOAT_AIRGAP_SLOPE[id] + FLOAT_AIRGAP_OFFSET[id];
+}
+
 inline float EMS_airgap_distance_binary_to_float(uint16_t binary_value){
 	return (binary_value / MAX_16BIT * ADC_MAX_VOLTAGE) * FLOAT_EMS_AIRGAP_SLOPE + FLOAT_EMS_AIRGAP_OFFSET;
 }

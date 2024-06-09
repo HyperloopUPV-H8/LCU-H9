@@ -55,11 +55,12 @@ public:
 		gui_connection = new ServerSocket(LCU_IP, TCP_SERVER_PORT);
 		vcu_connection = new ServerSocket(LCU_IP, TCP_VCU_PORT);
 		upd_gui = new DatagramSocket(LCU_IP, UDP_PORT, BACKEND, UDP_PORT);
-		udp_vcu = new DatagramSocket(LCU_IP, UDP_PORT, VCU_IP, UDP_PORT);
+		udp_vcu = new DatagramSocket(LCU_IP, UDP_VCU_PORT, VCU_IP, UDP_VCU_PORT);
 		EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LEVITATION_DATA_TCP_PACKET_ID,
 			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
 			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2],
-			shared_control_data.float_current_ref[3], shared_control_data.float_current_ref[4], shared_control_data.float_current_ref[5],
+			shared_control_data.float_current_ref[3], shared_control_data.float_current_ref[4],
+			shared_control_data.float_current_ref[5],
 			shared_control_data.float_current_ref[6], shared_control_data.float_current_ref[7], shared_control_data.float_current_ref[8],
 			shared_control_data.float_current_ref[9],
 			shared_control_data.float_airgap_to_pos[0], shared_control_data.float_airgap_to_pos_der[0], shared_control_data.float_airgap_to_pos_in[0],
@@ -197,10 +198,9 @@ if constexpr(USING_1DOF){
 		}
 }
 if constexpr(USING_5DOF){
-	shared_pod_data.average_integer_lpu_voltage = 0;
-		for(int i = 0; i < AIRGAP_COUNT/2; i++){
-			*shared_control_data.float_airgap_distance[i] = HEMS_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i])*1000;
-			*shared_control_data.float_airgap_distance[i+AIRGAP_COUNT/2] = EMS_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i+AIRGAP_COUNT/2])*1000;
+		shared_pod_data.average_integer_lpu_voltage = 0;
+		for(int i = 0; i < AIRGAP_COUNT; i++){
+			*shared_control_data.float_airgap_distance[i] = airgap_distance_binary_to_float(i, *shared_control_data.fixed_airgap_distance[i]);
 		}
 		for(int i = 0; i < LDU_COUNT; i++){
 			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]) - *shared_control_data.shunt_zeroing_offset[i];
