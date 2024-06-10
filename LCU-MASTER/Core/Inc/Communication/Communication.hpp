@@ -200,7 +200,7 @@ if constexpr(USING_1DOF){
 if constexpr(USING_5DOF){
 		shared_pod_data.average_integer_lpu_voltage = 0;
 		for(int i = 0; i < AIRGAP_COUNT; i++){
-			*shared_control_data.float_airgap_distance[i] = airgap_distance_binary_to_float(i, *shared_control_data.fixed_airgap_distance[i]);
+			*shared_control_data.float_airgap_distance[i] = airgap_distance_binary_to_float(i, *shared_control_data.fixed_airgap_distance[i])*1000;
 		}
 		for(int i = 0; i < LDU_COUNT; i++){
 			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]) - *shared_control_data.shunt_zeroing_offset[i];
