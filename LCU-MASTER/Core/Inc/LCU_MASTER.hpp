@@ -17,11 +17,17 @@ public:
 	StateMachine generalStateMachine;
 	LEDs leds;
 
+	struct CommFlags{
+		bool lcu_data_to_send = false;
+		bool levitation_data_to_send = false;
+		bool voltage_data_OBCCU_to_send = false;
+	}commflags;
 
 	LCU();
 	void sensors_inscribe();
 	void state_machine_definition();
 	void update();
+	void check_communications();
 
 
 	static inline float coil_temperature_calculation(uint16_t fixed_coil_temperature){
@@ -34,7 +40,7 @@ public:
 
 	static bool initial_to_operational_transition(){
 		if(Communication::flags.SPIEstablished){
-			return Communication::gui_connection->is_connected();
+			return Communication::vcu_connection->is_connected();
 		}
 		return false;
 	}
@@ -44,7 +50,7 @@ public:
 	}
 
 	static bool operational_to_fault_transition(){
-		return !(Communication::gui_connection->is_connected()) || *shared_control_data.slave_status == (uint8_t)FAULT;
+		return !(Communication::vcu_connection->is_connected()) || *shared_control_data.slave_status == (uint8_t)FAULT;
 	}
 };
 

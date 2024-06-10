@@ -37,6 +37,7 @@ void DOF5_update_vbat_data(){
 	for(int i = 0; i < LDU_COUNT; i++){
 		lcu_instance->ldu_array[i].update_vbat_value();
 	}
+	lcu_instance->ldu_array[5].binary_average_battery_voltage.output_value = lcu_instance->ldu_array[4].binary_average_battery_voltage.output_value;
 }
 
 void DOF1_update_airgap_data(){
@@ -107,8 +108,8 @@ void start_horizontal_levitation(){
 
 
 void set_desired_current_on_LDU(){
-	lcu_instance->ldu_array[ldu_to_change].desired_current = data_to_change;
  	disable_all_current_controls();
+ 	lcu_instance->ldu_array[ldu_to_change].desired_current = data_to_change;
  	lcu_instance->ldu_array[ldu_to_change].flags.fixed_vbat = true;
  	lcu_instance->ldu_array[ldu_to_change].flags.enable_current_control = true;
 }
