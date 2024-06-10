@@ -1,5 +1,34 @@
 #include "LCU_SLAVE.hpp"
 
+
+//##############  RUNNING MACROS  ##################
+void define_shared_data(){
+	shared_control_data.master_status = new uint8_t{0};
+	shared_control_data.master_secondary_status = new uint8_t{0};
+	shared_control_data.master_running_mode = new uint8_t{255};
+	shared_control_data.slave_status = (uint8_t*) &lcu_instance->generalStateMachine.current_state;
+	shared_control_data.slave_secondary_status = new uint8_t{0};
+	shared_control_data.slave_running_mode = new uint8_t{(uint8_t)RUNNING_MODE};
+	shared_control_data.current_control_count = &lcu_instance->CurrentPICount;
+	shared_control_data.levitation_control_count = &lcu_instance->LevitationControlCount;
+	for(int i = 0; i < LDU_COUNT; i++){
+		shared_control_data.fixed_coil_current[i] = &(lcu_instance->ldu_array[i].binary_average_current_shunt.output_value);
+		shared_control_data.fixed_battery_voltage[i] = &(lcu_instance->ldu_array[i].binary_average_battery_voltage.output_value);
+		shared_control_data.shunt_zeroing_offset[i] = &(lcu_instance->ldu_array[i].shunt_zeroing_offset);
+		shared_control_data.float_current_ref[i] =  &(lcu_instance->ldu_array[i].desired_current);
+	}
+	for(int i = 0; i < 5; i++){
+		shared_control_data.float_airgap_to_pos[i] = &(lcu_instance->levitationControl.position_error_data[i]);
+		shared_control_data.float_airgap_to_pos_der[i] = &(lcu_instance->levitationControl.position_error_data_derivative[i].output_value);
+		shared_control_data.float_airgap_to_pos_in[i] = &(lcu_instance->levitationControl.position_error_data_integral[i].output_value);
+	}
+	shared_control_data.float_airgap_to_pos[Z_POSITION_INDEX] = &(lcu_instance->levitationControl.position_z); //overwrites to use the position instead of the position error
+	for(int i = 0;  i < AIRGAP_COUNT; i++){
+		shared_control_data.fixed_airgap_distance[i] = &(Airgaps::airgaps_average_binary_data_array[i].output_value);
+		shared_control_data.float_airgap_distance[i] = &Airgaps::airgaps_data_array[i];
+	}
+}
+
 void LDUs_zeroing(){
 if constexpr(IS_HIL){
 		for(int i = 0; i < LDU_COUNT; i++){
@@ -53,18 +82,6 @@ void DOF1_update_vbat_data(){
 	lcu_instance->ldu_array[DOF1_USED_LDU_INDEX].update_vbat_value();
 }
 
-void rise_current_PI_flag(){
-	lcu_instance->PendingCurrentPI = true;
-}
-
-void rise_levitation_control_flag(){
-	lcu_instance->PendingLevitationControl = true;
-}
-
-void rise_levitation_stability_check_flag(){
-	lcu_instance->PendingLevitationStabilityCheck = true;
-}
-
 void enable_all_current_controls(){
 	for(int i = 0; i < LDU_COUNT; i++){
 		lcu_instance->ldu_array[i].flags.enable_current_control = true;
@@ -92,41 +109,33 @@ void update_levitation_constants(float new_levitation_constants[LDU_COUNT][15]){
 	}
 }
 
+
+//###################  SPI ORDERS CALLBACK  ####################
 void start_levitation_control(){
 	lcu_instance->set_desired_airgap_distance(data_to_change);
-	lcu_instance->start_control();
+	shared_control_data.flags.enable_levitation_control = true;
+	shared_control_data.flags.enable_automatic_lateral_levitation_transition = true;
 }
 
 void start_vertical_levitation(){
 	lcu_instance->set_desired_airgap_distance(data_to_change);
-	lcu_instance->start_vertical_control();
+	shared_control_data.flags.enable_levitation_control = true;
+	shared_control_data.flags.enable_automatic_lateral_levitation_transition = false;
 }
 
 void start_horizontal_levitation(){
-	lcu_instance->start_horizontal_control();
+	shared_control_data.flags.enable_lateral_levitation_control = true;
 }
 
+void stop_control(){
+	lcu_instance->levitationStateMachine.force_change_state(IDLE);
+}
 
 void set_desired_current_on_LDU(){
  	disable_all_current_controls();
  	lcu_instance->ldu_array[ldu_to_change].desired_current = data_to_change;
  	lcu_instance->ldu_array[ldu_to_change].flags.fixed_vbat = true;
  	lcu_instance->ldu_array[ldu_to_change].flags.enable_current_control = true;
-}
-
-void reset_desired_current_on_LDU(){//TODO: implement as order on GUI
-	for(int i = 0; i < LDU_COUNT; i++){
-		lcu_instance->ldu_array[i].Voltage_by_current_PI.reset();
-		lcu_instance->ldu_array[i].desired_current = 0;
-	}
-}
-
-void initial_order_callback(){
-	if(*shared_control_data.master_running_mode == *shared_control_data.slave_running_mode && *shared_control_data.slave_secondary_status == 1){
-		Communication::flags.SPIEstablished = true;
-	}else{
-
-	}
 }
 
 void test_pwm_order_callback(){
@@ -137,43 +146,33 @@ void test_pwm_order_callback(){
 	lcu_instance->ldu_buffers.turn_on();
 }
 
-void define_shared_data(){
-	shared_control_data.master_status = new uint8_t{0};
-	shared_control_data.master_secondary_status = new uint8_t{0};
-	shared_control_data.master_running_mode = new uint8_t{255};
-	shared_control_data.slave_status = (uint8_t*) &lcu_instance->generalStateMachine.current_state;
-	shared_control_data.slave_secondary_status = new uint8_t{0};
-	shared_control_data.slave_running_mode = new uint8_t{(uint8_t)RUNNING_MODE};
-	shared_control_data.current_control_count = &lcu_instance->CurrentPICount;
-	shared_control_data.levitation_control_count = &lcu_instance->LevitationControlCount;
-	for(int i = 0; i < LDU_COUNT; i++){
-		shared_control_data.fixed_coil_current[i] = &(lcu_instance->ldu_array[i].binary_average_current_shunt.output_value);
-		shared_control_data.fixed_battery_voltage[i] = &(lcu_instance->ldu_array[i].binary_average_battery_voltage.output_value);
-		shared_control_data.shunt_zeroing_offset[i] = &(lcu_instance->ldu_array[i].shunt_zeroing_offset);
-		shared_control_data.float_current_ref[i] =  &(lcu_instance->ldu_array[i].desired_current);
-	}
-	for(int i = 0; i < 5; i++){
-		shared_control_data.float_airgap_to_pos[i] = &(lcu_instance->levitationControl.position_error_data[i]);
-		shared_control_data.float_airgap_to_pos_der[i] = &(lcu_instance->levitationControl.position_error_data_derivative[i].output_value);
-		shared_control_data.float_airgap_to_pos_in[i] = &(lcu_instance->levitationControl.position_error_data_integral[i].output_value);
-	}
-	shared_control_data.float_airgap_to_pos[Z_POSITION_INDEX] = &(lcu_instance->levitationControl.position_z); //overwrites to use the position instead of the position error
-	for(int i = 0;  i < AIRGAP_COUNT; i++){
-		shared_control_data.fixed_airgap_distance[i] = &(Airgaps::airgaps_average_binary_data_array[i].output_value);
-		shared_control_data.float_airgap_distance[i] = &Airgaps::airgaps_data_array[i];
+void initial_order_callback(){
+	if(*shared_control_data.master_running_mode == *shared_control_data.slave_running_mode && *shared_control_data.slave_secondary_status == 1){
+		Communication::flags.SPIEstablished = true;
+	}else{
+
 	}
 }
 
+//####################  SECURITY ORDERS  ############################
 void send_to_fault(){
-	status_flags.fault_flag = true;
+	shared_control_data.flags.fault_flag = true;
 }
 
 void shutdown(){
-	lcu_instance->ldu_buffers.turn_off();
-	lcu_instance->levitationControl.stop();
-	disable_all_current_controls();
+	lcu_instance->stop_all_control();
 }
 
-void stop_control(){
-	lcu_instance->stop_all_control();
+
+//#####################  FLAG CONTROL  ###############################
+void rise_current_PI_flag(){
+	lcu_instance->PendingCurrentPI = true;
+}
+
+void rise_levitation_control_flag(){
+	lcu_instance->PendingLevitationControl = true;
+}
+
+void rise_levitation_stability_check_flag(){
+	lcu_instance->PendingLevitationStabilityCheck = true;
 }

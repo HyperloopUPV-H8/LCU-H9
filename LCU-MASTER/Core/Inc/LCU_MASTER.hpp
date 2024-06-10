@@ -40,7 +40,7 @@ public:
 
 	static bool initial_to_operational_transition(){
 		if(Communication::flags.SPIEstablished){
-			return Communication::vcu_connection->is_connected();
+			return Communication::gui_connection->is_connected();
 		}
 		return false;
 	}
@@ -50,7 +50,7 @@ public:
 	}
 
 	static bool operational_to_fault_transition(){
-		return !(Communication::vcu_connection->is_connected()) || *shared_control_data.slave_status == (uint8_t)FAULT;
+		return *shared_control_data.slave_status != (uint8_t)OPERATIONAL;
 	}
 };
 

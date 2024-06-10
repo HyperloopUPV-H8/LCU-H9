@@ -37,6 +37,7 @@ public:
 	struct levitation_control_flags{
 		bool stable_vertical_levitation = false;
 		bool stable_horizontal_levitation = false;
+		bool landing_complete = false;
 	}flags;
 
 	//stability calculator struct
@@ -120,7 +121,7 @@ public:
 
 		KID_calculator.execute();
 
-		if(!status_flags.enable_lateral_levitation_control){
+		if(!shared_control_data.flags.enable_lateral_levitation_control){
 			for(int i = 4; i < LDU_COUNT; i++){ //for all EMS
 				desired_current_vector[i] = desired_current;
 			}
@@ -142,19 +143,10 @@ public:
 	}
 
 	void start(){
-		status_flags.enable_lateral_levitation_control = true; //TODO: change when this is enabled
-		status_flags.enable_levitation_control = true;
-		prepare_derivator_buffer(); //TODO: still testing if this is better or not
-	}
-
-	void start_vertical(){
-		status_flags.enable_lateral_levitation_control = false;
-		status_flags.enable_levitation_control = true;
 		prepare_derivator_buffer();
 	}
 
 	void start_horizontal(){
-		status_flags.enable_lateral_levitation_control = true;
 		reset_horizontal();
 		position_error_data_derivative[Z_ROTATION_INDEX].input(position_error_data[Z_ROTATION_INDEX]);
 		position_error_data_derivative[Z_ROTATION_INDEX].execute();
@@ -163,8 +155,8 @@ public:
 	}
 
 	void stop(){
-		status_flags.enable_levitation_control = false;
-		status_flags.enable_lateral_levitation_control = false;
+		shared_control_data.flags.enable_levitation_control = false;
+		shared_control_data.flags.enable_lateral_levitation_control = false;
 		reset();
 	}
 

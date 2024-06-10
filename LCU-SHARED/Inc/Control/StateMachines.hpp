@@ -17,11 +17,5 @@ enum levitation_states{
 	DOF5_STABLE,
 	BOOSTER,
 	LANDING,
+	TESTING,
 };
-
-static struct lcu_status_flags{
-	bool enable_levitation_control = false;
-	bool enable_lateral_levitation_control = false;
-	bool enable_nominal_control = false;
-	bool fault_flag = false;
-}status_flags;

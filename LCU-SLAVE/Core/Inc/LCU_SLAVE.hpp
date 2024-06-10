@@ -67,9 +67,9 @@ if constexpr(USING_5DOF){
 
 	void DOF5_update(){
 		if(PendingLevitationControl){
-			LevitationControlCount++;
 			levitationControl.airgap_to_pos();
-			if(status_flags.enable_levitation_control){
+			if(shared_control_data.flags.enable_levitation_control){
+				LevitationControlCount++;
 				levitationControl.DOF5_control_loop();
 				update_desired_current_control();
 			}
@@ -90,7 +90,7 @@ if constexpr(USING_5DOF){
 
 	void DOF1_update(){
 		if(PendingLevitationControl){
-			if(status_flags.enable_levitation_control){
+			if(shared_control_data.flags.enable_levitation_control){
 				LevitationControlCount++;
 				levitationControl.DOF1_control_loop();
 				ldu_array[DOF1_USED_LDU_INDEX].desired_current = levitationControl.desired_current;
@@ -166,6 +166,7 @@ if constexpr(USING_5DOF){
 		levitationStateMachine.add_state(DOF5_STABLE);
 		levitationStateMachine.add_state(BOOSTER);
 		levitationStateMachine.add_state(LANDING);
+		levitationStateMachine.add_state(TESTING);
 
 		generalStateMachine.add_state_machine(levitationStateMachine, OPERATIONAL);
 		//################# ADDING ALL TRANSITIONS ##########################
@@ -173,6 +174,14 @@ if constexpr(USING_5DOF){
 		generalStateMachine.add_transition(INITIAL, OPERATIONAL, general_transition_initial_to_operational);
 		generalStateMachine.add_transition(INITIAL, FAULT, general_transition_initial_to_fault);
 		generalStateMachine.add_transition(OPERATIONAL, FAULT, general_transition_operational_to_fault);
+
+		levitationStateMachine.add_transition(IDLE, TAKING_OFF, levitation_transition_idle_to_taking);
+		levitationStateMachine.add_transition(TAKING_OFF, DOF3_STABLE, levitation_transition_taking_to_DOF3);
+		levitationStateMachine.add_transition(DOF3_STABLE, DOF5_STABLE, levitation_transition_DOF3_to_DOF5);
+		levitationStateMachine.add_transition(DOF5_STABLE, LANDING, levitation_transition_DOF5_to_landing);
+		levitationStateMachine.add_transition(LANDING, IDLE, levitation_transition_landing_to_idle);
+		levitationStateMachine.add_transition(IDLE, TESTING, levitation_transition_idle_to_testing);
+		levitationStateMachine.add_transition(TESTING, IDLE, levitation_transition_testing_to_idle);
 
 		//################# ADDING ALL CYCLIC ACTIONS #######################
 if constexpr(USING_5DOF){
@@ -185,14 +194,23 @@ if constexpr(USING_1DOF){
 		generalStateMachine.add_high_precision_cyclic_action(DOF1_update_airgap_data, std::chrono::microseconds((int) (AIRGAP_UPDATE_PERIOD_SECONDS*1000000)), {INITIAL, OPERATIONAL, FAULT});
 		generalStateMachine.add_low_precision_cyclic_action(DOF1_update_vbat_data, std::chrono::microseconds((int) (VBAT_UPDATE_PERIOD_SECONDS*1000000)), {INITIAL, OPERATIONAL, FAULT});
 }
-		generalStateMachine.add_mid_precision_cyclic_action(rise_current_PI_flag, std::chrono::microseconds((int) (CURRENT_CONTROL_PERIOD_SECONDS*1000000)), OPERATIONAL);
-		levitationStateMachine.add_low_precision_cyclic_action(rise_levitation_control_flag,  std::chrono::microseconds((int) (LEVITATION_CONTROL_PERIOD_SECONDS*1000000)), {TAKING_OFF,DOF3_STABLE,DOF5_STABLE,BOOSTER,LANDING});
+		levitationStateMachine.add_mid_precision_cyclic_action(rise_current_PI_flag, std::chrono::microseconds((int) (CURRENT_CONTROL_PERIOD_SECONDS*1000000)), {TAKING_OFF,DOF3_STABLE,DOF5_STABLE,BOOSTER,LANDING,TESTING});
+		generalStateMachine.add_low_precision_cyclic_action(rise_levitation_control_flag,  std::chrono::microseconds((int) (LEVITATION_CONTROL_PERIOD_SECONDS*1000000)), {INITIAL, OPERATIONAL, FAULT});
 		generalStateMachine.add_mid_precision_cyclic_action(LDUs_zeroing, std::chrono::microseconds((int) (CURRENT_ZEROING_SAMPLING_PERIOD_SECONDS*1000000)), INITIAL);
 
 		levitationStateMachine.add_low_precision_cyclic_action(rise_levitation_stability_check_flag, std::chrono::microseconds((int) (LEVITATION_STABILITY_CHECK_PERIOD_SECONDS*1000000)), {TAKING_OFF,DOF3_STABLE,DOF5_STABLE,BOOSTER,LANDING});
+
+
 		//###############  ADDING ALL TRANSITION CALLBACKS  ###################
 		generalStateMachine.add_enter_action(general_enter_operational, OPERATIONAL);
 		generalStateMachine.add_enter_action(general_enter_fault, FAULT);
+		levitationStateMachine.add_enter_action(levitation_enter_idle, IDLE);
+		levitationStateMachine.add_enter_action(levitation_enter_taking, TAKING_OFF);
+		levitationStateMachine.add_enter_action(levitation_enter_DOF3, DOF3_STABLE);
+		levitationStateMachine.add_enter_action(levitation_enter_DOF5, DOF5_STABLE);
+		levitationStateMachine.add_enter_action(levitation_enter_booster, BOOSTER);
+		levitationStateMachine.add_enter_action(levitation_enter_landing, LANDING);
+		levitationStateMachine.add_enter_action(levitation_enter_testing, TESTING);
 	}
 
 	void protections_inscribe(){
@@ -203,6 +221,11 @@ if constexpr(!IS_HIL){
 		}
 }
 	}
+
+	/* #############################################################################
+	 * ################## GENERAL STATE MACHINE TRANSITIONS ########################
+	 * #############################################################################
+	 */
 
 	static bool general_transition_defining_to_initial(){
 		return lcu_instance->DefinitionCompleted;
@@ -217,7 +240,7 @@ if constexpr(!IS_HIL){
 	}
 
 	static bool general_transition_operational_to_fault(){
-		return status_flags.fault_flag || *shared_control_data.master_status == (uint8_t) FAULT;
+		return shared_control_data.flags.fault_flag || *shared_control_data.master_status == (uint8_t) FAULT;
 	}
 
 	static void general_enter_operational(){
@@ -229,6 +252,77 @@ if constexpr(!IS_HIL){
 	}
 
 	/* #############################################################################
+	 * ################ LEVITATION STATE MACHINE TRANSITIONS #######################
+	 * #############################################################################
+	 */
+
+	static bool levitation_transition_idle_to_taking(){
+		return shared_control_data.flags.enable_levitation_control;
+	}
+
+	static bool levitation_transition_taking_to_DOF3(){
+		return lcu_instance->levitationControl.flags.stable_vertical_levitation || shared_control_data.flags.enable_lateral_levitation_control;
+	}
+
+	static bool levitation_transition_DOF3_to_DOF5(){
+		return lcu_instance->levitationControl.flags.stable_vertical_levitation && lcu_instance->levitationControl.flags.stable_horizontal_levitation
+				&& shared_control_data.flags.enable_levitation_control && shared_control_data.flags.enable_lateral_levitation_control;
+	}
+
+	static bool levitation_transition_DOF5_to_booster(){
+		return false;
+	}
+
+	static bool levitation_transition_booster_to_DOF5(){
+		return true;
+	}
+
+	static bool levitation_transition_DOF5_to_landing(){
+		return shared_control_data.flags.landing_flag;
+	}
+
+	static bool levitation_transition_landing_to_idle(){
+		return lcu_instance->levitationControl.flags.landing_complete;
+	}
+
+	static bool levitation_transition_idle_to_testing(){
+		return shared_control_data.flags.testing_flag;
+	}
+
+	static bool levitation_transition_testing_to_idle(){
+		return !shared_control_data.flags.testing_flag;
+	}
+
+	static void levitation_enter_idle(){
+		shutdown();
+	}
+
+	static void levitation_enter_taking(){
+		lcu_instance->start_vertical_control();
+	}
+
+	static void levitation_enter_DOF3(){
+		lcu_instance->start_horizontal_control();
+	}
+
+	static void levitation_enter_DOF5(){
+		//does nothing for now
+	}
+
+	static void levitation_enter_booster(){
+		//does nothing for now
+	}
+
+	static void levitation_enter_landing(){
+		//does nothing for now
+	}
+
+	static void levitation_enter_testing(){
+		lcu_instance->ldu_buffers.turn_on();
+	}
+
+
+	/* #############################################################################
 	 * ###################### UTILITY FUNCTIONS ####################################
 	 * #############################################################################
 	 */
@@ -237,18 +331,10 @@ if constexpr(!IS_HIL){
 		levitationControl.desired_airgap_distance_m = desired_airgap_distance;
 	}
 
-	void start_control(){
-		levitationStateMachine.force_change_state(TAKING_OFF);
-		lcu_instance->ldu_buffers.turn_on();
-		enable_all_current_controls();
-		levitationControl.start();
-	}
-
 	void start_vertical_control(){
-		levitationStateMachine.force_change_state(TAKING_OFF);
 		lcu_instance->ldu_buffers.turn_on_hems();
 		enable_all_current_controls();
-		levitationControl.start_vertical();
+		levitationControl.start();
 	}
 
 	void start_horizontal_control(){
@@ -257,8 +343,9 @@ if constexpr(!IS_HIL){
 	}
 
 	void stop_all_control(){
-		levitationStateMachine.force_change_state(IDLE);
-		shutdown();
+		lcu_instance->ldu_buffers.turn_off();
+		lcu_instance->levitationControl.stop();
+		disable_all_current_controls();
 		for(int i = 0; i < LDU_COUNT; i++){
 			ldu_array[i].Voltage_by_current_PI.reset();
 		}

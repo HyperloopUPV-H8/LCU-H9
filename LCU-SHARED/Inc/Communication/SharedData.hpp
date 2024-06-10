@@ -3,7 +3,20 @@
 #include "Tools/Tools.hpp"
 #include "Layout/Layout.hpp"
 
+
+struct control_flags{
+	bool enable_levitation_control = false;
+	bool enable_lateral_levitation_control = false;
+	bool enable_automatic_lateral_levitation_transition = false;
+	bool enable_nominal_control = false;
+	bool landing_flag = false;
+	bool fault_flag = false;
+	bool testing_flag = false;
+};
+
 struct control_data{
+	control_flags flags{};
+
 	uint8_t *master_status = nullptr;
 	uint8_t *master_secondary_status = nullptr; //does nothing for now
 	uint8_t *master_running_mode = nullptr; //running mode code on INITIAL
