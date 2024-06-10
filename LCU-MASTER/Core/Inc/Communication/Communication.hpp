@@ -106,6 +106,8 @@ public:
 		EthernetOrders[STICK_DOWN_TCP_ORDER_INDEX] = new StackOrder(STICK_DOWN_TCP_ORDER_ID, stick_down_slave);
 		EthernetOrders[LANDING_TCP_ORDER_INDEX] = new StackOrder(LANDING_TCP_ORDER_ID, landing_slave);
 		EthernetOrders[START_HORIZONTAL_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(START_HORIZONTAL_LEVITATION_TCP_ORDER_ID, start_slave_horizontal_levitation);
+		EthernetOrders[ENTER_TESTING_MODE_TCP_ORDER_INDEX] = new StackOrder(ENTER_TESTING_MODE_TCP_ORDER_ID, enter_testing_mode);
+		EthernetOrders[EXIT_TESTING_MODE_TCP_ORDER_INDEX] = new StackOrder(EXIT_TESTING_MODE_TCP_ORDER_ID, exit_testing_mode);
 
 		EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX] = new StackOrder(STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_ID, nullptr);
 		EthernetOrders[LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_INDEX] = new StackOrder(LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_ID, nullptr);
@@ -184,6 +186,16 @@ public:
 		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2] = new SPIPacket<0>;
 		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[STOP_LEVITATION_ORDER_INDEX] = new SPIStackOrder(STOP_LEVITATION_ORDER_ID, *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2], *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[ENTER_TESTING_MODE_ORDER_INDEX*2] = new SPIPacket<0>;
+		SPIPackets[ENTER_TESTING_MODE_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[ENTER_TESTING_MODE_ORDER_INDEX] = new SPIStackOrder(ENTER_TESTING_MODE_ORDER_ID, *SPIPackets[ENTER_TESTING_MODE_ORDER_INDEX*2], *SPIPackets[ENTER_TESTING_MODE_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[EXIT_TESTING_MODE_ORDER_INDEX*2] = new SPIPacket<0>;
+		SPIPackets[EXIT_TESTING_MODE_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[EXIT_TESTING_MODE_ORDER_INDEX] = new SPIStackOrder(EXIT_TESTING_MODE_ORDER_ID, *SPIPackets[EXIT_TESTING_MODE_ORDER_INDEX*2], *SPIPackets[EXIT_TESTING_MODE_ORDER_INDEX*2+1]);
 	}
 
 
@@ -233,6 +245,14 @@ if constexpr(USING_5DOF){
 
 	static void lcu_initial_transaction(){
 		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[MASTER_SLAVE_INITIAL_ORDER_ID]);
+	}
+
+	static void enter_testing_mode(){
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[ENTER_TESTING_MODE_ORDER_INDEX]);
+	}
+
+	static void exit_testing_mode(){
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[EXIT_TESTING_MODE_ORDER_INDEX]);
 	}
 
 	//#####################  SPI ORDERS CALLBACKS #######################

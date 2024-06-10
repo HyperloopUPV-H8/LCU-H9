@@ -37,7 +37,7 @@ public:
 
 		SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2] = new SPIPacket<2, uint8_t, uint8_t>(shared_control_data.master_status, shared_control_data.master_running_mode);
 		SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2+1] = new SPIPacket<43, uint8_t, uint8_t, uint8_t, float_ldu_array_deduction>(
-				shared_control_data.slave_status, shared_control_data.slave_running_mode, shared_control_data.slave_secondary_status,
+				shared_control_data.slave_status, shared_control_data.slave_running_mode, shared_control_data.slave_initialising_status,
 				shared_control_data.shunt_zeroing_offset[0],shared_control_data.shunt_zeroing_offset[1],shared_control_data.shunt_zeroing_offset[2],
 				shared_control_data.shunt_zeroing_offset[3],shared_control_data.shunt_zeroing_offset[4],shared_control_data.shunt_zeroing_offset[5],
 				shared_control_data.shunt_zeroing_offset[6],shared_control_data.shunt_zeroing_offset[7],shared_control_data.shunt_zeroing_offset[8],
@@ -111,6 +111,18 @@ public:
 		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[STOP_LEVITATION_ORDER_INDEX] = new SPIStackOrder(STOP_LEVITATION_ORDER_ID, *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2], *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1]);
 		SPIOrders[STOP_LEVITATION_ORDER_INDEX]->set_callback(stop_control);
+
+
+		SPIPackets[ENTER_TESTING_MODE_ORDER_INDEX*2] = new SPIPacket<0>;
+		SPIPackets[ENTER_TESTING_MODE_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[ENTER_TESTING_MODE_ORDER_INDEX] = new SPIStackOrder(ENTER_TESTING_MODE_ORDER_ID, *SPIPackets[ENTER_TESTING_MODE_ORDER_INDEX*2], *SPIPackets[ENTER_TESTING_MODE_ORDER_INDEX*2+1]);
+		SPIOrders[ENTER_TESTING_MODE_ORDER_INDEX]->set_callback(enter_testing);
+
+
+		SPIPackets[EXIT_TESTING_MODE_ORDER_INDEX*2] = new SPIPacket<0>;
+		SPIPackets[EXIT_TESTING_MODE_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[EXIT_TESTING_MODE_ORDER_INDEX] = new SPIStackOrder(EXIT_TESTING_MODE_ORDER_ID, *SPIPackets[EXIT_TESTING_MODE_ORDER_INDEX*2], *SPIPackets[EXIT_TESTING_MODE_ORDER_INDEX*2+1]);
+		SPIOrders[EXIT_TESTING_MODE_ORDER_INDEX]->set_callback(exit_testing);
 	}
 
 	static void start(){

@@ -169,6 +169,7 @@ if constexpr(USING_5DOF){
 		levitationStateMachine.add_state(TESTING);
 
 		generalStateMachine.add_state_machine(levitationStateMachine, OPERATIONAL);
+
 		//################# ADDING ALL TRANSITIONS ##########################
 		generalStateMachine.add_transition(DEFINING, INITIAL, general_transition_defining_to_initial);
 		generalStateMachine.add_transition(INITIAL, OPERATIONAL, general_transition_initial_to_operational);
@@ -211,6 +212,7 @@ if constexpr(USING_1DOF){
 		levitationStateMachine.add_enter_action(levitation_enter_booster, BOOSTER);
 		levitationStateMachine.add_enter_action(levitation_enter_landing, LANDING);
 		levitationStateMachine.add_enter_action(levitation_enter_testing, TESTING);
+
 	}
 
 	void protections_inscribe(){
@@ -244,7 +246,7 @@ if constexpr(!IS_HIL){
 	}
 
 	static void general_enter_operational(){
-		lcu_instance->ldu_buffers.turn_on();
+		//lcu_instance->levitationStateMachine.force_change_state(IDLE);
 	}
 
 	static void general_enter_fault(){

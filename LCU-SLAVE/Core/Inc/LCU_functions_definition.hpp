@@ -7,7 +7,8 @@ void define_shared_data(){
 	shared_control_data.master_secondary_status = new uint8_t{0};
 	shared_control_data.master_running_mode = new uint8_t{255};
 	shared_control_data.slave_status = (uint8_t*) &lcu_instance->generalStateMachine.current_state;
-	shared_control_data.slave_secondary_status = new uint8_t{0};
+	shared_control_data.slave_secondary_status = &lcu_instance->levitationStateMachine.current_state;
+	shared_control_data.slave_initialising_status = new uint8_t{0};
 	shared_control_data.slave_running_mode = new uint8_t{(uint8_t)RUNNING_MODE};
 	shared_control_data.current_control_count = &lcu_instance->CurrentPICount;
 	shared_control_data.levitation_control_count = &lcu_instance->LevitationControlCount;
@@ -35,7 +36,7 @@ if constexpr(IS_HIL){
 			lcu_instance->ldu_array[i].shunt_zeroing_offset = 0.0;
 		}
 		lcu_instance->CalibrationCompleted = true;
-		*shared_control_data.slave_secondary_status |= 1;
+		*shared_control_data.slave_initialising_status |= (uint8_t)1;
 		return;
 }
 	bool zeroing_complete = true;
@@ -48,7 +49,7 @@ if constexpr(IS_HIL){
 			lcu_instance->ldu_array[i].shunt_zeroing_offset = lcu_instance->ldu_array[i].average_current_for_zeroing.output_value;
 		}
 		lcu_instance->CalibrationCompleted = true;
-		*shared_control_data.slave_secondary_status |= 1;
+		*shared_control_data.slave_initialising_status |= (uint8_t)1;
 	}
 }
 
@@ -129,6 +130,14 @@ void start_horizontal_levitation(){
 
 void stop_control(){
 	lcu_instance->levitationStateMachine.force_change_state(IDLE);
+}
+
+void enter_testing(){
+	shared_control_data.flags.testing_flag = true;
+}
+
+void exit_testing(){
+	shared_control_data.flags.testing_flag = false;
 }
 
 void set_desired_current_on_LDU(){

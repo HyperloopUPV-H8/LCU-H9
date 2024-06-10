@@ -68,6 +68,8 @@ inline void initial_order_callback();
 inline void send_to_fault();
 inline void shutdown(); //stops all controls and sets PWM to 0
 inline void stop_control();
+inline void enter_testing();
+inline void exit_testing();
 
 /* #################################################################
  * #####################  PINOUT DISTRIBUTION  #####################

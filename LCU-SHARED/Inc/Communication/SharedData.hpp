@@ -22,6 +22,7 @@ struct control_data{
 	uint8_t *master_running_mode = nullptr; //running mode code on INITIAL
 	uint8_t *slave_status = nullptr;
 	uint8_t *slave_secondary_status = nullptr; //contains flags on INITIAL, levitation state machine on OPERATIONAL, and TODO: error code on FAULT
+	uint8_t *slave_initialising_status = nullptr;
 	uint8_t *slave_running_mode = nullptr; //running mode code on INITIAL
 
 
