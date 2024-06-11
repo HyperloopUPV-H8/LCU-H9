@@ -247,14 +247,6 @@ if constexpr(USING_5DOF){
 		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[MASTER_SLAVE_INITIAL_ORDER_ID]);
 	}
 
-	static void enter_testing_mode(){
-		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[ENTER_TESTING_MODE_ORDER_INDEX]);
-	}
-
-	static void exit_testing_mode(){
-		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[EXIT_TESTING_MODE_ORDER_INDEX]);
-	}
-
 	//#####################  SPI ORDERS CALLBACKS #######################
 
 	static inline float coil_current_calculation(uint16_t coil_current){
@@ -297,7 +289,6 @@ if constexpr(USING_5DOF){
 	static void start_slave_vertical_levitation(){
 		data_to_change = (float) data_from_backend;
 		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[START_VERTICAL_LEVITATION_ORDER_ID]);
-		vcu_connection->send_order(*EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX]);
 	}
 
 	static void stop_slave_levitation(){
@@ -309,12 +300,21 @@ if constexpr(USING_5DOF){
 	}
 
 	static void landing_slave(){
-		vcu_connection->send_order(*EthernetOrders[LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_INDEX]);
+		vcu_connection->send_order(*EthernetOrders[LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_INDEX]);//TODO: change this
 	}
 
 	static void start_slave_horizontal_levitation(){
 		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[START_HORIZONTAL_LEVITATION_ORDER_ID]);
 	}
+
+	static void enter_testing_mode(){
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[ENTER_TESTING_MODE_ORDER_INDEX]);
+	}
+
+	static void exit_testing_mode(){
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[EXIT_TESTING_MODE_ORDER_INDEX]);
+	}
+
 
 	static void set_new_slave_data_ready(){new_slave_data = true;}
 };

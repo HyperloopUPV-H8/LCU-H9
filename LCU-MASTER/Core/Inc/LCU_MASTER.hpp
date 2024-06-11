@@ -15,6 +15,7 @@ public:
 	uint8_t lpu_temperature_adc_id[LDU_COUNT]{0};
 	Communication communication;
 	StateMachine generalStateMachine;
+	StateMachine levitationStateMachine;
 	LEDs leds;
 
 	struct CommFlags{
@@ -40,7 +41,7 @@ public:
 
 	static bool initial_to_operational_transition(){
 		if(Communication::flags.SPIEstablished){
-			return Communication::gui_connection->is_connected();
+			return Communication::vcu_connection->is_connected();
 		}
 		return false;
 	}
@@ -51,6 +52,10 @@ public:
 
 	static bool operational_to_fault_transition(){
 		return *shared_control_data.slave_status != (uint8_t)OPERATIONAL;
+	}
+
+	static void levitation_enter_taking(){
+		Communication::vcu_connection->send_order(*Communication::EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX]);
 	}
 };
 

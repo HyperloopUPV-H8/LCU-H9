@@ -2,7 +2,7 @@
 
 LCU *lcu_instance = nullptr;
 
-LCU::LCU() : generalStateMachine(INITIAL){
+LCU::LCU() : generalStateMachine(INITIAL), levitationStateMachine(IDLE){
 	lcu_instance = this;
 	sensors_inscribe();
 	state_machine_definition();
@@ -69,6 +69,13 @@ void LCU::sensors_inscribe(){
 void LCU::state_machine_definition(){
 	generalStateMachine.add_state(OPERATIONAL);
 	generalStateMachine.add_state(FAULT);
+
+	levitationStateMachine.add_state(TAKING_OFF);
+	levitationStateMachine.add_state(DOF3_STABLE);
+	levitationStateMachine.add_state(DOF5_STABLE);
+	levitationStateMachine.add_state(BOOSTER);
+	levitationStateMachine.add_state(LANDING);
+	levitationStateMachine.add_state(TESTING);
 
 	generalStateMachine.add_transition(INITIAL, OPERATIONAL, initial_to_operational_transition);
 	generalStateMachine.add_transition(OPERATIONAL, FAULT, operational_to_fault_transition);
