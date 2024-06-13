@@ -40,10 +40,7 @@ public:
 	}
 
 	static bool initial_to_operational_transition(){
-		if(Communication::flags.SPIEstablished){
-			return Communication::vcu_connection->is_connected();
-		}
-		return false;
+		return Communication::flags.SPIEstablished && Communication::vcu_connection->is_connected();
 	}
 
 	static bool initial_to_fault_transition(){
@@ -52,6 +49,16 @@ public:
 
 	static bool operational_to_fault_transition(){
 		return *shared_control_data.slave_status != (uint8_t)OPERATIONAL;
+	}
+
+	static void general_enter_operational(){
+		lcu_instance->leds.Set_Operational_Led();
+		LDU_Buffer::ready_buffers();
+	}
+
+	static void general_enter_fault(){
+		lcu_instance->leds.Set_Fault_Led();
+		LDU_Buffer::shutdown_buffers();
 	}
 
 	static void levitation_enter_taking(){

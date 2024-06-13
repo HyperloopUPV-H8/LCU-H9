@@ -12,7 +12,7 @@ public:
 	uint8_t LDU_Ready_2_ID = 0;
 	DigitalOutput reset;
 
-	bool shut_down = false;
+	bool shut_down = true;
 	bool fixed_reset = false;
 	bool fixed_reset_value = false;
 
@@ -51,6 +51,12 @@ if constexpr(IS_HIL){
 	static void update_buffers(){
 		for(int i = 0; i < LDU_BUFFER_COUNT; i++){
 			ldu_buffers[i].update();
+		}
+	}
+
+	static void ready_buffers(){
+		for(int i = 0; i < LDU_BUFFER_COUNT; i++){
+			ldu_buffers[i].shut_down = false;
 		}
 	}
 
