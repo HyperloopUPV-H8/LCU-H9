@@ -17,7 +17,9 @@ static constexpr uint16_t LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_INDEX = 2;
 
 
 
-static constexpr uint32_t ETH_ORDER_COUNT = 15;
+static constexpr uint32_t ETH_ORDER_COUNT = 15 *2; //duplicated for bypass versions
+static constexpr uint16_t ETH_ORDER_BYPASS_ID_TO_ADD = 3000; //the ID of the real version plus this makes the ID of the bypass version
+static constexpr uint16_t ETH_ORDER_BYPASS_INDEX_TO_ADD = ETH_ORDER_COUNT/2;
 
 //############### VCU COMM ################
 

@@ -56,6 +56,8 @@ public:
 		vcu_connection = new ServerSocket(LCU_IP, TCP_VCU_PORT);
 		upd_gui = new DatagramSocket(LCU_IP, UDP_PORT, BACKEND, UDP_PORT);
 		udp_vcu = new DatagramSocket(LCU_IP, UDP_VCU_PORT, VCU_IP, UDP_VCU_PORT);
+
+		//PACKETS
 		EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LEVITATION_DATA_TCP_PACKET_ID,
 			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
 			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2],
@@ -95,22 +97,25 @@ public:
 
 		EthernetPackets[LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_INDEX] = new StackPacket(LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_ID, &shared_pod_data.average_integer_lpu_voltage);
 
-		EthernetOrders[TEST_PWM_TCP_ORDER_INDEX] = new StackOrder(TEST_PWM_TCP_ORDER_ID, send_pwm_data_from_backend, &ldu_number_to_change, &duty_to_change);
-		EthernetOrders[START_LEVITATION_CONTROL_TCP_ORDER_INDEX] = new StackOrder(START_LEVITATION_CONTROL_TCP_ORDER_ID, start_slave_levitation_control, &data_from_backend);
-		EthernetOrders[TEST_DESIRED_CURRENT_TCP_ORDER_INDEX] = new StackOrder(TEST_DESIRED_CURRENT_TCP_ORDER_ID, send_desired_current_data_from_backend, &ldu_number_to_change, &data_from_backend);
-		EthernetOrders[TEST_START_RESET_TCP_ORDER_INDEX] = new StackOrder<2,uint16_t>(TEST_START_RESET_TCP_ORDER_ID, fix_buffer_reset_high, &ldu_number_to_change);
-		EthernetOrders[TEST_STOP_RESET_TCP_ORDER_INDEX] = new StackOrder<2,uint16_t>(TEST_STOP_RESET_TCP_ORDER_ID, fix_buffer_reset_low, &ldu_number_to_change);
+		//ORDERS
+		for(int i = 0; i < 2; i++){
+		EthernetOrders[TEST_PWM_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder(TEST_PWM_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), send_pwm_data_from_backend, &ldu_number_to_change, &duty_to_change);
+		EthernetOrders[START_LEVITATION_CONTROL_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder(START_LEVITATION_CONTROL_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), start_slave_levitation_control, &data_from_backend);
+		EthernetOrders[TEST_DESIRED_CURRENT_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder(TEST_DESIRED_CURRENT_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), send_desired_current_data_from_backend, &ldu_number_to_change, &data_from_backend);
+		EthernetOrders[TEST_START_RESET_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder<2,uint16_t>(TEST_START_RESET_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), fix_buffer_reset_high, &ldu_number_to_change);
+		EthernetOrders[TEST_STOP_RESET_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder<2,uint16_t>(TEST_STOP_RESET_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), fix_buffer_reset_low, &ldu_number_to_change);
 
-		EthernetOrders[START_VERTICAL_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(START_VERTICAL_LEVITATION_TCP_ORDER_ID, start_slave_vertical_levitation, &data_from_backend);
-		EthernetOrders[STOP_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(STOP_LEVITATION_TCP_ORDER_ID, stop_slave_levitation);
-		EthernetOrders[STICK_DOWN_TCP_ORDER_INDEX] = new StackOrder(STICK_DOWN_TCP_ORDER_ID, stick_down_slave);
-		EthernetOrders[LANDING_TCP_ORDER_INDEX] = new StackOrder(LANDING_TCP_ORDER_ID, landing_slave);
-		EthernetOrders[START_HORIZONTAL_LEVITATION_TCP_ORDER_INDEX] = new StackOrder(START_HORIZONTAL_LEVITATION_TCP_ORDER_ID, start_slave_horizontal_levitation);
-		EthernetOrders[ENTER_TESTING_MODE_TCP_ORDER_INDEX] = new StackOrder(ENTER_TESTING_MODE_TCP_ORDER_ID, enter_testing_mode);
-		EthernetOrders[EXIT_TESTING_MODE_TCP_ORDER_INDEX] = new StackOrder(EXIT_TESTING_MODE_TCP_ORDER_ID, exit_testing_mode);
+		EthernetOrders[START_VERTICAL_LEVITATION_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder(START_VERTICAL_LEVITATION_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), start_slave_vertical_levitation, &data_from_backend);
+		EthernetOrders[STOP_LEVITATION_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder(STOP_LEVITATION_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), stop_slave_levitation);
+		EthernetOrders[STICK_DOWN_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder(STICK_DOWN_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), stick_down_slave);
+		EthernetOrders[LANDING_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder(LANDING_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), landing_slave);
+		EthernetOrders[START_HORIZONTAL_LEVITATION_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder(START_HORIZONTAL_LEVITATION_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), start_slave_horizontal_levitation);
+		EthernetOrders[ENTER_TESTING_MODE_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder(ENTER_TESTING_MODE_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), enter_testing_mode);
+		EthernetOrders[EXIT_TESTING_MODE_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder(EXIT_TESTING_MODE_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), exit_testing_mode);
 
-		EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX] = new StackOrder(STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_ID, nullptr);
-		EthernetOrders[LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_INDEX] = new StackOrder(LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_ID, nullptr);
+		EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder(STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), nullptr);
+		EthernetOrders[LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder(LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), nullptr);
+		}
 	}
 
 
