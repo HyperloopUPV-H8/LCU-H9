@@ -141,6 +141,9 @@ void exit_testing(){
 }
 
 void set_desired_current_on_LDU(){
+	if(ldu_to_change >= LDU_COUNT || lcu_instance->levitationStateMachine.current_state != TESTING){
+			return;
+	}
  	disable_all_current_controls();
  	lcu_instance->ldu_array[ldu_to_change].desired_current = data_to_change;
  	lcu_instance->ldu_array[ldu_to_change].flags.fixed_vbat = true;
@@ -149,7 +152,9 @@ void set_desired_current_on_LDU(){
 
 void test_pwm_order_callback(){
 	shutdown();
-	if(ldu_to_change >= LDU_COUNT){return;}
+	if(ldu_to_change >= LDU_COUNT || lcu_instance->levitationStateMachine.current_state != TESTING){
+		return;
+	}
 	lcu_instance->ldu_array[ldu_to_change].set_pwms_duty(duty_to_change);
 	lcu_instance->ldu_array[ldu_to_change].desired_current = 0;
 	lcu_instance->ldu_buffers.turn_on();
