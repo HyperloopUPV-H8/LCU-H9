@@ -8,4 +8,4 @@
 
 
 #define ARITHMETIC_MODE float
-constexpr LCU_running_modes RUNNING_MODE = DOF5_DEBUG;
+constexpr LCU_running_modes RUNNING_MODE = DOF5;
