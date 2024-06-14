@@ -37,6 +37,8 @@ public:
 	struct levitation_control_flags{
 		bool stable_vertical_levitation = false;
 		bool stable_horizontal_levitation = false;
+		bool fixed_stable_levitation = false;
+		bool fixed_stable_levitation_value = false;
 		bool landing_complete = false;
 	}flags;
 
@@ -193,8 +195,13 @@ public:
 				stable_position_flag[j] = false;
 			}
 		}
-		flags.stable_vertical_levitation = stable_position_flag[Z_POSITION_INDEX] && stable_position_flag[X_ROTATION_INDEX] && stable_position_flag[Y_ROTATION_INDEX];
-		flags.stable_horizontal_levitation = stable_position_flag[Y_POSITION_INDEX] && stable_position_flag[Z_ROTATION_INDEX];
+		if(flags.fixed_stable_levitation){
+			flags.stable_vertical_levitation = flags.fixed_stable_levitation_value;
+			flags.stable_horizontal_levitation = flags.fixed_stable_levitation_value;
+		}else{
+			flags.stable_vertical_levitation = stable_position_flag[Z_POSITION_INDEX] && stable_position_flag[X_ROTATION_INDEX] && stable_position_flag[Y_ROTATION_INDEX];
+			flags.stable_horizontal_levitation = stable_position_flag[Y_POSITION_INDEX] && stable_position_flag[Z_ROTATION_INDEX];
+		}
 	}
 
 };

@@ -83,6 +83,9 @@ void LCU::state_machine_definition(){
 
 	generalStateMachine.add_enter_action(general_enter_operational, OPERATIONAL);
 	generalStateMachine.add_enter_action(general_enter_fault, FAULT);
+
+	levitationStateMachine.add_enter_action(levitation_enter_DOF5, DOF5);
+	levitationStateMachine.add_enter_action(levitation_enter_idle, IDLE);
 }
 
 void LCU::state_machine_start(){

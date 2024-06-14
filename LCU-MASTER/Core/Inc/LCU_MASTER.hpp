@@ -48,7 +48,7 @@ public:
 	}
 
 	static bool initial_to_operational_transition(){
-		return *shared_control_data.slave_status == OPERATIONAL;
+		return *shared_control_data.slave_status == OPERATIONAL && Communication::flags.SPIEstablished;
 	}
 
 	static bool initial_to_fault_transition(){
@@ -56,7 +56,10 @@ public:
 	}
 
 	static bool operational_to_fault_transition(){
-		return *shared_control_data.slave_status != (uint8_t)OPERATIONAL;
+		if constexpr(PROTECTED){
+			return *shared_control_data.slave_status != (uint8_t)OPERATIONAL;
+		}
+		return false;
 	}
 
 	static void general_enter_operational(){
@@ -69,8 +72,12 @@ public:
 		LDU_Buffer::shutdown_buffers();
 	}
 
-	static void levitation_enter_taking(){
+	static void levitation_enter_DOF5(){
 		Communication::vcu_connection->send_order(*Communication::EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX]);
+	}
+
+	static void levitation_enter_idle(){
+		Communication::vcu_connection->send_order(*Communication::EthernetOrders[LANDING_TCP_ORDER_INDEX]);
 	}
 };
 

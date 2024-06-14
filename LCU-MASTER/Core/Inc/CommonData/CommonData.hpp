@@ -12,6 +12,7 @@
 #define USING_1DOF (RUNNING_MODE == DOF1)
 #define USING_5DOF (RUNNING_MODE != DOF1)
 #define IS_HIL (RUNNING_MODE == DOF5_HIL)
+#define PROTECTED (RUNNING_MODE == DOF5)
 
 static ip_addr_t master_ip_addr = IPADDR4_INIT_BYTES(LCU_IP_B0,LCU_IP_B1,LCU_IP_B2,LCU_IP_B3);
 static IPV4 LCU_IP(master_ip_addr);

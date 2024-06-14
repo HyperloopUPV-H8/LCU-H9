@@ -49,5 +49,7 @@ void initial_order_callback(){
 	if(*shared_control_data.slave_running_mode == *shared_control_data.master_running_mode){
 		Communication::flags.SPIEstablished = true;
 		LCU::initial_to_operational_confirmation_check();
+	}else{
+		ErrorHandler("Master and slave are not in the same mode");
 	}
 }

@@ -172,6 +172,20 @@ void initial_order_callback(){
 	}
 }
 
+void set_stable_levitation_on(){
+	lcu_instance->levitationControl.flags.fixed_stable_levitation = true;
+	lcu_instance->levitationControl.flags.fixed_stable_levitation_value = true;
+}
+
+void set_stable_levitation_off(){
+	lcu_instance->levitationControl.flags.fixed_stable_levitation = true;
+	lcu_instance->levitationControl.flags.fixed_stable_levitation_value = false;
+}
+
+void reset(){
+	HAL_NVIC_SystemReset();
+}
+
 //####################  SECURITY ORDERS  ############################
 void send_to_fault(){
 	shared_control_data.flags.fault_flag = true;

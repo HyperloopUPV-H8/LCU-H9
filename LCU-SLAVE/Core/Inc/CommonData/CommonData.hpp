@@ -11,6 +11,7 @@
 #define USING_1DOF (RUNNING_MODE == DOF1)
 #define USING_5DOF (RUNNING_MODE != DOF1)
 #define IS_HIL (RUNNING_MODE == DOF5_HIL)
+#define PROTECTED (RUNNING_MODE == DOF5)
 
 constexpr float MAXIMUM_DESIRED_CURRENT = 38.0;
 constexpr float MAXIMUM_PEAK_CURRENT = 45.0;
@@ -64,6 +65,9 @@ inline void test_pwm_order_callback();
 
 inline void define_shared_data();
 inline void initial_order_callback();
+inline void set_stable_levitation_on();
+inline void set_stable_levitation_off();
+inline void reset();
 
 inline void send_to_fault();
 inline void shutdown(); //stops all controls and sets PWM to 0

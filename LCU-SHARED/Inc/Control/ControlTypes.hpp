@@ -11,5 +11,6 @@
 enum LCU_running_modes{
 	DOF1,
 	DOF5,
+	DOF5_DEBUG,
 	DOF5_HIL,
 };

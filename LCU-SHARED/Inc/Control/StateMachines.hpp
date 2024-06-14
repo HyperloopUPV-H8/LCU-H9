@@ -8,6 +8,7 @@ enum LCU_states{
 	INITIAL = 0b00100000,
 	OPERATIONAL = 0b01010000,
 	FAULT = 0b11111111,
+	RESETING = 0b10101010,
 };
 
 enum levitation_states{

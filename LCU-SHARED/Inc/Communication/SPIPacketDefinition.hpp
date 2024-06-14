@@ -3,7 +3,7 @@
 #include "Tools/Tools.hpp"
 #include "SharedData.hpp"
 
-static constexpr uint32_t SPI_ORDER_COUNT = 12;
+static constexpr uint32_t SPI_ORDER_COUNT = 15;
 
 static constexpr uint16_t MASTER_SLAVE_INITIAL_ORDER_ID = 15;
 static constexpr uint16_t MASTER_SLAVE_INITIAL_ORDER_INDEX = 0;
@@ -40,5 +40,15 @@ static constexpr uint16_t ENTER_TESTING_MODE_ORDER_INDEX = 10;
 
 static constexpr uint16_t EXIT_TESTING_MODE_ORDER_ID = 1009;
 static constexpr uint16_t EXIT_TESTING_MODE_ORDER_INDEX = 11;
+
+static constexpr uint16_t TESTING_SET_STABLE_LEVITATION_ON_ORDER_ID = 1010;
+static constexpr uint16_t TESTING_SET_STABLE_LEVITATION_ON_ORDER_INDEX = 12;
+
+static constexpr uint16_t TESTING_SET_STABLE_LEVITATION_OFF_ORDER_ID = 1011;
+static constexpr uint16_t TESTING_SET_STABLE_LEVITATION_OFF_ORDER_INDEX = 13;
+
+static constexpr uint16_t RESET_ORDER_ID = 1012;
+static constexpr uint16_t RESET_ORDER_INDEX = 14;
+
 
 

@@ -234,7 +234,12 @@ if constexpr(!IS_HIL){
 	}
 
 	static bool general_transition_initial_to_operational(){
-		return Communication::flags.SPIEstablished && Communication::flags.MasterConfirmation;
+		if constexpr(PROTECTED){
+			return Communication::flags.SPIEstablished && Communication::flags.MasterConfirmation;
+		}else{
+			return (Communication::flags.SPIEstablished && Communication::flags.MasterConfirmation) || *shared_control_data.master_status == OPERATIONAL;
+		}
+
 	}
 
 	static bool general_transition_initial_to_fault(){
@@ -242,7 +247,7 @@ if constexpr(!IS_HIL){
 	}
 
 	static bool general_transition_operational_to_fault(){
-		return shared_control_data.flags.fault_flag || *shared_control_data.master_status == (uint8_t) FAULT;
+		return shared_control_data.flags.fault_flag || *shared_control_data.master_status != (uint8_t) OPERATIONAL;
 	}
 
 	static void general_enter_operational(){
