@@ -5,6 +5,7 @@
 void define_shared_data(){
 	shared_control_data.master_status = new uint8_t{0};
 	shared_control_data.master_secondary_status = new uint8_t{0};
+	shared_control_data.master_initialising_status = new uint8_t{0};
 	shared_control_data.master_running_mode = new uint8_t{255};
 	shared_control_data.slave_status = (uint8_t*) &lcu_instance->generalStateMachine.current_state;
 	shared_control_data.slave_secondary_status = &lcu_instance->levitationStateMachine.current_state;
@@ -161,8 +162,11 @@ void test_pwm_order_callback(){
 }
 
 void initial_order_callback(){
-	if(*shared_control_data.master_running_mode == *shared_control_data.slave_running_mode && *shared_control_data.slave_secondary_status == 1){
+	if(*shared_control_data.master_running_mode == *shared_control_data.slave_running_mode){
 		Communication::flags.SPIEstablished = true;
+		if(*shared_control_data.master_initialising_status == 1){
+			Communication::flags.MasterConfirmation = true;
+		}
 	}else{
 
 	}

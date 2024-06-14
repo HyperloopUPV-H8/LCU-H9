@@ -18,10 +18,11 @@ struct control_data{
 	control_flags flags{};
 
 	uint8_t *master_status = nullptr;
-	uint8_t *master_secondary_status = nullptr; //does nothing for now
+	uint8_t *master_secondary_status = nullptr;
+	uint8_t *master_initialising_status = nullptr;
 	uint8_t *master_running_mode = nullptr; //running mode code on INITIAL
 	uint8_t *slave_status = nullptr;
-	uint8_t *slave_secondary_status = nullptr; //contains flags on INITIAL, levitation state machine on OPERATIONAL, and TODO: error code on FAULT
+	uint8_t *slave_secondary_status = nullptr;
 	uint8_t *slave_initialising_status = nullptr;
 	uint8_t *slave_running_mode = nullptr; //running mode code on INITIAL
 
@@ -49,6 +50,8 @@ struct control_data{
 	float *float_airgap_to_pos_in[5]{nullptr};
 };
 
+#define INITIAL_STATUS_ZEROING 1
+#define INITIAL_STATUS_COMPLETE (INITIAL_STATUS_ZEROING)
 static uint16_t ldu_to_change = 0;
 static float duty_to_change = 0;
 static float data_to_change = 0;

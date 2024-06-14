@@ -22,6 +22,7 @@ public:
 
 	static struct communication_flags{
 		bool SPIEstablished = false;
+		bool MasterConfirmation = false;
 	}flags;
 
 	static void init(){
@@ -35,7 +36,7 @@ public:
 	void define_packets(){
 		define_shared_data();
 
-		SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2] = new SPIPacket<2, uint8_t, uint8_t>(shared_control_data.master_status, shared_control_data.master_running_mode);
+		SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2] = new SPIPacket<3, uint8_t, uint8_t, uint8_t>(shared_control_data.master_status, shared_control_data.master_running_mode, shared_control_data.master_initialising_status);
 		SPIPackets[MASTER_SLAVE_INITIAL_ORDER_INDEX*2+1] = new SPIPacket<43, uint8_t, uint8_t, uint8_t, float_ldu_array_deduction>(
 				shared_control_data.slave_status, shared_control_data.slave_running_mode, shared_control_data.slave_initialising_status,
 				shared_control_data.shunt_zeroing_offset[0],shared_control_data.shunt_zeroing_offset[1],shared_control_data.shunt_zeroing_offset[2],

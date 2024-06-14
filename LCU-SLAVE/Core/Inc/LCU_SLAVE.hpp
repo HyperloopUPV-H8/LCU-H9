@@ -234,7 +234,7 @@ if constexpr(!IS_HIL){
 	}
 
 	static bool general_transition_initial_to_operational(){
-		return lcu_instance->CalibrationCompleted;
+		return Communication::flags.SPIEstablished && Communication::flags.MasterConfirmation;
 	}
 
 	static bool general_transition_initial_to_fault(){

@@ -17,6 +17,7 @@ void fix_buffer_reset_low(){
 void define_shared_data(){
 	shared_control_data.master_status = (uint8_t*) &(lcu_instance->generalStateMachine.current_state);
 	shared_control_data.master_secondary_status = new uint8_t{0};
+	shared_control_data.master_initialising_status = new uint8_t{0};
 	shared_control_data.master_running_mode = new uint8_t{(uint8_t)RUNNING_MODE};
 	shared_control_data.slave_status = new uint8_t{0};
 	shared_control_data.slave_secondary_status = new uint8_t{0};
@@ -45,7 +46,8 @@ void define_shared_data(){
 }
 
 void initial_order_callback(){
-	if(*shared_control_data.slave_initialising_status == 1 && *shared_control_data.slave_running_mode == *shared_control_data.master_running_mode){
+	if(*shared_control_data.slave_running_mode == *shared_control_data.master_running_mode){
 		Communication::flags.SPIEstablished = true;
+		LCU::initial_to_operational_confirmation_check();
 	}
 }

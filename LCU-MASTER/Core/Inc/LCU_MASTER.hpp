@@ -27,6 +27,7 @@ public:
 	LCU();
 	void sensors_inscribe();
 	void state_machine_definition();
+	void state_machine_start();
 	void update();
 	void check_communications();
 
@@ -39,8 +40,15 @@ public:
 		return lpu_coil_temperature / MAX_16BIT * ADC_MAX_VOLTAGE; //TODO: calculate in correct units
 	}
 
+	static void initial_to_operational_confirmation_check(){
+		if(*shared_control_data.slave_initialising_status == INITIAL_STATUS_COMPLETE || Communication::vcu_connection->is_connected()){
+			Communication::flags.MasterConfirmation = true;
+			*shared_control_data.master_initialising_status = 1;
+		}
+	}
+
 	static bool initial_to_operational_transition(){
-		return Communication::flags.SPIEstablished && Communication::vcu_connection->is_connected();
+		return *shared_control_data.slave_status == OPERATIONAL;
 	}
 
 	static bool initial_to_fault_transition(){
