@@ -2,8 +2,7 @@
 
 LCU *lcu_instance = nullptr;
 
-LCU::LCU() : generalStateMachine(INITIAL),
-		sync_spi_with_slave{PG12,&buffer_side}{
+LCU::LCU() : generalStateMachine(INITIAL){
 	lcu_instance = this;
 	sensors_inscribe();
 	state_machine_definition();
@@ -39,15 +38,13 @@ void LCU::update(){
 	sync_spi_with_slave.read();
 	if(buffer_side == PinState::ON && is_down){ // RISING EDGE
 		is_down = false;
-		is_up = true;
-		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[AIRGAP_PACKET]);
+		Communication::upd_gui->send_packet(*Communication::EthernetPackets[AIRGAPS_FULL_DATA_TCP_INDEX]);
+		SPI::master_transmit_Order(Communication::spi_id, SPIBaseOrder::SPIOrdersByID[AIRGAPS_PACKET]);
 
 	}
-	if(buffer_side == PinState::OFF && is_up){ // FALLING EDGE
-		is_up = false;
+	if(buffer_side == PinState::OFF && !is_down){ // FALLING EDGE
 		is_down = true;
-		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[AIRGAP_PACKET_2]);
-
+		SPI::master_transmit_Order(Communication::spi_id, SPIBaseOrder::SPIOrdersByID[AIRGAPS_PACKET_2]);
 	}
 }
 
@@ -79,6 +76,8 @@ void LCU::sensors_inscribe(){
 	LDU_Buffer::ldu_buffers[2] = LDU_Buffer{LCU_BUFFER_RESET_PIN_3, LCU_BUFFER_FAULT_PIN_5, LCU_BUFFER_READY_PIN_5, LCU_BUFFER_FAULT_PIN_6, LCU_BUFFER_READY_PIN_6};
 	LDU_Buffer::ldu_buffers[3] = LDU_Buffer{LCU_BUFFER_RESET_PIN_4, LCU_BUFFER_FAULT_PIN_7, LCU_BUFFER_READY_PIN_7, LCU_BUFFER_FAULT_PIN_8, LCU_BUFFER_READY_PIN_8};
 	LDU_Buffer::ldu_buffers[4] = LDU_Buffer{LCU_BUFFER_RESET_PIN_5, LCU_BUFFER_FAULT_PIN_9, LCU_BUFFER_READY_PIN_9, LCU_BUFFER_FAULT_PIN_10, LCU_BUFFER_READY_PIN_10};
+
+	sync_spi_with_slave = DigitalSensor{PD3,&buffer_side};
 }
 
 void LCU::state_machine_definition(){
@@ -88,11 +87,11 @@ void LCU::state_machine_definition(){
 	generalStateMachine.add_transition(INITIAL, OPERATIONAL, initial_to_operational_transition);
 	generalStateMachine.add_transition(OPERATIONAL, FAULT, operational_to_fault_transition);
 
-	generalStateMachine.add_low_precision_cyclic_action([&](){lcu_instance->commflags.lcu_data_to_send = true;}, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
+	//generalStateMachine.add_low_precision_cyclic_action([&](){lcu_instance->commflags.lcu_data_to_send = true;}, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
 	generalStateMachine.add_low_precision_cyclic_action([&](){lcu_instance->commflags.voltage_data_OBCCU_to_send = true;}, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
-	generalStateMachine.add_low_precision_cyclic_action([&](){lcu_instance->commflags.levitation_data_to_send = true;}, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
+	//generalStateMachine.add_low_precision_cyclic_action([&](){lcu_instance->commflags.levitation_data_to_send = true;}, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
 	generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_initial_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), INITIAL);
-	generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_data_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
+	//generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_data_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
 
 	generalStateMachine.add_enter_action(general_enter_operational, OPERATIONAL);
 	generalStateMachine.add_enter_action(general_enter_fault, FAULT);

@@ -12,10 +12,10 @@ public:
 	static uint16_t airgaps_binary_data_array[AIRGAP_COUNT];
 	static IntegerMovingAverage<uint16_t, uint16_t, 0, 10> airgaps_average_binary_data_array[AIRGAP_COUNT];
 	static float airgaps_data_array[AIRGAP_COUNT];
-	static uint32_t samples = 0;
-	static DigitalOutputService send_buffer_side;
-	static inline void inscribe(){
+	static uint32_t samples;
+	static uint8_t send_buffer_side;
 
+	static inline void inscribe(){
 			airgaps_index_array[0] = ADC::inscribe(AIRGAP_PIN_1);
 			airgaps_index_array[1] = ADC::inscribe(AIRGAP_PIN_2);
 			airgaps_index_array[2] = ADC::inscribe(AIRGAP_PIN_3);
@@ -24,7 +24,7 @@ public:
 			airgaps_index_array[5] = ADC::inscribe(AIRGAP_PIN_6);
 			airgaps_index_array[6] = ADC::inscribe(AIRGAP_PIN_7);
 			airgaps_index_array[7] = ADC::inscribe(AIRGAP_PIN_8);
-			send_buffer_side = DigitalOutputService::inscribe(PG12);
+			send_buffer_side = DigitalOutputService::inscribe(PD3);
 	}
 
 	static inline void start(){
@@ -35,28 +35,22 @@ public:
 	}
 
 	static inline void update_binary(){
-		static bool sent_first = false;
-		static bool sent_second = false;
 		for(int i = 0; i < AIRGAP_COUNT; i++){
 			airgaps_binary_data_array[i] = *airgaps_binary_data_pointer_array[i];
 			airgaps_average_binary_data_array[i].compute(airgaps_binary_data_array[i]);
 		}
-		if(k >= 100){
-			k = 0;
-			sent_first  = false;
-			sent_second = false;
+		if(samples >= 100){
+			samples = 0;
 		}
-		airgaps_samples[k] = *airgaps_binary_data_pointer_array[0];
-		if(k > 55 && not sent_first){
+		airgaps_samples.buffer[samples] = *airgaps_binary_data_pointer_array[0];
+		if(samples > 55){
 			//send first packet
 			DigitalOutputService::turn_on(send_buffer_side);
-			sent_first = true;
-		}else if(k > 5 && not sent_second){
+		}else if(samples > 5){
 			//send second packet
 			DigitalOutputService::turn_off(send_buffer_side);
-			sent_second = true;
 		}
-		k++;
+		samples++;
 	}
 
 	static inline void update_data(){
