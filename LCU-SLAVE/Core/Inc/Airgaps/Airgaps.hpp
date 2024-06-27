@@ -31,9 +31,22 @@ public:
 		}
 	}
 
-	static inline void update_binary(){
+	static inline void update_binary_no_filter(){
 		for(int i = 0; i < AIRGAP_COUNT; i++){
 			airgaps_binary_data_array[i] = *airgaps_binary_data_pointer_array[i];
+			airgaps_average_binary_data_array[i].compute(airgaps_binary_data_array[i]);
+		}
+	}
+
+	static inline void update_binary(){
+		for(int i = 0; i < AIRGAP_COUNT; i++){
+			uint16_t prev = airgaps_binary_data_array[i];
+			airgaps_binary_data_array[i] = *airgaps_binary_data_pointer_array[i];
+			if(airgaps_binary_data_array[i] < MINIMUM_EXPECTED_AIRGAP_VALUE_BINARY[i] ||
+				airgaps_binary_data_array[i] > MAXIMUM_EXPECTED_AIRGAP_VALUE_BINARY[i] ||
+				abs((int32_t)airgaps_binary_data_array[i] - (int32_t)prev) > MAXIMUM_EXPECTED_AIRGAP_INCREASE_BINARY[i]){
+				airgaps_binary_data_array[i] = prev;
+			}
 			airgaps_average_binary_data_array[i].compute(airgaps_binary_data_array[i]);
 		}
 	}

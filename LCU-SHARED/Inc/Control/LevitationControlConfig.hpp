@@ -12,6 +12,8 @@ static constexpr double LEVITATION_CONTROL_PERIOD_SECONDS = (double) (1.0 / LEVI
 #define LEVITATION_CONTROL_DOF1_MOVING_AVERAGE_SIZE 20
 #define LEVITATION_CONTROL_DOF5_DERIVATIVE_MOVING_AVERAGE_SIZE 20
 
+#define MAXIMUM_EXPECTED_Z_INCREASE 0.0005
+
 // 		y 		dy 		z 			dz 			rot_x 		drot_x	rot_y 		d_roty 	rot_z 	drot_z 	iy 		iz 		irot_x 		irot_y 		irot_z
 
 

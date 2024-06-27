@@ -81,8 +81,11 @@ public:
 										+ Airgaps::get_airgap_data(2) - POD_CENTER_TO_SR_DISTANCE + (-POD_CENTER_DISTANCE_Y_TO_AIRGAP_Z * sin_rot_x + POD_CENTER_DISTANCE_X_TO_AIRGAP_Z * sin_rot_y - POD_CENTER_DISTANCE_Z_TO_AIRGAP_Z * cos_rot_x)
 										+ Airgaps::get_airgap_data(3) - POD_CENTER_TO_SR_DISTANCE + ( POD_CENTER_DISTANCE_Y_TO_AIRGAP_Z * sin_rot_x + POD_CENTER_DISTANCE_X_TO_AIRGAP_Z * sin_rot_y - POD_CENTER_DISTANCE_Z_TO_AIRGAP_Z * cos_rot_x))/(-4);
 
+		float prev =  position_error_data[Z_POSITION_INDEX];
 		position_error_data[Z_POSITION_INDEX] = position_z - desired_airgap_distance_m; //substracts the reference of levitation distance, only for Z pos as all other references are 0
-
+		/*if(abs(position_error_data[Z_POSITION_INDEX]-prev)>MAXIMUM_EXPECTED_Z_INCREASE){
+			position_error_data[Z_POSITION_INDEX]  = prev;
+		}*/
 	}
 
 	void DOF5_control_loop(){
