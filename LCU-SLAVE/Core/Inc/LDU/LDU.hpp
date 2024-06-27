@@ -30,8 +30,6 @@ public:
 	uint32_t zeroing_sample_count = 0;
 	float shunt_zeroing_offset = 0.0;
 
-	Boundary<decltype(current_shunt), TIME_ACCUMULATION> *extended_current_protection;
-
 
 	struct LDU_flags{
 		bool fixed_vbat = false;
@@ -141,11 +139,6 @@ if constexpr(!IS_HIL){
 		if(current_shunt > MAXIMUM_PEAK_CURRENT || current_shunt < -MAXIMUM_PEAK_CURRENT){
 			send_to_fault();
 		}
-
-		//extended_current_protection->check_accumulation(current_shunt);
-		//if(extended_current_protection->still_good == Protections::FAULT){
-		//	send_to_fault();
-		//}
 }
 		Voltage_by_current_PI.input(desired_current - current_shunt);
 		Voltage_by_current_PI.execute();
@@ -182,8 +175,6 @@ if constexpr(!IS_HIL){
 	}
 
 	void add_ldu_protection(){
-		extended_current_protection = new Boundary<decltype(current_shunt), TIME_ACCUMULATION>(&current_shunt, MAXIMUM_PEAK_CURRENT, MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS, CURRENT_CONTROL_FREQ_HZ);
-		//add_protection(&current_shunt,*extended_current_protection); //TODO: doesn t work
 	}
 
 	void ldu_zeroing(){

@@ -50,7 +50,11 @@ public:
 	}
 
 	static bool operational_to_fault_transition(){
-		return !(Communication::vcu_connection->is_connected()) || *shared_control_data.slave_status == (uint8_t)FAULT;
+		if(*shared_control_data.slave_status == (uint8_t)FAULT){
+			ErrorHandler("Slave gone into fault");
+			return true;
+		}
+		return !(Communication::vcu_connection->is_connected()) ;
 	}
 };
 
