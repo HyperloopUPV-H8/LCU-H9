@@ -12,8 +12,8 @@
 #define USING_5DOF (RUNNING_MODE != DOF1)
 #define IS_HIL (RUNNING_MODE == DOF5_HIL)
 
-constexpr float MAXIMUM_DESIRED_CURRENT = 38.0;
-constexpr float MAXIMUM_PEAK_CURRENT = 45.0;
+constexpr float MAXIMUM_DESIRED_CURRENT = 40.0;
+constexpr float MAXIMUM_PEAK_CURRENT = 55.0;
 constexpr float MAXIMUM_EXTENDED_CURRENT = 25.0;
 constexpr float MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS = 4.0;
 
