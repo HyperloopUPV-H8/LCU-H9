@@ -21,7 +21,7 @@ constexpr float MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS = 4.0;
 #define DOF1_USED_AIRGAP_INDEX 0
 
 extern control_data shared_control_data;
-
+extern airgaps_full_samples airgaps_samples;
 /*  ##############################################################
  *  ###################  SHARED_CONTROL_DATA  ####################
  *  ##############################################################

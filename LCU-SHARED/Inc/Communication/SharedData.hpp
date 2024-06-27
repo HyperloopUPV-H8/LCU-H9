@@ -35,6 +35,11 @@ struct control_data{
 	float *float_airgap_to_pos_in[5]{nullptr};
 };
 
+struct airgaps_full_samples{
+	uint16_t buffer[100];
+};
+
+
 static uint16_t ldu_to_change = 0;
 static float duty_to_change = 0;
 static float data_to_change = 0;

@@ -2,12 +2,14 @@
 
 LCU *lcu_instance = nullptr;
 
-LCU::LCU() : generalStateMachine(INITIAL){
+LCU::LCU() : generalStateMachine(INITIAL),
+		sync_spi_with_slave{PG12,&buffer_side}{
 	lcu_instance = this;
 	sensors_inscribe();
 	state_machine_definition();
 	ProtectionManager::link_state_machine(generalStateMachine, FAULT);
 	Communication::init();
+
 	STLIB::start(LCU_IP.string_address);
 
 	for(uint8_t i = 0; i < LDU_COUNT; i++){
@@ -33,6 +35,19 @@ void LCU::update(){
 		shared_control_data.float_lpu_temperature[i] = lpu_temperature_calculation(shared_control_data.fixed_lpu_temperature[i]);
 		shared_control_data.fixed_coil_temperature[i] = ADC::get_int_value(coil_temperature_adc_id[i]);
 		shared_control_data.float_coil_temperature[i] = coil_temperature_calculation(shared_control_data.fixed_coil_temperature[i]);
+	}
+	sync_spi_with_slave.read();
+	if(buffer_side == PinState::ON && is_down){ // RISING EDGE
+		is_down = false;
+		is_up = true;
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[AIRGAP_PACKET]);
+
+	}
+	if(buffer_side == PinState::OFF && is_up){ // FALLING EDGE
+		is_up = false;
+		is_down = true;
+		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[AIRGAP_PACKET_2]);
+
 	}
 }
 

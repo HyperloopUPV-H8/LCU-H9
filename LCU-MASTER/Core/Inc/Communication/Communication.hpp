@@ -72,6 +72,19 @@ public:
 			shared_control_data.float_airgap_to_pos[4], shared_control_data.float_airgap_to_pos_der[4], shared_control_data.float_airgap_to_pos_in[4]
 		);
 
+		EthernetPackets[AIRGAPS_FULL_DATA_INDEX] = new StackPacket(AIRGAPS_FULL_DATA,
+				airgaps_data[0],airgaps_data[1],airgaps_data[2],airgaps_data[3],airgaps_data[4],airgaps_data[5],airgaps_data[6],airgaps_data[7],airgaps_data[8],airgaps_data[9],
+				airgaps_data[10],airgaps_data[11],airgaps_data[12],airgaps_data[13],airgaps_data[14],airgaps_data[15],airgaps_data[16],airgaps_data[17],airgaps_data[18],airgaps_data[19],
+				airgaps_data[20],airgaps_data[21],airgaps_data[22],airgaps_data[23],airgaps_data[24],airgaps_data[25],airgaps_data[26],airgaps_data[27],airgaps_data[28],airgaps_data[29],
+				airgaps_data[30],airgaps_data[31],airgaps_data[32],airgaps_data[33],airgaps_data[34],airgaps_data[35],airgaps_data[36],airgaps_data[37],airgaps_data[38],airgaps_data[39],
+				airgaps_data[40],airgaps_data[41],airgaps_data[42],airgaps_data[43],airgaps_data[44],airgaps_data[45],airgaps_data[46],airgaps_data[47],airgaps_data[48],airgaps_data[49],
+				airgaps_data[50],airgaps_data[51],airgaps_data[52],airgaps_data[53],airgaps_data[54],airgaps_data[55],airgaps_data[56],airgaps_data[57],airgaps_data[58],airgaps_data[59],
+				airgaps_data[60],airgaps_data[61],airgaps_data[62],airgaps_data[63],airgaps_data[64],airgaps_data[65],airgaps_data[66],airgaps_data[67],airgaps_data[68],airgaps_data[69],
+				airgaps_data[70],airgaps_data[71],airgaps_data[72],airgaps_data[73],airgaps_data[74],airgaps_data[75],airgaps_data[76],airgaps_data[77],airgaps_data[78],airgaps_data[79],
+				airgaps_data[80],airgaps_data[81],airgaps_data[82],airgaps_data[83],airgaps_data[84],airgaps_data[85],airgaps_data[86],airgaps_data[87],airgaps_data[88],airgaps_data[89],
+				airgaps_data[90],airgaps_data[91],airgaps_data[92],airgaps_data[93],airgaps_data[94],airgaps_data[95],airgaps_data[96],airgaps_data[97],airgaps_data[98],airgaps_data[99]
+		);
+
 		EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LCU_DATA_TCP_PACKET_ID,
 			shared_control_data.master_status, shared_control_data.slave_status,
 			&shared_control_data.float_coil_temperature[0],&shared_control_data.float_coil_temperature[1],&shared_control_data.float_coil_temperature[2],
@@ -189,6 +202,36 @@ public:
 		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2] = new SPIPacket<0>;
 		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[STOP_LEVITATION_ORDER_INDEX] = new SPIStackOrder(STOP_LEVITATION_ORDER_ID, *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2], *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1]);
+
+
+
+
+		SPIPackets[AIRGAPS_PACKET_ORDER_INDEX*2] = new SPIPacket<0>();
+		SPIPackets[AIRGAPS_PACKET_ORDER_INDEX*2+1] = new SPIPacket<50,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,
+										 uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,
+										 uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,
+										 uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,
+										 uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t>(
+	  &airgaps_samples[0],&airgaps_samples[1],&airgaps_samples[2],&airgaps_samples[3],&airgaps_samples[4],&airgaps_samples[5],&airgaps_samples[6],&airgaps_samples[7],&airgaps_samples[8],&airgaps_samples[9],
+	  &airgaps_samples[10],&airgaps_samples[11],&airgaps_samples[12],&airgaps_samples[13],&airgaps_samples[14],&airgaps_samples[15],&airgaps_samples[16],&airgaps_samples[17],&airgaps_samples[18],&airgaps_samples[19],
+	  &airgaps_samples[20],&airgaps_samples[21],&airgaps_samples[22],&airgaps_samples[23],&airgaps_samples[24],&airgaps_samples[25],&airgaps_samples[26],&airgaps_samples[27],&airgaps_samples[28],&airgaps_samples[29],
+	  &airgaps_samples[30],&airgaps_samples[31],&airgaps_samples[32],&airgaps_samples[33],&airgaps_samples[34],&airgaps_samples[35],&airgaps_samples[36],&airgaps_samples[37],&airgaps_samples[38],&airgaps_samples[39],
+	  &airgaps_samples[40],&airgaps_samples[41],&airgaps_samples[42],&airgaps_samples[43],&airgaps_samples[44],&airgaps_samples[45],&airgaps_samples[46],&airgaps_samples[47],&airgaps_samples[48],&airgaps_samples[49]);
+		SPIPackets[AIRGAPS_PACKET_2_ORDER_INDEX*2] = new SPIPacket<0>();
+		SPIPackets[AIRGAPS_PACKET_2_ORDER_INDEX*2+1] = new SPIPacket<50,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,
+										 uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,
+										 uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,
+										 uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,
+										 uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t>(
+	  &airgaps_samples[50],&airgaps_samples[51],&airgaps_samples[52],&airgaps_samples[53],&airgaps_samples[54],&airgaps_samples[55],&airgaps_samples[56],&airgaps_samples[57],&airgaps_samples[58],&airgaps_samples[59],
+	  &airgaps_samples[60],&airgaps_samples[61],&airgaps_samples[62],&airgaps_samples[63],&airgaps_samples[64],&airgaps_samples[65],&airgaps_samples[66],&airgaps_samples[67],&airgaps_samples[68],&airgaps_samples[69],
+	  &airgaps_samples[70],&airgaps_samples[71],&airgaps_samples[72],&airgaps_samples[73],&airgaps_samples[74],&airgaps_samples[75],&airgaps_samples[76],&airgaps_samples[77],&airgaps_samples[78],&airgaps_samples[79],
+	  &airgaps_samples[80],&airgaps_samples[81],&airgaps_samples[82],&airgaps_samples[83],&airgaps_samples[84],&airgaps_samples[85],&airgaps_samples[86],&airgaps_samples[87],&airgaps_samples[88],&airgaps_samples[89],
+	  &airgaps_samples[90],&airgaps_samples[91],&airgaps_samples[92],&airgaps_samples[93],&airgaps_samples[94],&airgaps_samples[95],&airgaps_samples[96],&airgaps_samples[97],&airgaps_samples[98],&airgaps_samples[99]
+										 );
+		SPIOrders[AIRGAPS_PACKET_ORDER_INDEX] = new SPIStackOrder(AIRGAPS_PACKET, *SPIPackets[AIRGAPS_PACKET_ORDER_INDEX*2], *SPIPackets[AIRGAPS_PACKET_ORDER_INDEX*2+1]);
+		SPIOrders[AIRGAPS_PACKET_2_ORDER_INDEX] = new SPIStackOrder(AIRGAPS_PACKET_2, *SPIPackets[AIRGAPS_PACKET_2_ORDER_INDEX*2], *SPIPackets[AIRGAPS_PACKET_2_ORDER_INDEX*2+1]);
+
 	}
 
 

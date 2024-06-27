@@ -3,7 +3,7 @@
 #include "Tools/Tools.hpp"
 #include "SharedData.hpp"
 
-static constexpr uint32_t SPI_ORDER_COUNT = 10;
+static constexpr uint32_t SPI_ORDER_COUNT = 12;
 
 static constexpr uint16_t MASTER_SLAVE_INITIAL_ORDER_ID = 15;
 static constexpr uint16_t MASTER_SLAVE_INITIAL_ORDER_INDEX = 0;
@@ -19,7 +19,6 @@ static constexpr uint16_t START_LEVITATION_CONTROL_ORDER_INDEX = 3;
 
 static constexpr uint16_t STOP_LEVITATION_ORDER_ID = 1007;
 static constexpr uint16_t STOP_LEVITATION_ORDER_INDEX = 4;
-
 
 
 static constexpr uint32_t FIRST_TESTING_ORDER_INDEX = 5;
@@ -38,4 +37,10 @@ static constexpr uint16_t START_VERTICAL_LEVITATION_ORDER_INDEX = FIRST_TESTING_
 
 static constexpr uint16_t START_HORIZONTAL_LEVITATION_ORDER_ID = 1006;
 static constexpr uint16_t START_HORIZONTAL_LEVITATION_ORDER_INDEX = FIRST_TESTING_ORDER_INDEX+4;
+
+static constexpr uint16_t AIRGAPS_PACKET = 1008;
+static constexpr uint16_t AIRGAPS_PACKET_ORDER_INDEX = FIRST_TESTING_ORDER_INDEX +5;
+
+static constexpr uint16_t AIRGAPS_PACKET_2 = 1009;
+static constexpr uint16_t AIRGAPS_PACKET_2_ORDER_INDEX = FIRST_TESTING_ORDER_INDEX +6;
 

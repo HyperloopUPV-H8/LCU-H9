@@ -32,7 +32,13 @@ struct pod_data{
 	uint16_t average_integer_lpu_voltage = 0;
 };
 extern pod_data shared_pod_data;
+extern airgaps_full_samples airgaps_samples;
+struct airgaps_as_floats{
+		float buffer[100]{};
+		uint16_t cache_buffer[100]{};
+};
 
+extern airgaps_as_floats airgaps_data;
 /*  #################################################################
  *  ################  STATIC FUNCTIONS DECLARATION  #################
  *  #################################################################

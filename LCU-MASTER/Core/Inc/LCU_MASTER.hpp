@@ -16,7 +16,10 @@ public:
 	Communication communication;
 	StateMachine generalStateMachine;
 	LEDs leds;
-
+	PinState buffer_side{};
+	bool is_down{};
+	bool is_up{};
+	DigitalSensor sync_spi_with_slave;
 	struct CommFlags{
 		bool lcu_data_to_send = false;
 		bool levitation_data_to_send = false;
