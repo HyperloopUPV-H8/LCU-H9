@@ -14,6 +14,9 @@ if constexpr(IS_HIL){
 		lcu_instance->ldu_array[i].ldu_zeroing();
 		zeroing_complete &= lcu_instance->ldu_array[i].flags.finished_zeroing;
 	}
+	Airgaps::airgap_sumation_zeroing();
+	zeroing_complete &=Airgaps::horizontal_airgap_zeroing_complete;
+
 	if(zeroing_complete){
 		for(int i = 0; i < LDU_COUNT; i++){
 			lcu_instance->ldu_array[i].shunt_zeroing_offset = lcu_instance->ldu_array[i].average_current_for_zeroing.output_value;
