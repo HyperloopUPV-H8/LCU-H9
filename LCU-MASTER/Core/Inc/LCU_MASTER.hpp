@@ -20,6 +20,7 @@ public:
 	struct CommFlags{
 		bool lcu_data_to_send = false;
 		bool levitation_data_to_send = false;
+		bool noise_data_to_send = false;
 		bool voltage_data_OBCCU_to_send = false;
 	}commflags;
 

@@ -4,7 +4,7 @@
 #include "SharedData.hpp"
 
 
-static constexpr uint32_t ETH_PACKET_COUNT = 3;
+static constexpr uint32_t ETH_PACKET_COUNT = 4;
 
 static const uint16_t SEND_LCU_DATA_TCP_PACKET_ID = 315;
 static constexpr uint16_t SEND_LCU_DATA_TCP_PACKET_INDEX = 0;
@@ -12,8 +12,12 @@ static constexpr uint16_t SEND_LCU_DATA_TCP_PACKET_INDEX = 0;
 static const uint16_t SEND_LEVITATION_DATA_TCP_PACKET_ID = 316;
 static constexpr uint16_t SEND_LEVITATION_DATA_TCP_PACKET_INDEX = 1;
 
+
+static const uint16_t NOISE_DATA_TCP_PACKET_ID = 318;
+static constexpr uint16_t NOISE_DATA_TCP_PACKET_INDEX = 2;
+
 static constexpr uint16_t LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_ID = 981;
-static constexpr uint16_t LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_INDEX = 2;
+static constexpr uint16_t LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_INDEX = 3;
 
 
 

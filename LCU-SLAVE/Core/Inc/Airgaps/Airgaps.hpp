@@ -73,7 +73,7 @@ if constexpr(USING_1DOF){
 }
 if constexpr(USING_5DOF && !IS_HIL){
 		for(int i = 0; i < AIRGAP_COUNT; i++){
-			airgaps_data_array[i] = airgap_distance_binary_to_float(i, airgaps_average_binary_data_array[i].output_value, noise);
+			airgaps_data_array[i] = airgap_distance_binary_to_float(i, airgaps_average_binary_data_array[i].output_value);
 		}
 }
 if constexpr(IS_HIL){

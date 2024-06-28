@@ -39,6 +39,7 @@ public:
 	static float data_to_change;
 	static bool new_slave_data;
 	static int32_t noise;
+	static float noise_for_hems;
 
 	static void init(){
 		spi_id = SPI::inscribe(SPI::spi3);
@@ -59,6 +60,10 @@ public:
 		udp_vcu = new DatagramSocket(LCU_IP, UDP_VCU_PORT, VCU_IP, UDP_VCU_PORT);
 
 		//PACKETS
+		EthernetPackets[NOISE_DATA_TCP_PACKET_INDEX] = new StackPacket(NOISE_DATA_TCP_PACKET_ID,
+				&noise_for_hems
+		);
+
 		EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LEVITATION_DATA_TCP_PACKET_ID,
 			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
 			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2],
@@ -207,13 +212,15 @@ if constexpr(USING_1DOF){
 if constexpr(USING_5DOF){
 		shared_pod_data.average_integer_lpu_voltage = 0;
 		for(int i = 0; i < AIRGAP_COUNT; i++){
-			*shared_control_data.float_airgap_distance[i] = airgap_distance_binary_to_float(i, *shared_control_data.fixed_airgap_distance[i],noise)*1000;
+			*shared_control_data.float_airgap_distance[i] = airgap_distance_binary_to_float(i, *shared_control_data.fixed_airgap_distance[i])*1000;
 		}
 		for(int i = 0; i < LDU_COUNT; i++){
 			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]) - *shared_control_data.shunt_zeroing_offset[i];
 			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
 			shared_pod_data.integer_lpu_voltage[i] = battery_voltage_binary_to_OBCCU(*shared_control_data.fixed_battery_voltage[i]);
 			shared_pod_data.average_integer_lpu_voltage += shared_pod_data.integer_lpu_voltage[i];
+			noise_for_hems = airgap_distance_differential_binary_to_float(0,noise);
+
 		}
 		shared_pod_data.average_integer_lpu_voltage /= LDU_COUNT;
 }
@@ -227,6 +234,10 @@ if constexpr(USING_5DOF){
 
 	static void send_levitation_data_to_backend(){
 		upd_gui->send_packet(*EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX]);
+	}
+
+	static void send_noise_data_to_backend(){
+		upd_gui->send_packet(*EthernetPackets[NOISE_DATA_TCP_PACKET_INDEX]);
 	}
 
 	static void send_voltage_data_to_OBCCU(){
