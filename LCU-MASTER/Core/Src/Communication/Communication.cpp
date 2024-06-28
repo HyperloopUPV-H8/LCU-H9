@@ -20,4 +20,5 @@ float Communication::duty_to_change = 0;
 float Communication::data_from_backend = 0;
 float Communication::data_to_change = 0;
 bool Communication::new_slave_data = false;
+int32_t Communication::noise = 0;
 

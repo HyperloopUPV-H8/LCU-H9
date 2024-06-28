@@ -2,6 +2,7 @@
 
 #include <CommonData/CommonData.hpp>
 #include "SPI/SPI.hpp"
+#include "Airgaps/Airgaps.hpp"
 
 #define coil_t shared_control_data.fixed_coil_temperature
 #define lpu_t shared_control_data.fixed_lpu_temperature
@@ -51,11 +52,11 @@ public:
 			&coil_t[0], &coil_t[1], &coil_t[2], &coil_t[3], &coil_t[4], &coil_t[5], &coil_t[6], &coil_t[7], &coil_t[8], &coil_t[9],
 			&lpu_t[0], &lpu_t[1], &lpu_t[2], &lpu_t[3], &lpu_t[4], &lpu_t[5], &lpu_t[6], &lpu_t[7], &lpu_t[8], &lpu_t[9]
 		);
-		SPIPackets[SENSOR_DATA_ORDER_INDEX*2+1] = new SPIPacket<60, uint8_t, uint8_t, ldu_array_deduction, ldu_array_deduction, airgap_array_deduction>(
+		SPIPackets[SENSOR_DATA_ORDER_INDEX*2+1] = new SPIPacket<64, uint8_t, uint8_t, ldu_array_deduction, ldu_array_deduction, airgap_array_deduction, int32_t>(
 			shared_control_data.slave_status, shared_control_data.slave_secondary_status,
 			coil_I[0], coil_I[1], coil_I[2], coil_I[3], coil_I[4], coil_I[5], coil_I[6], coil_I[7], coil_I[8], coil_I[9],
 			bat_V[0], bat_V[1], bat_V[2], bat_V[3], bat_V[4], bat_V[5], bat_V[6], bat_V[7], bat_V[8], bat_V[9],
-			airgap[0], airgap[1], airgap[2], airgap[3], airgap[4], airgap[5], airgap[6], airgap[7]
+			airgap[0], airgap[1], airgap[2], airgap[3], airgap[4], airgap[5], airgap[6], airgap[7],&Airgaps::noise
 		);
 		SPIOrders[SENSOR_DATA_ORDER_INDEX] = new SPIStackOrder(SENSOR_DATA_ORDER_ID, *SPIPackets[SENSOR_DATA_ORDER_INDEX*2], *SPIPackets[SENSOR_DATA_ORDER_INDEX*2+1]);
 
