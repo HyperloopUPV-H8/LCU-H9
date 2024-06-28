@@ -17,7 +17,7 @@ static constexpr uint16_t LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_INDEX = 2;
 
 
 
-static constexpr uint32_t ETH_ORDER_COUNT = 13 *2; //duplicated for bypass versions
+static constexpr uint32_t ETH_ORDER_COUNT = 15 *2; //duplicated for bypass versions
 static constexpr uint16_t ETH_ORDER_BYPASS_ID_TO_ADD = 3000; //the ID of the real version plus this makes the ID of the bypass version
 static constexpr uint16_t ETH_ORDER_BYPASS_INDEX_TO_ADD = ETH_ORDER_COUNT/2;
 
@@ -64,4 +64,12 @@ static constexpr uint16_t LANDING_TCP_ORDER_INDEX = FIRST_ETH_TESTING_ORDER_INDE
 
 static constexpr uint16_t START_HORIZONTAL_LEVITATION_TCP_ORDER_ID = 360;
 static constexpr uint16_t START_HORIZONTAL_LEVITATION_TCP_ORDER_INDEX = FIRST_ETH_TESTING_ORDER_INDEX+9;
+
+
+static constexpr uint16_t STABLE_LEVITATION_TCP_ORDER_ID = 363;
+static constexpr uint16_t STABLE_LEVITATION_TCP_ORDER_INDEX = FIRST_ETH_TESTING_ORDER_INDEX+10;
+
+static constexpr uint16_t UNSTABLE_LEVITATION_TCP_ORDER_ID = 364;
+static constexpr uint16_t UNSTABLE_LEVITATION_TCP_ORDER_INDEX = FIRST_ETH_TESTING_ORDER_INDEX+11;
+
 

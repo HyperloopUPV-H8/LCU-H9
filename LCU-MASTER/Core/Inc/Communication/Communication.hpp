@@ -113,6 +113,8 @@ public:
 
 		EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder<0>(STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), nullptr);
 		EthernetOrders[LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder<0>(LANDING_COMPLETE_CONFIRMATION_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), nullptr);
+		EthernetOrders[STABLE_LEVITATION_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder<0>(STABLE_LEVITATION_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), set_slave_stable_levitation);
+		EthernetOrders[UNSTABLE_LEVITATION_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder<0>(UNSTABLE_LEVITATION_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), set_slave_unstable_levitation);
 		}
 	}
 
@@ -190,6 +192,16 @@ public:
 		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2] = new SPIPacket<0>;
 		SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[STOP_LEVITATION_ORDER_INDEX] = new SPIStackOrder(STOP_LEVITATION_ORDER_ID, *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2], *SPIPackets[STOP_LEVITATION_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[STABLE_LEVITATION_ORDER_INDEX*2] = new SPIPacket<0>;
+		SPIPackets[STABLE_LEVITATION_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[STABLE_LEVITATION_ORDER_INDEX] = new SPIStackOrder(STABLE_LEVITATION_ORDER_ID, *SPIPackets[STABLE_LEVITATION_ORDER_INDEX*2], *SPIPackets[STABLE_LEVITATION_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[UNSTABLE_LEVITATION_ORDER_INDEX*2] = new SPIPacket<0>;
+		SPIPackets[UNSTABLE_LEVITATION_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[UNSTABLE_LEVITATION_ORDER_INDEX] = new SPIStackOrder(UNSTABLE_LEVITATION_ORDER_ID, *SPIPackets[UNSTABLE_LEVITATION_ORDER_INDEX*2], *SPIPackets[UNSTABLE_LEVITATION_ORDER_INDEX*2+1]);
 	}
 
 
@@ -300,6 +312,14 @@ if constexpr(USING_5DOF){
 
 	static void start_slave_horizontal_levitation(){
 		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[START_HORIZONTAL_LEVITATION_ORDER_ID]);
+	}
+
+	static void set_slave_stable_levitation(){
+		SPI::master_transmit_Order(spi_id,SPIBaseOrder::SPIOrdersByID[STABLE_LEVITATION_ORDER_ID]);
+	}
+
+	static void set_slave_unstable_levitation(){
+		SPI::master_transmit_Order(spi_id,SPIBaseOrder::SPIOrdersByID[UNSTABLE_LEVITATION_ORDER_ID]);
 	}
 
 	static void set_new_slave_data_ready(){new_slave_data = true;}

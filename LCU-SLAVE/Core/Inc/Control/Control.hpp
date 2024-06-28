@@ -83,9 +83,9 @@ public:
 
 		float prev =  position_error_data[Z_POSITION_INDEX];
 		position_error_data[Z_POSITION_INDEX] = position_z - desired_airgap_distance_m; //substracts the reference of levitation distance, only for Z pos as all other references are 0
-		/*if(abs(position_error_data[Z_POSITION_INDEX]-prev)>MAXIMUM_EXPECTED_Z_INCREASE){
-			position_error_data[Z_POSITION_INDEX]  = prev;
-		}*/
+		if(position_error_data[Z_POSITION_INDEX]-prev>MAXIMUM_EXPECTED_Z_INCREASE && Airgaps::activate_filter){
+			position_error_data[Z_POSITION_INDEX] = prev + MAXIMUM_EXPECTED_Z_INCREASE;
+		}
 	}
 
 	void DOF5_control_loop(){

@@ -13,6 +13,8 @@ public:
 	static IntegerMovingAverage<uint16_t, uint16_t, 0, 10> airgaps_average_binary_data_array[AIRGAP_COUNT];
 	static float airgaps_data_array[AIRGAP_COUNT];
 
+	static bool activate_filter;
+
 	static inline void inscribe(){
 			airgaps_index_array[0] = ADC::inscribe(AIRGAP_PIN_1);
 			airgaps_index_array[1] = ADC::inscribe(AIRGAP_PIN_2);
@@ -39,13 +41,18 @@ public:
 	}
 
 	static inline void update_binary(){
+		if(!activate_filter){update_binary_no_filter();return;}
 		for(int i = 0; i < AIRGAP_COUNT; i++){
 			uint16_t prev = airgaps_binary_data_array[i];
 			airgaps_binary_data_array[i] = *airgaps_binary_data_pointer_array[i];
+
 			if(airgaps_binary_data_array[i] < MINIMUM_EXPECTED_AIRGAP_VALUE_BINARY[i] ||
-				airgaps_binary_data_array[i] > MAXIMUM_EXPECTED_AIRGAP_VALUE_BINARY[i] ||
-				abs((int32_t)airgaps_binary_data_array[i] - (int32_t)prev) > MAXIMUM_EXPECTED_AIRGAP_INCREASE_BINARY[i]){
+				airgaps_binary_data_array[i] > MAXIMUM_EXPECTED_AIRGAP_VALUE_BINARY[i]){
 				airgaps_binary_data_array[i] = prev;
+			}/*else if((int32_t)airgaps_binary_data_array[i] - (int32_t)prev > MAXIMUM_EXPECTED_AIRGAP_INCREASE_BINARY[i]){
+				airgaps_binary_data_array[i] = prev + MAXIMUM_EXPECTED_AIRGAP_INCREASE_BINARY[i];
+			}*/else if((int32_t)prev - (int32_t)airgaps_binary_data_array[i] > MAXIMUM_EXPECTED_AIRGAP_INCREASE_BINARY[i]){
+				airgaps_binary_data_array[i] = prev - MAXIMUM_EXPECTED_AIRGAP_INCREASE_BINARY[i];
 			}
 			airgaps_average_binary_data_array[i].compute(airgaps_binary_data_array[i]);
 		}

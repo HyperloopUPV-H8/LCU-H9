@@ -58,6 +58,8 @@ inline void update_levitation_constants(float new_levitation_constants[LDU_COUNT
 inline void start_levitation_control();
 inline void start_vertical_levitation();
 inline void start_horizontal_levitation();
+inline void set_stable_levitation_callback();
+inline void set_unstable_levitation_callback();
 
 inline void set_desired_current_on_LDU();
 inline void test_pwm_order_callback();

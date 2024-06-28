@@ -137,6 +137,14 @@ void test_pwm_order_callback(){
 	lcu_instance->ldu_buffers.turn_on();
 }
 
+void set_stable_levitation_callback(){
+	Airgaps::activate_filter = true;
+}
+
+void set_unstable_levitation_callback(){
+	Airgaps::activate_filter = false;
+}
+
 void define_shared_data(){
 	shared_control_data.master_status = new uint8_t{0};
 	shared_control_data.master_secondary_status = new uint8_t{0};
