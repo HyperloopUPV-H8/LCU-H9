@@ -40,7 +40,7 @@ public:
 
 	static bool initial_to_operational_transition(){
 		if(Communication::flags.SPIEstablished){
-			return Communication::vcu_connection->is_connected();
+			return Communication::vcu_connection->is_connected()
 		}
 		return false;
 	}
@@ -54,7 +54,7 @@ public:
 			ErrorHandler("Slave gone into fault");
 			return true;
 		}
-		return !(Communication::vcu_connection->is_connected()) ;
+		return false;
 	}
 };
 
