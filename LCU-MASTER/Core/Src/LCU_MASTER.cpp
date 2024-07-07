@@ -28,7 +28,11 @@ void LCU::update(){
 	if(commflags.temperature_read){
 		commflags.temperature_read = false;
 		Temperature_Sensors::update();
-
+	}
+	if constexpr(!POD_PROTECTIONS){
+		if(Communication::vcu_connection.is_connected()){
+			ErrorHandler("VCU connected while LCU is not in POD mode");
+		}
 	}
 }
 
