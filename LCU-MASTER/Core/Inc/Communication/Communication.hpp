@@ -95,7 +95,7 @@ public:
 			shared_control_data.float_airgap_distance[6],shared_control_data.float_airgap_distance[7]
 		);
 
-		EthernetPackets[LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_INDEX] = new StackPacket(LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_ID, &shared_pod_data.average_integer_lpu_voltage);
+		EthernetPackets[LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_INDEX] = new StackPacket(LPU_VOLTAGE_INTEGER_DATA_TCP_PACKET_ID, &shared_pod_data.average_integer_lpu_voltage, &shared_pod_data.useless);
 
 		//ORDERS
 		for(int i = 0; i < 2; i++){
