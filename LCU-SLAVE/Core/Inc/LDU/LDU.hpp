@@ -137,7 +137,7 @@ else{
 		}
 if constexpr(!IS_HIL){
 		if(current_shunt > MAXIMUM_PEAK_CURRENT || current_shunt < -MAXIMUM_PEAK_CURRENT){
-			send_to_fault();
+			send_to_fault(index + LDU_CURRENT_LIMIT);
 		}
 }
 		Voltage_by_current_PI.input(desired_current - current_shunt);

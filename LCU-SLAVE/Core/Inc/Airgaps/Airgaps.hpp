@@ -37,6 +37,7 @@ public:
 		for(int i = 0; i < AIRGAP_COUNT; i++){
 			airgaps_binary_data_array[i] = *airgaps_binary_data_pointer_array[i];
 			airgaps_average_binary_data_array[i].compute(airgaps_binary_data_array[i]);
+			check_binary_value(i);
 		}
 	}
 
@@ -55,7 +56,17 @@ public:
 				airgaps_binary_data_array[i] = prev - MAXIMUM_EXPECTED_AIRGAP_INCREASE_BINARY[i];
 			}
 			airgaps_average_binary_data_array[i].compute(airgaps_binary_data_array[i]);
+			check_binary_value(i);
 		}
+	}
+
+	static inline void check_binary_value(uint8_t index){
+if constexpr(POD_PROTECTIONS){
+		if(airgaps_average_binary_data_array[index].output_value <= MINIMUM_BINARY_VALUE_IN_CONNECTION||
+			airgaps_average_binary_data_array[index].output_value >= MAXIMUM_BINARY_VALUE_IN_CONNECTION){
+			send_to_fault(AIRGAP_OUT_OF_RANGE+index);
+		}
+}
 	}
 
 	static inline void update_data(){

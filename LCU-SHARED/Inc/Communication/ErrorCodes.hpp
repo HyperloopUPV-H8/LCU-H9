@@ -1,0 +1,12 @@
+#pragma once
+
+#include "Tools/Tools.hpp"
+
+enum ERROR_CODES: uint16_t{
+	ERROR_HANDLER_TRIGGERED = 1,
+	MASTER_NOT_IN_SAME_MODE = 2,
+	MASTER_SENT_TO_FAULT = 3,
+	LDU_ZEROING_FAILED = 11, //11 to 20
+	LDU_CURRENT_LIMIT = 21, //21 to 30
+	AIRGAP_OUT_OF_RANGE = 31, //31 to 38
+};

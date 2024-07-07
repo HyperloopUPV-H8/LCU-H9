@@ -200,11 +200,17 @@ if constexpr(!IS_HIL){
 	}
 
 	static bool general_transition_initial_to_fault(){
-		return false;
+		if(*shared_control_data.master_status == (uint8_t) FAULT){
+			send_to_fault(MASTER_SENT_TO_FAULT);
+		}
+		return status_flags.fault_flag;
 	}
 
 	static bool general_transition_operational_to_fault(){
-		return status_flags.fault_flag || *shared_control_data.master_status == (uint8_t) FAULT;
+		if( *shared_control_data.master_status == (uint8_t) FAULT){
+			send_to_fault(MASTER_SENT_TO_FAULT);
+		}
+		return status_flags.fault_flag;
 	}
 
 	static void general_enter_operational(){
@@ -239,6 +245,11 @@ if constexpr(!IS_HIL){
 	void start_horizontal_control(){
 		lcu_instance->ldu_buffers.turn_on_ems();
 		levitationControl.start_horizontal();
+	}
+
+	void enter_booster(){
+		lcu_instance->ldu_buffers.turn_on_ems();
+		levitationControl.enter_booster();
 	}
 
 	void stop_control(){

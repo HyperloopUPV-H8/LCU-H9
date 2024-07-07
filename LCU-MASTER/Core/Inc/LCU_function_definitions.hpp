@@ -50,6 +50,7 @@ void general_enter_operational(){
 void general_enter_fault(){
 	lcu_instance->leds.Set_Fault_Led();
 	LDU_Buffer::shutdown_buffers();
+	ProtectionManager::propagate_fault();
 }
 
 void initial_order_callback(){

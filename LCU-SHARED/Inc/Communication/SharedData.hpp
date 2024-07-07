@@ -2,6 +2,7 @@
 
 #include "Tools/Tools.hpp"
 #include "Layout/Layout.hpp"
+#include "Communication/ErrorCodes.hpp"
 
 struct control_data{
 	uint8_t *master_status = nullptr;
@@ -10,7 +11,7 @@ struct control_data{
 	uint8_t *slave_status = nullptr;
 	uint8_t *slave_secondary_status = nullptr; //contains flags on INITIAL, levitation state machine on OPERATIONAL, and TODO: error code on FAULT
 	uint8_t *slave_running_mode = nullptr; //running mode code on INITIAL
-
+	uint16_t error_code = 0;
 
 	uint16_t fixed_coil_temperature[LDU_COUNT]{0};
 	uint16_t fixed_lpu_temperature[LDU_COUNT]{0};

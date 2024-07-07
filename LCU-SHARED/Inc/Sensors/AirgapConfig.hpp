@@ -24,6 +24,11 @@ static constexpr uint32_t AIRGAP_UPDATE_DATA_HZ = 7500;
 static constexpr float AIRGAP_UPDATE_PERIOD_SECONDS = (float) (1.0 / AIRGAP_UPDATE_DATA_HZ);
 static constexpr uint32_t AIRGAP_MOVING_AVERAGE_COUNT = 10;
 
+static constexpr uint16_t MINIMUM_BINARY_VALUE_IN_CONNECTION = 5000; //around 0.0607 m in airgap
+static constexpr uint16_t MAXIMUM_BINARY_VALUE_IN_CONNECTION = 60000; //around 0.0886 m in airgap
+
+
+//stable levitation filter
 static constexpr float MAXIMUM_EXPECTED_AIRGAP_INCREASE = 0.00001;
 static constexpr uint16_t MAXIMUM_EXPECTED_AIRGAP_INCREASE_BINARY[AIRGAP_COUNT]{
 		(uint16_t)(MAXIMUM_EXPECTED_AIRGAP_INCREASE/(FLOAT_AIRGAP_SLOPE[0]*ADC_BINARY_TO_VOLTAGE)),

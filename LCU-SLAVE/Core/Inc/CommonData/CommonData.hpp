@@ -11,6 +11,7 @@
 #define USING_1DOF (RUNNING_MODE == DOF1)
 #define USING_5DOF (RUNNING_MODE != DOF1)
 #define IS_HIL (RUNNING_MODE == DOF5_HIL)
+#define POD_PROTECTIONS (RUNNING_MODE == POD)
 
 constexpr float MAXIMUM_DESIRED_CURRENT = 40.0;
 constexpr float MAXIMUM_PEAK_CURRENT = 55.0;
@@ -58,6 +59,7 @@ inline void update_levitation_constants(float new_levitation_constants[LDU_COUNT
 inline void start_levitation_control();
 inline void start_vertical_levitation();
 inline void start_horizontal_levitation();
+inline void enter_booster_callback();
 inline void set_stable_levitation_callback();
 inline void set_unstable_levitation_callback();
 
@@ -67,7 +69,7 @@ inline void test_pwm_order_callback();
 inline void define_shared_data();
 inline void initial_order_callback();
 
-inline void send_to_fault();
+inline void send_to_fault(uint16_t error_code);
 inline void shutdown(); //stops all controls and sets PWM to 0
 
 /* #################################################################

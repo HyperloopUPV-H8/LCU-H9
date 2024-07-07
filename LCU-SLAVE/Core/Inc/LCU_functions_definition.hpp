@@ -9,13 +9,22 @@ if constexpr(IS_HIL){
 		*shared_control_data.slave_secondary_status |= 1;
 		return;
 }
+	if(lcu_instance->CalibrationCompleted){return;}
 	bool zeroing_complete = true;
 	for(int i = 0; i < LDU_COUNT; i++){
 		lcu_instance->ldu_array[i].ldu_zeroing();
 		zeroing_complete &= lcu_instance->ldu_array[i].flags.finished_zeroing;
 	}
+
 	if(zeroing_complete){
 		for(int i = 0; i < LDU_COUNT; i++){
+
+if constexpr(POD_PROTECTIONS){ 	//POD_PROTECTIONS
+			if(abs(lcu_instance->ldu_array[i].average_current_for_zeroing.output_value) > CURRENT_ZEROING_MAXIMUM_LIMIT){
+				send_to_fault(LDU_ZEROING_FAILED + i);
+			}
+}								//end of POD_PROTECTIONS
+
 			lcu_instance->ldu_array[i].shunt_zeroing_offset = lcu_instance->ldu_array[i].average_current_for_zeroing.output_value;
 		}
 		lcu_instance->CalibrationCompleted = true;
@@ -121,10 +130,13 @@ void reset_desired_current_on_LDU(){//TODO: implement as order on GUI
 }
 
 void initial_order_callback(){
-	if(*shared_control_data.master_running_mode == *shared_control_data.slave_running_mode && *shared_control_data.slave_secondary_status == 1){
-		Communication::flags.SPIEstablished = true;
+	if(*shared_control_data.master_running_mode == *shared_control_data.slave_running_mode)
+	{
+		if (*shared_control_data.slave_secondary_status == 1){
+			Communication::flags.SPIEstablished = true;
+		}
 	}else{
-
+		send_to_fault(MASTER_NOT_IN_SAME_MODE);
 	}
 }
 
@@ -142,6 +154,10 @@ void set_stable_levitation_callback(){
 
 void set_unstable_levitation_callback(){
 	Airgaps::activate_filter = false;
+}
+
+void enter_booster_callback(){
+	lcu_instance->enter_booster();
 }
 
 void define_shared_data(){
@@ -171,7 +187,10 @@ void define_shared_data(){
 	}
 }
 
-void send_to_fault(){
+void send_to_fault(uint16_t error_code){
+	if(shared_control_data.error_code == 0){
+		shared_control_data.error_code = error_code;
+	}
 	status_flags.fault_flag = true;
 }
 

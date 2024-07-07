@@ -40,19 +40,24 @@ public:
 
 	static bool initial_to_operational_transition(){
 		if(Communication::flags.SPIEstablished){
-			return Communication::vcu_connection->is_connected()
+if constexpr(POD_PROTECTIONS){
+			return Communication::vcu_connection->is_connected();
+}
+			return true;
 		}
 		return false;
 	}
 
 	static bool initial_to_fault_transition(){
+		if(*shared_control_data.slave_status == (uint8_t)FAULT){
+			ErrorHandler("Slave gone into fault, with error code %i",shared_control_data.error_code);
+		}
 		return false;
 	}
 
 	static bool operational_to_fault_transition(){
 		if(*shared_control_data.slave_status == (uint8_t)FAULT){
-			ErrorHandler("Slave gone into fault");
-			return true;
+			ErrorHandler("Slave gone into fault, with error code %i",shared_control_data.error_code);
 		}
 		return false;
 	}

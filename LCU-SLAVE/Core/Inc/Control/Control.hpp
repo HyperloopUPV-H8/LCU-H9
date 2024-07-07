@@ -136,12 +136,18 @@ public:
 	}
 
 	void start_horizontal(){
+		desired_current = 0.0;
 		status_flags.enable_lateral_levitation_control = true;
 		reset_horizontal();
 		position_error_data_derivative[Z_ROTATION_INDEX].input(position_error_data[Z_ROTATION_INDEX]);
 		position_error_data_derivative[Z_ROTATION_INDEX].execute();
 		position_error_data_derivative[Y_POSITION_INDEX].input(position_error_data[Y_POSITION_INDEX]);
 		position_error_data_derivative[Y_POSITION_INDEX].execute();
+	}
+
+	void enter_booster(){
+		desired_current = 20.0;
+		status_flags.enable_lateral_levitation_control = false;
 	}
 
 	void stop(){
@@ -156,7 +162,7 @@ public:
 			position_error_data_derivative[i].reset();
 			position_error_data_integral[i].reset();
 		}
-		desired_current = 0;
+		desired_current = 0.0;
 	}
 
 	void reset_horizontal(){
