@@ -30,7 +30,7 @@ void LCU::update(){
 		Temperature_Sensors::update();
 	}
 	if constexpr(!POD_PROTECTIONS){
-		if(Communication::vcu_connection.is_connected()){
+		if(Communication::vcu_connection->is_connected()){
 			ErrorHandler("VCU connected while LCU is not in POD mode");
 		}
 	}

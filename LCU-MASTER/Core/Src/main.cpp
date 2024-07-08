@@ -12,14 +12,7 @@ void asserts();
 int main(void)
 {
 	asserts();
-	Communication::test_order_received = new DigitalOutput(PG4);
-
 	LCU lcu_master;
-
-	Communication::test_order_received->turn_on();
-	uint8_t unused_variable = Time::set_timeout(3000,[&](){
-		Communication::test_order_received->turn_off();
-	});
 
 
 	while(1) {
