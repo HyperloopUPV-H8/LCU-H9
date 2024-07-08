@@ -22,3 +22,8 @@ static constexpr double CURRENT_ZEROING_SAMPLING_PERIOD_SECONDS = (double) (1.0 
 static constexpr uint32_t CURRENT_ZEROING_SAMPLE_AMOUNT = 1000;
 
 static constexpr float CURRENT_ZEROING_MAXIMUM_LIMIT = 50.0;
+static constexpr float MAXIMUM_DESIRED_CURRENT = 40.0;
+static constexpr float MAXIMUM_PEAK_CURRENT = 55.0;
+static constexpr float MAXIMUM_EXTENDED_CURRENT = 25.0;
+static constexpr float MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS = 4.0;
+

@@ -30,6 +30,8 @@ public:
 	uint32_t zeroing_sample_count = 0;
 	float shunt_zeroing_offset = 0.0;
 
+	Boundary<float,ProtectionType::TIME_ACCUMULATION> maximum_accumulated_current{&current_shunt,MAXIMUM_EXTENDED_CURRENT,MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS,CURRENT_CONTROL_FREQ_HZ};
+
 
 	struct LDU_flags{
 		bool fixed_vbat = false;
@@ -131,15 +133,22 @@ else{
 		if(!flags.fixed_vbat){ //fixed VBAT is used to clamp value when levitating
 			battery_voltage = get_vbat_data();
 		}
-		if(!flags.enable_current_control){
-			change_pwms_duty(LDU_duty_cycle);
-			return;
-		}
+
+
 if constexpr(!IS_HIL){
 		if(current_shunt > MAXIMUM_PEAK_CURRENT || current_shunt < -MAXIMUM_PEAK_CURRENT){
 			send_to_fault(index + LDU_CURRENT_LIMIT);
 		}
+		maximum_accumulated_current.check_accumulation(current_shunt);
+		if(maximum_accumulated_current.still_good == Protections::FAULT){
+			send_to_fault(index + LDU_CURRENT_LIMIT);
+		}
 }
+		if(!flags.enable_current_control){
+			change_pwms_duty(LDU_duty_cycle);
+			return;
+		}
+
 		Voltage_by_current_PI.input(desired_current - current_shunt);
 		Voltage_by_current_PI.execute();
 
@@ -175,6 +184,7 @@ if constexpr(!IS_HIL){
 	}
 
 	void add_ldu_protection(){
+		//ProtectionManager::_add_protection(&current_shunt,maximum_accumulated_current);
 	}
 
 	void ldu_zeroing(){

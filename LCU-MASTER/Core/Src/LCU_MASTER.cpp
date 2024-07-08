@@ -56,13 +56,19 @@ void LCU::state_machine_definition(){
 	generalStateMachine.add_transition(INITIAL, FAULT, initial_to_fault_transition);
 	generalStateMachine.add_transition(OPERATIONAL, FAULT, operational_to_fault_transition);
 
+
+	//INITIAL CYCLIC ACTIONS
+	generalStateMachine.add_mid_precision_cyclic_action([&](){if(!Temperature_Sensors::zeroing_complete){Temperature_Sensors::zeroing();}else{Temperature_Sensors::update();}}, std::chrono::microseconds((int) (TEMPERATURE_ZEROING_SAMPLING_PERIOD_SECONDS*1000000)), INITIAL);
+	generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_initial_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), INITIAL);
+
+	//COMMUNICATION CYCLIC ACTIONS
 	generalStateMachine.add_low_precision_cyclic_action([&](){lcu_instance->commflags.lcu_data_to_send = true;}, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
 	generalStateMachine.add_low_precision_cyclic_action([&](){lcu_instance->commflags.voltage_data_OBCCU_to_send = true;}, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
 	generalStateMachine.add_low_precision_cyclic_action([&](){lcu_instance->commflags.levitation_data_to_send = true;}, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
-	generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_initial_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), INITIAL);
 	generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_data_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
 	generalStateMachine.add_low_precision_cyclic_action([&](){ErrorHandlerModel::error_to_communicate = true;}, chrono::seconds(2), {FAULT});
-	generalStateMachine.add_mid_precision_cyclic_action([&](){if(!Temperature_Sensors::zeroing_complete){Temperature_Sensors::zeroing();}else{Temperature_Sensors::update();}}, std::chrono::microseconds((int) (TEMPERATURE_ZEROING_SAMPLING_PERIOD_SECONDS*1000000)), INITIAL);
+
+	//READ AND PROTECTION CYCLIC ACTIONS
 	generalStateMachine.add_mid_precision_cyclic_action([&](){lcu_instance->commflags.temperature_read = true;}, std::chrono::microseconds((int) (TEMPERATURE_UPDATE_PERIOD_SECONDS*1000000)), {OPERATIONAL, FAULT});
 
 	generalStateMachine.add_enter_action(general_enter_operational, OPERATIONAL);
