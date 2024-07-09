@@ -26,6 +26,10 @@ public:
 	SPIStackOrder* SPIOrders[SPI_ORDER_COUNT];
 	SPIBasePacket* SPIPackets[SPI_ORDER_COUNT*2];
 
+	static uint32_t last_current_control_count_for_frequency;
+	static uint32_t last_levitation_control_count_for_frequency;
+	static uint32_t current_control_frequency;
+	static uint32_t levitation_control_frequency;
 
 	static struct communication_flags{
 		bool SPIEstablished = false;
@@ -59,7 +63,7 @@ public:
 
 		//PACKETS
 		EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX] = new StackPacket(SEND_LEVITATION_DATA_TCP_PACKET_ID,
-			shared_control_data.current_control_count, shared_control_data.levitation_control_count,
+			&current_control_frequency, &levitation_control_frequency,
 			shared_control_data.float_current_ref[0], shared_control_data.float_current_ref[1], shared_control_data.float_current_ref[2],
 			shared_control_data.float_current_ref[3], shared_control_data.float_current_ref[4],
 			shared_control_data.float_current_ref[5],
@@ -238,6 +242,13 @@ if constexpr(USING_5DOF){
 	}
 
 	//###################  PERIODIC FUNCTIONS  #########################
+
+	static void calculate_control_frequencies(){
+		current_control_frequency = *shared_control_data.current_control_count - last_current_control_count_for_frequency;
+		levitation_control_frequency = *shared_control_data.levitation_control_count - last_levitation_control_count_for_frequency;
+		last_current_control_count_for_frequency = *shared_control_data.current_control_count;
+		last_levitation_control_count_for_frequency = *shared_control_data.levitation_control_count;
+	}
 
 	static void send_lcu_data_to_backend(){
 		upd_gui->send_packet(*EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX]);

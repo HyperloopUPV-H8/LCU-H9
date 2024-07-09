@@ -67,6 +67,7 @@ void LCU::state_machine_definition(){
 	generalStateMachine.add_low_precision_cyclic_action([&](){lcu_instance->commflags.levitation_data_to_send = true;}, chrono::milliseconds(ETH_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
 	generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_data_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), {OPERATIONAL, FAULT});
 	generalStateMachine.add_low_precision_cyclic_action([&](){ErrorHandlerModel::error_to_communicate = true;}, chrono::seconds(2), {FAULT});
+	generalStateMachine.add_low_precision_cyclic_action(Communication::calculate_control_frequencies, chrono::seconds(1), {INITIAL, OPERATIONAL, FAULT});
 
 	//READ AND PROTECTION CYCLIC ACTIONS
 	generalStateMachine.add_mid_precision_cyclic_action([&](){lcu_instance->commflags.temperature_read = true;}, std::chrono::microseconds((int) (TEMPERATURE_UPDATE_PERIOD_SECONDS*1000000)), {OPERATIONAL, FAULT});

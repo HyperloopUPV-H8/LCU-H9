@@ -12,6 +12,11 @@ DigitalOutput* Communication::test_order_received = nullptr;
 Order* Communication::EthernetOrders[ETH_ORDER_COUNT]{nullptr};
 Packet* Communication::EthernetPackets[ETH_PACKET_COUNT]{nullptr};
 
+uint32_t Communication::last_current_control_count_for_frequency = 0;
+uint32_t Communication::last_levitation_control_count_for_frequency = 0;
+uint32_t Communication::current_control_frequency = 0;
+uint32_t Communication::levitation_control_frequency = 0;
+
 Communication::communication_flags Communication::flags{};
 
 uint16_t Communication::ldu_number_to_change = 0;
