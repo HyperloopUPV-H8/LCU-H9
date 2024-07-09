@@ -40,6 +40,7 @@ public:
 	void update(){
 		generalStateMachine.check_transitions();
 		Communication::update();
+		if(ErrorHandlerModel::error_triggered > 0.0){send_to_fault(ERROR_HANDLER_TRIGGERED);}
 if constexpr(USING_1DOF){
 		DOF1_update();
 }

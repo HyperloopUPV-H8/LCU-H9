@@ -146,7 +146,7 @@ if constexpr(!IS_HIL){
 		ExtendedCurrentCompressedDataCounter++;
 		if(ExtendedCurrentCompressedDataCounter >= MAXIMUM_EXTENDED_CURRENT_COMPRESSOR_SPAN){
 			ExtendedCurrentCompressedDataCounter = 0;
-			ExtendedCurrentAdder.compute(ExtendedCurrentDataCompressor.output_value);
+			ExtendedCurrentAdder.compute(abs(ExtendedCurrentDataCompressor.output_value));
 			if(ExtendedCurrentAdder.output_value > MAXIMUM_EXTENDED_CURRENT){
 				send_to_fault(index + LDU_EXTENDED_CURRENT_LIMIT);
 			}
