@@ -2,6 +2,8 @@
 
 #include <CommonData/CommonData.hpp>
 
+static constexpr uint16_t MAXIMUM_EXTENDED_CURRENT_ACCUMULATOR_SIZE = ((uint16_t)((4.0*CURRENT_CONTROL_FREQ_HZ)/MAXIMUM_EXTENDED_CURRENT_COMPRESSOR_SPAN));
+
 template<LCU_running_modes running_mode, typename arithmetic_number_type>
 class LDU{
 public:
@@ -30,8 +32,9 @@ public:
 	uint32_t zeroing_sample_count = 0;
 	float shunt_zeroing_offset = 0.0;
 
-	Boundary<float,ProtectionType::TIME_ACCUMULATION> maximum_accumulated_current{&current_shunt,MAXIMUM_EXTENDED_CURRENT,MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS,CURRENT_CONTROL_FREQ_HZ};
-
+	FloatMovingAverage<MAXIMUM_EXTENDED_CURRENT_COMPRESSOR_SPAN> ExtendedCurrentDataCompressor;
+	FloatMovingAverage<MAXIMUM_EXTENDED_CURRENT_ACCUMULATOR_SIZE> ExtendedCurrentAdder;
+	uint16_t ExtendedCurrentCompressedDataCounter = 0;
 
 	struct LDU_flags{
 		bool fixed_vbat = false;
@@ -139,10 +142,16 @@ if constexpr(!IS_HIL){
 		if(current_shunt > MAXIMUM_PEAK_CURRENT || current_shunt < -MAXIMUM_PEAK_CURRENT){
 			send_to_fault(index + LDU_CURRENT_LIMIT);
 		}
-		maximum_accumulated_current.check_accumulation(current_shunt);
-		if(maximum_accumulated_current.still_good == Protections::FAULT){
-			send_to_fault(index + LDU_CURRENT_LIMIT);
+		ExtendedCurrentDataCompressor.compute(current_shunt);
+		ExtendedCurrentCompressedDataCounter++;
+		if(ExtendedCurrentCompressedDataCounter >= MAXIMUM_EXTENDED_CURRENT_COMPRESSOR_SPAN){
+			ExtendedCurrentCompressedDataCounter = 0;
+			ExtendedCurrentAdder.compute(ExtendedCurrentDataCompressor.output_value);
+			if(ExtendedCurrentAdder.output_value > MAXIMUM_EXTENDED_CURRENT){
+				send_to_fault(index + LDU_EXTENDED_CURRENT_LIMIT);
+			}
 		}
+
 }
 		if(!flags.enable_current_control){
 			change_pwms_duty(LDU_duty_cycle);
@@ -181,10 +190,6 @@ if constexpr(!IS_HIL){
 		if(duty < 0.5 && duty > -0.5){return 0;}
 
 		return duty;
-	}
-
-	void add_ldu_protection(){
-		//ProtectionManager::_add_protection(&current_shunt,maximum_accumulated_current);
 	}
 
 	void ldu_zeroing(){

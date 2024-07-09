@@ -9,6 +9,7 @@ enum ERROR_CODES: uint16_t{
 	LDU_ZEROING_FAILED = 11, //11 to 20
 	LDU_CURRENT_LIMIT = 21, //21 to 30
 	AIRGAP_OUT_OF_RANGE = 31, //31 to 38
+	LDU_EXTENDED_CURRENT_LIMIT = 41, //41 to 50
 };
 
 
@@ -45,4 +46,14 @@ static unordered_map<uint16_t,string> error_codes_messages{
 	{36,"Airgap 6 out of range, either noise is too high or the cable is disconnected"},
 	{37,"Airgap 7 out of range, either noise is too high or the cable is disconnected"},
 	{38,"Airgap 8 out of range, either noise is too high or the cable is disconnected"},
+	{41,"LDU 1 was in high current for an extended time"},
+	{42,"LDU 2 was in high current for an extended time"},
+	{43,"LDU 3 was in high current for an extended time"},
+	{44,"LDU 4 was in high current for an extended time"},
+	{45,"LDU 5 was in high current for an extended time"},
+	{46,"LDU 6 was in high current for an extended time"},
+	{47,"LDU 7 was in high current for an extended time"},
+	{48,"LDU 8 was in high current for an extended time"},
+	{49,"LDU 9 was in high current for an extended time"},
+	{50,"LDU 10 was in high current for an extended time"},
 };
