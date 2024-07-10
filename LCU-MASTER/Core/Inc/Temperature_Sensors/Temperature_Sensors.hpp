@@ -85,6 +85,13 @@ if constexpr(POD_PROTECTIONS){
 
 			shared_control_data.float_coil_temperature[i] = coil_temperature[i] - coil_temperature_adc_zeroing[i];
 			shared_control_data.float_lpu_temperature[i] = lpu_temperature[i] - lpu_temperature_adc_zeroing[i];
+
+			if(shared_control_data.float_coil_temperature[i] > COIL_TEMPERATURE_MAXIMUM_LIMIT){
+				ErrorHandler("Coil %i temperature is over the safe maximum",i);
+			}
+			if(shared_control_data.float_lpu_temperature[i] > LPU_TEMPERATURE_MAXIMUM_LIMIT){
+				ErrorHandler("LPU %i temperature is over the safe maximum",i);
+			}
 		}
 	}
 };

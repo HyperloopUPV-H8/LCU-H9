@@ -15,3 +15,5 @@ static constexpr uint32_t TEMPERATURE_ZEROING_SAMPLE_AMOUNT = 1000;
 
 static constexpr float LPU_TEMPERATURE_ZEROING_MAXIMUM_LIMIT = 100.0;
 static constexpr float COIL_TEMPERATURE_ZEROING_MAXIMUM_LIMIT = 100.0;
+static constexpr float LPU_TEMPERATURE_MAXIMUM_LIMIT = 100.0;
+static constexpr float COIL_TEMPERATURE_MAXIMUM_LIMIT = 100.0;
