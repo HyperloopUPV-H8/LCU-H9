@@ -31,7 +31,7 @@ void LCU::update(){
 	}
 	if constexpr(!POD_PROTECTIONS){
 		if(Communication::vcu_connection->is_connected()){
-			ErrorHandler("VCU connected while LCU is not in POD mode");
+			//ErrorHandler("VCU connected while LCU is not in POD mode");
 		}
 	}
 }
