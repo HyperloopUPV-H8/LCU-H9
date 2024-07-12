@@ -4,10 +4,10 @@
 
 
 enum LCU_states{
-	DEFINING = 0b00000001,
-	INITIAL = 0b00100000,
-	OPERATIONAL = 0b01010000,
-	FAULT = 0b11111111,
+	DEFINING = 0,
+	INITIAL = 1,
+	OPERATIONAL = 2,
+	FAULT = 3,
 };
 
 static struct lcu_status_flags{
