@@ -49,6 +49,11 @@ void general_enter_operational(){
 
 void general_enter_fault(){
 	lcu_instance->leds.Set_Fault_Led();
+	if(ProtectionManager::external_trigger){
+		Communication::lcu_data_transaction();
+		Communication::send_discharge();
+		uint8_t id = Time::set_timeout(13000, [&](){Communication::stop_slave_levitation();LDU_Buffer::shutdown_buffers();});
+	}
 	LDU_Buffer::shutdown_buffers();
 	ProtectionManager::propagate_fault();
 }

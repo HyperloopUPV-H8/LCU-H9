@@ -120,6 +120,7 @@ public:
 		EthernetOrders[STABLE_LEVITATION_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder<0>(STABLE_LEVITATION_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), set_slave_stable_levitation);
 		EthernetOrders[UNSTABLE_LEVITATION_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder<0>(UNSTABLE_LEVITATION_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), set_slave_unstable_levitation);
 		EthernetOrders[ENTER_BOOSTER_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder<0>(ENTER_BOOSTER_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), set_slave_booster);
+		EthernetOrders[DISCHARGE_TCP_ORDER_INDEX+(i*ETH_ORDER_BYPASS_INDEX_TO_ADD)] = new StackOrder<0>(DISCHARGE_TCP_ORDER_ID+(i*ETH_ORDER_BYPASS_ID_TO_ADD), send_discharge);
 		}
 	}
 
@@ -213,6 +214,12 @@ public:
 		SPIPackets[ENTER_BOOSTER_ORDER_INDEX*2] = new SPIPacket<0>;
 		SPIPackets[ENTER_BOOSTER_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[ENTER_BOOSTER_ORDER_INDEX] = new SPIStackOrder(ENTER_BOOSTER_ORDER_ID, *SPIPackets[ENTER_BOOSTER_ORDER_INDEX*2], *SPIPackets[ENTER_BOOSTER_ORDER_INDEX*2+1]);
+
+
+		SPIPackets[SEND_DISCHARGE_ORDER_INDEX*2] = new SPIPacket<0>;
+		SPIPackets[SEND_DISCHARGE_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[SEND_DISCHARGE_ORDER_INDEX] = new SPIStackOrder(SEND_DISCHARGE_ORDER_ID, *SPIPackets[SEND_DISCHARGE_ORDER_INDEX*2], *SPIPackets[SEND_DISCHARGE_ORDER_INDEX*2+1]);
+
 	}
 
 
@@ -235,9 +242,11 @@ if constexpr(USING_5DOF){
 			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]) - *shared_control_data.shunt_zeroing_offset[i];
 			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
 			shared_pod_data.integer_lpu_voltage[i] = battery_voltage_binary_to_OBCCU(*shared_control_data.fixed_battery_voltage[i]);
-			shared_pod_data.average_integer_lpu_voltage += shared_pod_data.integer_lpu_voltage[i];
+			if(i != 5){
+				shared_pod_data.average_integer_lpu_voltage += shared_pod_data.integer_lpu_voltage[i];
+			}
 		}
-		shared_pod_data.average_integer_lpu_voltage /= LDU_COUNT;
+		shared_pod_data.average_integer_lpu_voltage /= 9;
 }
 	}
 
@@ -342,6 +351,11 @@ if constexpr(USING_5DOF){
 
 	static void set_slave_booster(){
 		SPI::master_transmit_Order(spi_id,SPIBaseOrder::SPIOrdersByID[ENTER_BOOSTER_ORDER_ID]);
+	}
+
+	static void send_discharge(){
+		SPI::master_transmit_Order(spi_id,SPIBaseOrder::SPIOrdersByID[SEND_DISCHARGE_ORDER_ID]);
+		uint8_t id = Time::set_timeout(13000, stop_slave_levitation());
 	}
 
 	static void set_new_slave_data_ready(){new_slave_data = true;}

@@ -131,6 +131,12 @@ public:
 		SPIPackets[ENTER_BOOSTER_ORDER_INDEX*2+1] = new SPIPacket<0>;
 		SPIOrders[ENTER_BOOSTER_ORDER_INDEX] = new SPIStackOrder(ENTER_BOOSTER_ORDER_ID, *SPIPackets[ENTER_BOOSTER_ORDER_INDEX*2], *SPIPackets[ENTER_BOOSTER_ORDER_INDEX*2+1]);
 		SPIOrders[ENTER_BOOSTER_ORDER_INDEX]->set_callback(enter_booster_callback);
+
+
+		SPIPackets[SEND_DISCHARGE_ORDER_INDEX*2] = new SPIPacket<0>;
+		SPIPackets[SEND_DISCHARGE_ORDER_INDEX*2+1] = new SPIPacket<0>;
+		SPIOrders[SEND_DISCHARGE_ORDER_INDEX] = new SPIStackOrder(SEND_DISCHARGE_ORDER_ID, *SPIPackets[SEND_DISCHARGE_ORDER_INDEX*2], *SPIPackets[SEND_DISCHARGE_ORDER_INDEX*2+1]);
+		SPIOrders[SEND_DISCHARGE_ORDER_INDEX]->set_callback(activate_discharge_callback);
 	}
 
 	static void start(){

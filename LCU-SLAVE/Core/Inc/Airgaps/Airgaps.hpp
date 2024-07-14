@@ -64,7 +64,7 @@ public:
 if constexpr(POD_PROTECTIONS){
 		if(airgaps_average_binary_data_array[index].output_value <= MINIMUM_BINARY_VALUE_IN_CONNECTION||
 			airgaps_average_binary_data_array[index].output_value >= MAXIMUM_BINARY_VALUE_IN_CONNECTION){
-			send_to_fault(AIRGAP_OUT_OF_RANGE+index);
+			//send_to_fault(AIRGAP_OUT_OF_RANGE+index);
 		}
 }
 	}

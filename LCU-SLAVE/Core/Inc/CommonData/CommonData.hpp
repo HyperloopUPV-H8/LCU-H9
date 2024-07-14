@@ -66,6 +66,7 @@ inline void initial_order_callback();
 
 inline void send_to_fault(uint16_t error_code);
 inline void shutdown(); //stops all controls and sets PWM to 0
+inline void activate_discharge_callback();
 
 /* #################################################################
  * #####################  PINOUT DISTRIBUTION  #####################

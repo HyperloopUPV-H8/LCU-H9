@@ -192,10 +192,24 @@ void send_to_fault(uint16_t error_code){
 		shared_control_data.error_code = error_code;
 	}
 	status_flags.fault_flag = true;
+	shutdown();
 }
 
 void shutdown(){
 	lcu_instance->ldu_buffers.turn_off();
 	lcu_instance->levitationControl.stop();
 	disable_all_current_controls();
+}
+
+void activate_discharge_callback(){
+if constexpr(POD_PROTECTIONS){
+	lcu_instance->ldu_buffers.turn_on();
+	disable_all_current_controls();
+	lcu_instance->ldu_array[6].desired_current = 5.0;
+	lcu_instance->ldu_array[6].enable_current_control();
+	lcu_instance->ldu_array[7].desired_current = 5.0;
+	lcu_instance->ldu_array[7].enable_current_control();
+	lcu_instance->ldu_array[6].flags.fixed_vbat = false;
+	lcu_instance->ldu_array[7].flags.fixed_vbat = false;
+}
 }
