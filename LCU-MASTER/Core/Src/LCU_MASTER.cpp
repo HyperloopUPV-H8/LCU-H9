@@ -2,7 +2,7 @@
 
 LCU *lcu_instance = nullptr;
 
-LCU::LCU() : generalStateMachine(DEFINING){
+LCU::LCU() : generalStateMachine(DEFINING), levitationStateMachine(IDLE){
 	lcu_instance = this;
 	sensors_inscribe();
 	state_machine_definition();
@@ -13,7 +13,6 @@ LCU::LCU() : generalStateMachine(DEFINING){
 	communication.define_packets();
 	Communication::start();
 	commflags.definition_complete = true;
-
 }
 
 
@@ -21,6 +20,7 @@ void LCU::update(){
 	STLIB::update();
 	SPI::Order_update();
 	generalStateMachine.check_transitions();
+	levitationStateMachine.check_transitions();
 	ProtectionManager::check_protections();
 	Communication::update();
 	check_communications();
@@ -51,10 +51,17 @@ void LCU::state_machine_definition(){
 	generalStateMachine.add_state(OPERATIONAL);
 	generalStateMachine.add_state(FAULT);
 
+	levitationStateMachine.add_state(VERTICAL_LEVITATION);
+	levitationStateMachine.add_state(COMPLETE_LEVITATION);
+	levitationStateMachine.add_state(BOOSTING);
+	levitationStateMachine.add_state(DISCHARGING);
+
 	generalStateMachine.add_transition(DEFINING, INITIAL, defining_to_initial_transition);
 	generalStateMachine.add_transition(INITIAL, OPERATIONAL, initial_to_operational_transition);
 	generalStateMachine.add_transition(INITIAL, FAULT, initial_to_fault_transition);
 	generalStateMachine.add_transition(OPERATIONAL, FAULT, operational_to_fault_transition);
+
+	levitationStateMachine.add_transition(DISCHARGING, IDLE, discharging_to_idle_transition);
 
 
 	//INITIAL CYCLIC ACTIONS
@@ -74,6 +81,9 @@ void LCU::state_machine_definition(){
 
 	generalStateMachine.add_enter_action(general_enter_operational, OPERATIONAL);
 	generalStateMachine.add_enter_action(general_enter_fault, FAULT);
+
+	levitationStateMachine.add_enter_action(levitation_enter_idle, IDLE);
+	levitationStateMachine.add_enter_action(levitation_enter_discharging, DISCHARGING);
 }
 
 void LCU::check_communications(){
@@ -89,4 +99,9 @@ void LCU::check_communications(){
 		Communication::send_voltage_data_to_OBCCU();
 		commflags.voltage_data_OBCCU_to_send = false;
 	}
+}
+
+void LCU::set_timer_to_idle(uint64_t milliseconds_to_idle){
+	commflags.timer_to_idle_flag = true;
+	timer_to_idle_ns = Time::get_global_tick() + milliseconds_to_idle*1000000;
 }

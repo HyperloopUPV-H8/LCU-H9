@@ -51,11 +51,26 @@ void general_enter_fault(){
 	lcu_instance->leds.Set_Fault_Led();
 	if(ProtectionManager::external_trigger){
 		Communication::lcu_data_transaction();
-		Communication::send_discharge();
-		uint8_t id = Time::set_timeout(13000, [&](){Communication::stop_slave_levitation();LDU_Buffer::shutdown_buffers();});
+		lcu_instance->levitationStateMachine.force_change_state(DISCHARGING);
+	}else{
+		LDU_Buffer::shutdown_buffers();
+		lcu_instance->levitationStateMachine.force_change_state(IDLE);
 	}
-	LDU_Buffer::shutdown_buffers();
 	ProtectionManager::propagate_fault();
+}
+
+void levitation_enter_idle(){
+	lcu_instance->commflags.timer_to_idle_flag = false;
+	Communication::stop_slave_levitation();
+}
+
+void external_enter_discharging(){
+	lcu_instance->levitationStateMachine.force_change_state(DISCHARGING);
+}
+
+void levitation_enter_discharging(){
+	Communication::send_discharge();
+	lcu_instance->set_timer_to_idle(13000);
 }
 
 void initial_order_callback(){

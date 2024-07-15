@@ -14,7 +14,9 @@ class LCU{
 public:
 	Communication communication;
 	StateMachine generalStateMachine;
+	StateMachine levitationStateMachine;
 	LEDs leds;
+	uint64_t timer_to_idle_ns = 0;
 
 	struct CommFlags{
 		bool lcu_data_to_send = false;
@@ -22,6 +24,7 @@ public:
 		bool voltage_data_OBCCU_to_send = false;
 		bool definition_complete = false;
 		bool temperature_read = false;
+		bool timer_to_idle_flag = false;
 	}commflags;
 
 	LCU();
@@ -29,6 +32,7 @@ public:
 	void state_machine_definition();
 	void update();
 	void check_communications();
+	void set_timer_to_idle(uint64_t milliseconds_to_idle);
 
 	static bool defining_to_initial_transition(){
 		return lcu_instance->commflags.definition_complete;
@@ -56,6 +60,14 @@ if constexpr(POD_PROTECTIONS){
 			slave_error_parser(shared_control_data.error_code);
 		}
 		return false;
+	}
+
+	static bool common_to_idle_transition(){
+		return lcu_instance->commflags.timer_to_idle_flag && Time::get_global_tick() > lcu_instance->timer_to_idle_ns;
+	}
+
+	static bool discharging_to_idle_transition(){
+		return shared_pod_data.average_integer_lpu_voltage < 30 || common_to_idle_transition();
 	}
 
 	static void slave_error_parser(uint16_t error_code){

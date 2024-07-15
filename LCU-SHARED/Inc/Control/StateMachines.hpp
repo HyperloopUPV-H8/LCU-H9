@@ -10,6 +10,14 @@ enum LCU_states{
 	FAULT = 3,
 };
 
+enum levitation_states{
+	IDLE = 0,
+	VERTICAL_LEVITATION,
+	COMPLETE_LEVITATION,
+	BOOSTING,
+	DISCHARGING,
+};
+
 static struct lcu_status_flags{
 	bool enable_current_control = false;
 	bool enable_levitation_control = false;

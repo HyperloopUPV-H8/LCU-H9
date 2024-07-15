@@ -45,6 +45,10 @@ void fix_buffer_reset_low();
 void define_shared_data();
 void general_enter_operational();
 void general_enter_fault();
+void levitation_enter_idle();
+void external_enter_discharging();
+void levitation_enter_discharging();
+
 void initial_order_callback();
 
 /* #################################################################
