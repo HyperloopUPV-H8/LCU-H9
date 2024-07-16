@@ -139,3 +139,6 @@ inline void activate_discharge_callback();
 #define ON_BUFF_PIN_4 		PG4
 #define ON_BUFF_PIN_5 		PB2
 
+
+extern bool active_discharge_in_fault;
+
