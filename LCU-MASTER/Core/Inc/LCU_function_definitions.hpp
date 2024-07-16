@@ -51,7 +51,17 @@ void general_enter_fault(){
 	lcu_instance->leds.Set_Fault_Led();
 	if(ProtectionManager::external_trigger){
 		Communication::lcu_data_transaction();
-		lcu_instance->levitationStateMachine.force_change_state(DISCHARGING);
+		// ONLY SENT DISCHARGE ORDER IF SOME VOLTAGE PRESENT IN THE BUS
+
+		//if(shared_pod_data.average_integer_lpu_voltage > 133){
+			for(int i = 0; i < 5; i++){
+				LDU_Buffer::ldu_buffers[i].fixed_reset = true;
+				LDU_Buffer::ldu_buffers[i].fixed_reset_value = true;
+			}
+			uint8_t id = Time::set_timeout(100, [&](){
+				lcu_instance->levitationStateMachine.force_change_state(DISCHARGING);
+			});
+		//}
 	}else{
 		LDU_Buffer::shutdown_buffers();
 		lcu_instance->levitationStateMachine.force_change_state(IDLE);
@@ -70,7 +80,7 @@ void external_enter_discharging(){
 
 void levitation_enter_discharging(){
 	Communication::send_discharge();
-	lcu_instance->set_timer_to_idle(13000);
+	//lcu_instance->set_timer_to_idle(13000);
 }
 
 void initial_order_callback(){

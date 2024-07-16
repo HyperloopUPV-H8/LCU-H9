@@ -72,7 +72,8 @@ if constexpr(USING_5DOF){
 			PendingLevitationControl = false;
 		}
 
-		if(PendingCurrentPI){
+		if((PendingCurrentPI && generalStateMachine.current_state == OPERATIONAL)||
+			(generalStateMachine.current_state == FAULT && active_discharge_in_fault)){
 			CurrentPICount++;
 			run_current_PI();
 			PendingCurrentPI = false;
@@ -169,7 +170,7 @@ if constexpr(USING_1DOF){
 		generalStateMachine.add_high_precision_cyclic_action(DOF1_update_airgap_data, std::chrono::microseconds((int) (AIRGAP_UPDATE_PERIOD_SECONDS*1000000)), {INITIAL, OPERATIONAL, FAULT});
 		generalStateMachine.add_low_precision_cyclic_action(DOF1_update_vbat_data, std::chrono::microseconds((int) (VBAT_UPDATE_PERIOD_SECONDS*1000000)), {INITIAL, OPERATIONAL, FAULT});
 }
-		generalStateMachine.add_mid_precision_cyclic_action(rise_current_PI_flag, std::chrono::microseconds((int) (CURRENT_CONTROL_PERIOD_SECONDS*1000000)), OPERATIONAL);
+		generalStateMachine.add_mid_precision_cyclic_action(rise_current_PI_flag, std::chrono::microseconds((int) (CURRENT_CONTROL_PERIOD_SECONDS*1000000)), {OPERATIONAL,FAULT});
 		generalStateMachine.add_low_precision_cyclic_action(rise_levitation_control_flag,  std::chrono::microseconds((int) (LEVITATION_CONTROL_PERIOD_SECONDS*1000000)), OPERATIONAL);
 		generalStateMachine.add_mid_precision_cyclic_action(LDUs_zeroing, std::chrono::microseconds((int) (CURRENT_ZEROING_SAMPLING_PERIOD_SECONDS*1000000)), INITIAL);
 

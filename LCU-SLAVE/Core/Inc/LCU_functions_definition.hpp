@@ -44,8 +44,12 @@ void DOF5_update_shunt_data(){
 
 void DOF5_update_vbat_data(){
 	for(int i = 0; i < LDU_COUNT; i++){
+		if(i == 0 || i == 5)continue;
 		lcu_instance->ldu_array[i].update_vbat_value();
 	}
+	lcu_instance->ldu_array[0].binary_average_battery_voltage.output_value = (lcu_instance->ldu_array[1].binary_average_battery_voltage.output_value + lcu_instance->ldu_array[2].binary_average_battery_voltage.output_value)/2;
+	lcu_instance->ldu_array[5].binary_average_battery_voltage.output_value = (lcu_instance->ldu_array[6].binary_average_battery_voltage.output_value  + lcu_instance->ldu_array[7].binary_average_battery_voltage.output_value)/2;
+
 }
 
 void DOF1_update_airgap_data(){
@@ -202,14 +206,26 @@ void shutdown(){
 }
 
 void activate_discharge_callback(){
-if constexpr(POD_PROTECTIONS){
-	lcu_instance->ldu_buffers.turn_on();
-	disable_all_current_controls();
-	lcu_instance->ldu_array[6].desired_current = 5.0;
-	lcu_instance->ldu_array[6].enable_current_control();
-	lcu_instance->ldu_array[7].desired_current = 5.0;
-	lcu_instance->ldu_array[7].enable_current_control();
-	lcu_instance->ldu_array[6].flags.fixed_vbat = false;
-	lcu_instance->ldu_array[7].flags.fixed_vbat = false;
-}
+uint8_t id = Time::set_timeout(100, [&](){
+	active_discharge_in_fault = true;
+	if constexpr(POD_PROTECTIONS){
+		lcu_instance->ldu_buffers.turn_on();
+		disable_all_current_controls();
+		lcu_instance->ldu_array[6].desired_current = 5.0;
+		lcu_instance->ldu_array[6].flags.disabled_LDU = false;
+		lcu_instance->ldu_array[6].enable_current_control();
+		lcu_instance->ldu_array[7].desired_current = 5.0;
+		lcu_instance->ldu_array[7].flags.disabled_LDU = false;
+		lcu_instance->ldu_array[7].enable_current_control();
+		lcu_instance->ldu_array[6].flags.fixed_vbat = false;
+		lcu_instance->ldu_array[7].flags.fixed_vbat = false;
+	}
+});
+Time::set_timeout(13000,[&](){
+	active_discharge_in_fault = false;
+	lcu_instance->ldu_array[6].desired_current =0.0;
+	lcu_instance->ldu_array[6].disable_current_control();
+	lcu_instance->ldu_array[7].desired_current =0.0;
+	lcu_instance->ldu_array[7].disable_current_control();
+});
 }
