@@ -17,6 +17,7 @@ if constexpr(IS_HIL){
 	}
 
 	if(zeroing_complete){
+		Airgaps::check_flags = true;
 		for(int i = 0; i < LDU_COUNT; i++){
 
 if constexpr(POD_PROTECTIONS){ 	//POD_PROTECTIONS

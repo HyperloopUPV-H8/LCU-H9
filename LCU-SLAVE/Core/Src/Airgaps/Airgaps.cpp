@@ -6,3 +6,4 @@ uint16_t Airgaps::airgaps_binary_data_array[AIRGAP_COUNT]{0};
 IntegerMovingAverage<uint16_t, uint16_t, 0, 10> Airgaps::airgaps_average_binary_data_array[AIRGAP_COUNT]{};
 float Airgaps::airgaps_data_array[AIRGAP_COUNT]{0.0};
 bool Airgaps::activate_filter = false;
+bool Airgaps::check_flags = false;

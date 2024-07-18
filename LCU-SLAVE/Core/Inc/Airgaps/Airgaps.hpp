@@ -14,6 +14,7 @@ public:
 	static float airgaps_data_array[AIRGAP_COUNT];
 
 	static bool activate_filter;
+	static bool check_flags;
 
 	static inline void inscribe(){
 			airgaps_index_array[0] = ADC::inscribe(AIRGAP_PIN_1);
@@ -61,10 +62,12 @@ public:
 	}
 
 	static inline void check_binary_value(uint8_t index){
+		if(index == 5){
+			return;
+		}
 if constexpr(POD_PROTECTIONS){
-		if(airgaps_average_binary_data_array[index].output_value <= MINIMUM_BINARY_VALUE_IN_CONNECTION||
-			airgaps_average_binary_data_array[index].output_value >= MAXIMUM_BINARY_VALUE_IN_CONNECTION){
-			//send_to_fault(AIRGAP_OUT_OF_RANGE+index);
+		if(check_flags && airgaps_average_binary_data_array[index].output_value <= MINIMUM_BINARY_VALUE_IN_CONNECTION){
+			send_to_fault(AIRGAP_OUT_OF_RANGE+index);
 		}
 }
 	}
