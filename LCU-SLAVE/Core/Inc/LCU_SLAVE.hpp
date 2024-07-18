@@ -72,7 +72,7 @@ if constexpr(USING_5DOF){
 			PendingLevitationControl = false;
 		}
 
-		if((PendingCurrentPI && generalStateMachine.current_state == OPERATIONAL)||
+		if(PendingCurrentPI && (generalStateMachine.current_state == OPERATIONAL)||
 			(generalStateMachine.current_state == FAULT && active_discharge_in_fault)){
 			CurrentPICount++;
 			run_current_PI();
