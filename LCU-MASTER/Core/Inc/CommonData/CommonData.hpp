@@ -12,17 +12,28 @@
 #define USING_1DOF (RUNNING_MODE == DOF1)
 #define USING_5DOF (RUNNING_MODE != DOF1)
 #define IS_HIL (RUNNING_MODE == DOF5_HIL)
+#define POD_PROTECTIONS (RUNNING_MODE == POD)
 
-static ip_addr_t master_ip_addr = IPADDR4_INIT_BYTES(MASTER_IP_B0,MASTER_IP_B1,MASTER_IP_B2,MASTER_IP_B3);
-static IPV4 MASTER_IP(master_ip_addr);
+static ip_addr_t master_ip_addr = IPADDR4_INIT_BYTES(LCU_IP_B0,LCU_IP_B1,LCU_IP_B2,LCU_IP_B3);
+static IPV4 LCU_IP(master_ip_addr);
+static IPV4 VCU_IP("192.168.1.3");
 static IPV4 BACKEND("192.168.0.9");
 
 
 static const uint32_t TCP_SERVER_PORT = 50500;
 static const uint32_t TCP_CLIENT_PORT = 50401;
+static const uint32_t TCP_VCU_PORT = 50304;
+static const uint32_t UDP_VCU_PORT = 50414;
 static const uint32_t UDP_PORT = 50400;
 
 extern control_data shared_control_data;
+
+struct pod_data{
+	uint16_t integer_lpu_voltage[LDU_COUNT]{0};
+	uint16_t average_integer_lpu_voltage = 0;
+	bool useless = false;
+};
+extern pod_data shared_pod_data;
 
 /*  #################################################################
  *  ################  STATIC FUNCTIONS DECLARATION  #################
@@ -34,6 +45,10 @@ void fix_buffer_reset_low();
 void define_shared_data();
 void general_enter_operational();
 void general_enter_fault();
+void levitation_enter_idle();
+void external_enter_discharging();
+void levitation_enter_discharging();
+
 void initial_order_callback();
 
 /* #################################################################
@@ -103,5 +118,9 @@ void initial_order_callback();
 #define LCU_BUFFER_FAULT_PIN_10 PE11
 #define LCU_BUFFER_READY_PIN_10 PE10
 
+
 #define OPERATIONAL_LED_PIN 	PG8
-#define FAULT_LED_PIN			PG6
+#define FAULT_LED_PIN			PG7
+#define CAN_LED_PIN				PG6
+#define FLASH_LED_PIN			PG5
+#define SLEEP_LED_PIN			PG4

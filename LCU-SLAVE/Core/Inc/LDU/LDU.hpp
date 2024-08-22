@@ -2,6 +2,8 @@
 
 #include <CommonData/CommonData.hpp>
 
+static constexpr uint16_t MAXIMUM_EXTENDED_CURRENT_ACCUMULATOR_SIZE = ((uint16_t)((4.0*CURRENT_CONTROL_FREQ_HZ)/MAXIMUM_EXTENDED_CURRENT_COMPRESSOR_SPAN));
+
 template<LCU_running_modes running_mode, typename arithmetic_number_type>
 class LDU{
 public:
@@ -30,10 +32,12 @@ public:
 	uint32_t zeroing_sample_count = 0;
 	float shunt_zeroing_offset = 0.0;
 
-	Boundary<decltype(current_shunt), TIME_ACCUMULATION> *extended_current_protection;
-
+	FloatMovingAverage<MAXIMUM_EXTENDED_CURRENT_COMPRESSOR_SPAN> ExtendedCurrentDataCompressor;
+	FloatMovingAverage<MAXIMUM_EXTENDED_CURRENT_ACCUMULATOR_SIZE> ExtendedCurrentAdder;
+	uint16_t ExtendedCurrentCompressedDataCounter = 0;
 
 	struct LDU_flags{
+		bool disabled_LDU = false;
 		bool fixed_vbat = false;
 		bool enable_current_control = false;
 		bool fixed_desired_current = false;
@@ -41,7 +45,11 @@ public:
 	}flags;
 
 
-	LDU() = default;
+	LDU(){
+		flags.disabled_LDU = true;
+		flags.finished_zeroing = true;
+	}
+
 	LDU(uint8_t index, Pin &pwm1_pin, Pin &pwm2_pin, Pin &vbat_pin, Pin &shunt_pin, float current_kp, float current_ki) :
 		index(index), Voltage_by_current_PI{current_kp, current_ki, CURRENT_CONTROL_PERIOD_SECONDS}{
 		pwm1 = new PWM(pwm1_pin);
@@ -54,6 +62,7 @@ public:
 
 
 	void start(){
+		if(flags.disabled_LDU){return;}
 		pwm1->turn_on();
 		pwm2->turn_on();
 		ADC::turn_on(vbat_id);
@@ -68,6 +77,7 @@ public:
 	void change_pwm2_duty(float duty){pwm2->set_duty_cycle(duty);}
 
 	void change_pwms_duty(float duty){
+		if(flags.disabled_LDU){return;}
 if constexpr(IS_HIL){
 		if(duty > 0){
 			change_pwm2_duty(5);
@@ -92,12 +102,13 @@ if constexpr(IS_HIL){
 		change_pwms_duty(duty);
 	}
 
-	void change_pwm1_freq(uint32_t freq){pwm1->set_frequency(freq);}
-	void change_pwm2_freq(uint32_t freq){pwm2->set_frequency(freq);}
+	void change_pwm1_freq(uint32_t freq){if(flags.disabled_LDU){return;}pwm1->set_frequency(freq);}
+	void change_pwm2_freq(uint32_t freq){if(flags.disabled_LDU){return;}pwm2->set_frequency(freq);}
 
 
 	//################  DATA STORING, PROCESSING AND PARSING  ###################
 	void update_vbat_value(){
+		if(flags.disabled_LDU){return;}
 		if(!flags.fixed_vbat){
 			binary_battery_voltage = ADC::get_int_value(vbat_id);
 			binary_average_battery_voltage.compute(binary_battery_voltage);
@@ -105,6 +116,7 @@ if constexpr(IS_HIL){
 	}
 
 	float get_vbat_data(){
+		if(flags.disabled_LDU){return 0.0;}
 if constexpr(IS_HIL){
 		return 250.0;
 }
@@ -114,11 +126,13 @@ else{
 	}
 
 	void update_shunt_value(){
+		if(flags.disabled_LDU){return;}
 		binary_current_shunt = *binary_current_shunt_pointer;
 		binary_average_current_shunt.compute(binary_current_shunt);
 	}
 
 	float get_shunt_data(){
+		if(flags.disabled_LDU){return 0.0;}
 		if constexpr(IS_HIL){
 			return coil_current_binary_to_real_HIL(binary_average_current_shunt.output_value);
 		}else{
@@ -129,24 +143,33 @@ else{
 
 	//#################  CURRENT CONTROL  #########################
 	void PI_current_to_duty_cycle(){
+		if(flags.disabled_LDU){return;}
 		current_shunt = get_shunt_data();
 		if(!flags.fixed_vbat){ //fixed VBAT is used to clamp value when levitating
 			battery_voltage = get_vbat_data();
 		}
+
+
+if constexpr(!IS_HIL){
+		if(current_shunt > MAXIMUM_PEAK_CURRENT || current_shunt < -MAXIMUM_PEAK_CURRENT){
+			send_to_fault(index + LDU_CURRENT_LIMIT);
+		}
+		ExtendedCurrentDataCompressor.compute(current_shunt);
+		ExtendedCurrentCompressedDataCounter++;
+		if(ExtendedCurrentCompressedDataCounter >= MAXIMUM_EXTENDED_CURRENT_COMPRESSOR_SPAN){
+			ExtendedCurrentCompressedDataCounter = 0;
+			ExtendedCurrentAdder.compute(abs(ExtendedCurrentDataCompressor.output_value));
+			if(ExtendedCurrentAdder.output_value > MAXIMUM_EXTENDED_CURRENT){
+				send_to_fault(index + LDU_EXTENDED_CURRENT_LIMIT);
+			}
+		}
+
+}
 		if(!flags.enable_current_control){
 			change_pwms_duty(LDU_duty_cycle);
 			return;
 		}
-if constexpr(!IS_HIL){
-		if(current_shunt > MAXIMUM_PEAK_CURRENT || current_shunt < -MAXIMUM_PEAK_CURRENT){
-			send_to_fault();
-		}
 
-		//extended_current_protection->check_accumulation(current_shunt);
-		//if(extended_current_protection->still_good == Protections::FAULT){
-		//	send_to_fault();
-		//}
-}
 		Voltage_by_current_PI.input(desired_current - current_shunt);
 		Voltage_by_current_PI.execute();
 
@@ -161,6 +184,7 @@ if constexpr(!IS_HIL){
 	}
 
 	float calculate_duty_by_voltage(float voltage){
+		if(flags.disabled_LDU){return 0.0;}
 		if(battery_voltage < 0.0001){
 			return 0;
 		}
@@ -181,12 +205,8 @@ if constexpr(!IS_HIL){
 		return duty;
 	}
 
-	void add_ldu_protection(){
-		extended_current_protection = new Boundary<decltype(current_shunt), TIME_ACCUMULATION>(&current_shunt, MAXIMUM_PEAK_CURRENT, MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS, CURRENT_CONTROL_FREQ_HZ);
-		//add_protection(&current_shunt,*extended_current_protection); //TODO: doesn t work
-	}
-
 	void ldu_zeroing(){
+		if(flags.disabled_LDU){return;}
 		if(flags.finished_zeroing){
 			return;
 		}
@@ -196,4 +216,20 @@ if constexpr(!IS_HIL){
 			flags.finished_zeroing = true;
 		}
 	}
+
+	void enable_current_control(){
+		if(flags.disabled_LDU){return;}
+		flags.enable_current_control = true;
+		flags.fixed_vbat = true;
+	}
+
+	void disable_current_control(){
+		if(flags.disabled_LDU){return;}
+		flags.enable_current_control = false;
+		flags.fixed_vbat = false;
+		desired_current = 0.0;
+		Voltage_by_current_PI.reset();
+		set_pwms_duty(0);
+	}
 };
+

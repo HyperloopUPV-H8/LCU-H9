@@ -40,7 +40,7 @@ if constexpr(IS_HIL){
 		if(shut_down){
 			reset.turn_off();
 		}else{
-			if(fixed_reset && fixed_reset_value || !fixed_reset && check_ready_and_fault()){
+			if((fixed_reset && fixed_reset_value) || (!fixed_reset && check_ready_and_fault())){
 				reset.turn_on();
 			}else{
 				reset.turn_off();

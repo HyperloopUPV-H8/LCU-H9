@@ -11,11 +11,7 @@
 #define USING_1DOF (RUNNING_MODE == DOF1)
 #define USING_5DOF (RUNNING_MODE != DOF1)
 #define IS_HIL (RUNNING_MODE == DOF5_HIL)
-
-constexpr float MAXIMUM_DESIRED_CURRENT = 38.0;
-constexpr float MAXIMUM_PEAK_CURRENT = 45.0;
-constexpr float MAXIMUM_EXTENDED_CURRENT = 25.0;
-constexpr float MAXIMUM_TIME_FOR_EXTENDED_CURRENT_SECONDS = 4.0;
+#define POD_PROTECTIONS (RUNNING_MODE == POD)
 
 #define DOF1_USED_LDU_INDEX 9
 #define DOF1_USED_AIRGAP_INDEX 0
@@ -56,14 +52,21 @@ inline void run_current_PI();
 
 inline void update_levitation_constants(float new_levitation_constants[LDU_COUNT][15]);
 inline void start_levitation_control();
+inline void start_vertical_levitation();
+inline void start_horizontal_levitation();
+inline void enter_booster_callback();
+inline void set_stable_levitation_callback();
+inline void set_unstable_levitation_callback();
+
 inline void set_desired_current_on_LDU();
-inline void initial_order_callback();
 inline void test_pwm_order_callback();
 
 inline void define_shared_data();
+inline void initial_order_callback();
 
-inline void send_to_fault();
-inline void shutdown();
+inline void send_to_fault(uint16_t error_code);
+inline void shutdown(); //stops all controls and sets PWM to 0
+inline void activate_discharge_callback();
 
 /* #################################################################
  * #####################  PINOUT DISTRIBUTION  #####################
@@ -135,4 +138,7 @@ inline void shutdown();
 #define ON_BUFF_PIN_3 		PG5
 #define ON_BUFF_PIN_4 		PG4
 #define ON_BUFF_PIN_5 		PB2
+
+
+extern bool active_discharge_in_fault;
 

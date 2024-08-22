@@ -9,13 +9,23 @@ if constexpr(IS_HIL){
 		*shared_control_data.slave_secondary_status |= 1;
 		return;
 }
+	if(lcu_instance->CalibrationCompleted){return;}
 	bool zeroing_complete = true;
 	for(int i = 0; i < LDU_COUNT; i++){
 		lcu_instance->ldu_array[i].ldu_zeroing();
 		zeroing_complete &= lcu_instance->ldu_array[i].flags.finished_zeroing;
 	}
+
 	if(zeroing_complete){
+		Airgaps::check_flags = true;
 		for(int i = 0; i < LDU_COUNT; i++){
+
+if constexpr(POD_PROTECTIONS){ 	//POD_PROTECTIONS
+			if(abs(lcu_instance->ldu_array[i].average_current_for_zeroing.output_value) > CURRENT_ZEROING_MAXIMUM_LIMIT){
+				send_to_fault(LDU_ZEROING_FAILED + i);
+			}
+}								//end of POD_PROTECTIONS
+
 			lcu_instance->ldu_array[i].shunt_zeroing_offset = lcu_instance->ldu_array[i].average_current_for_zeroing.output_value;
 		}
 		lcu_instance->CalibrationCompleted = true;
@@ -35,8 +45,12 @@ void DOF5_update_shunt_data(){
 
 void DOF5_update_vbat_data(){
 	for(int i = 0; i < LDU_COUNT; i++){
+		if(i == 0 || i == 5)continue;
 		lcu_instance->ldu_array[i].update_vbat_value();
 	}
+	lcu_instance->ldu_array[0].binary_average_battery_voltage.output_value = (lcu_instance->ldu_array[1].binary_average_battery_voltage.output_value + lcu_instance->ldu_array[2].binary_average_battery_voltage.output_value)/2;
+	lcu_instance->ldu_array[5].binary_average_battery_voltage.output_value = (lcu_instance->ldu_array[6].binary_average_battery_voltage.output_value  + lcu_instance->ldu_array[7].binary_average_battery_voltage.output_value)/2;
+
 }
 
 void DOF1_update_airgap_data(){
@@ -73,10 +87,7 @@ void enable_all_current_controls(){
 
 void disable_all_current_controls(){
 	for(int i = 0; i < LDU_COUNT; i++){
-		lcu_instance->ldu_array[i].flags.enable_current_control = false;
-		lcu_instance->ldu_array[i].flags.fixed_vbat = false;
-		lcu_instance->ldu_array[i].Voltage_by_current_PI.reset();
-		lcu_instance->ldu_array[i].set_pwms_duty(0);
+		lcu_instance->ldu_array[i].disable_current_control();
 	}
 }
 
@@ -99,14 +110,22 @@ void start_levitation_control(){
 	lcu_instance->start_control();
 }
 
+void start_vertical_levitation(){
+	lcu_instance->set_desired_airgap_distance(data_to_change);
+	lcu_instance->start_vertical_control();
+}
+
+void start_horizontal_levitation(){
+	lcu_instance->start_horizontal_control();
+}
+
 
 void set_desired_current_on_LDU(){
-	lcu_instance->ldu_array[ldu_to_change].desired_current = data_to_change;
  	disable_all_current_controls();
+ 	lcu_instance->ldu_array[ldu_to_change].desired_current = data_to_change;
  	lcu_instance->ldu_array[ldu_to_change].flags.fixed_vbat = true;
  	lcu_instance->ldu_array[ldu_to_change].flags.enable_current_control = true;
 }
-
 
 void reset_desired_current_on_LDU(){//TODO: implement as order on GUI
 	for(int i = 0; i < LDU_COUNT; i++){
@@ -116,10 +135,13 @@ void reset_desired_current_on_LDU(){//TODO: implement as order on GUI
 }
 
 void initial_order_callback(){
-	if(*shared_control_data.master_running_mode == *shared_control_data.slave_running_mode && *shared_control_data.slave_secondary_status == 1){
-		Communication::flags.SPIEstablished = true;
+	if(*shared_control_data.master_running_mode == *shared_control_data.slave_running_mode)
+	{
+		if (*shared_control_data.slave_secondary_status == 1){
+			Communication::flags.SPIEstablished = true;
+		}
 	}else{
-
+		send_to_fault(MASTER_NOT_IN_SAME_MODE);
 	}
 }
 
@@ -129,6 +151,18 @@ void test_pwm_order_callback(){
 	lcu_instance->ldu_array[ldu_to_change].set_pwms_duty(duty_to_change);
 	lcu_instance->ldu_array[ldu_to_change].desired_current = 0;
 	lcu_instance->ldu_buffers.turn_on();
+}
+
+void set_stable_levitation_callback(){
+	Airgaps::activate_filter = true;
+}
+
+void set_unstable_levitation_callback(){
+	Airgaps::activate_filter = false;
+}
+
+void enter_booster_callback(){
+	lcu_instance->enter_booster();
 }
 
 void define_shared_data(){
@@ -158,16 +192,41 @@ void define_shared_data(){
 	}
 }
 
-void send_to_fault(){
+void send_to_fault(uint16_t error_code){
+	if(shared_control_data.error_code == 0){
+		shared_control_data.error_code = error_code;
+	}
 	status_flags.fault_flag = true;
+	shutdown();
 }
 
 void shutdown(){
 	lcu_instance->ldu_buffers.turn_off();
-	disable_all_current_controls();
-	for(int i = 0; i < LDU_COUNT; i++){
-		lcu_instance->ldu_array[i].Voltage_by_current_PI.reset();
-		lcu_instance->ldu_array[i].set_pwms_duty(0);
-	}
 	lcu_instance->levitationControl.stop();
+	disable_all_current_controls();
+}
+
+void activate_discharge_callback(){
+uint8_t id = Time::set_timeout(100, [&](){
+	active_discharge_in_fault = true;
+	if constexpr(POD_PROTECTIONS){
+		lcu_instance->ldu_buffers.turn_on();
+		disable_all_current_controls();
+		lcu_instance->ldu_array[6].desired_current = 5.0;
+		lcu_instance->ldu_array[6].flags.disabled_LDU = false;
+		lcu_instance->ldu_array[6].enable_current_control();
+		lcu_instance->ldu_array[7].desired_current = 5.0;
+		lcu_instance->ldu_array[7].flags.disabled_LDU = false;
+		lcu_instance->ldu_array[7].enable_current_control();
+		lcu_instance->ldu_array[6].flags.fixed_vbat = false;
+		lcu_instance->ldu_array[7].flags.fixed_vbat = false;
+	}
+});
+Time::set_timeout(13000,[&](){
+	active_discharge_in_fault = false;
+	lcu_instance->ldu_array[6].desired_current =0.0;
+	lcu_instance->ldu_array[6].disable_current_control();
+	lcu_instance->ldu_array[7].desired_current =0.0;
+	lcu_instance->ldu_array[7].disable_current_control();
+});
 }

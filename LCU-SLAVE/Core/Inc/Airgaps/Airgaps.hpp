@@ -13,6 +13,9 @@ public:
 	static IntegerMovingAverage<uint16_t, uint16_t, 0, 10> airgaps_average_binary_data_array[AIRGAP_COUNT];
 	static float airgaps_data_array[AIRGAP_COUNT];
 
+	static bool activate_filter;
+	static bool check_flags;
+
 	static inline void inscribe(){
 			airgaps_index_array[0] = ADC::inscribe(AIRGAP_PIN_1);
 			airgaps_index_array[1] = ADC::inscribe(AIRGAP_PIN_2);
@@ -31,11 +34,42 @@ public:
 		}
 	}
 
-	static inline void update_binary(){
+	static inline void update_binary_no_filter(){
 		for(int i = 0; i < AIRGAP_COUNT; i++){
 			airgaps_binary_data_array[i] = *airgaps_binary_data_pointer_array[i];
 			airgaps_average_binary_data_array[i].compute(airgaps_binary_data_array[i]);
+			check_binary_value(i);
 		}
+	}
+
+	static inline void update_binary(){
+		if(!activate_filter){update_binary_no_filter();return;}
+		for(int i = 0; i < AIRGAP_COUNT; i++){
+			uint16_t prev = airgaps_binary_data_array[i];
+			airgaps_binary_data_array[i] = *airgaps_binary_data_pointer_array[i];
+
+			/*if(airgaps_binary_data_array[i] < MINIMUM_EXPECTED_AIRGAP_VALUE_BINARY[i] ||
+				airgaps_binary_data_array[i] > MAXIMUM_EXPECTED_AIRGAP_VALUE_BINARY[i]){
+				airgaps_binary_data_array[i] = prev;
+			}else*/ if((int32_t)airgaps_binary_data_array[i] - (int32_t)prev > MAXIMUM_EXPECTED_AIRGAP_INCREASE_BINARY[i]){
+				airgaps_binary_data_array[i] = prev + MAXIMUM_EXPECTED_AIRGAP_INCREASE_BINARY[i];
+			}else if((int32_t)prev - (int32_t)airgaps_binary_data_array[i] > MAXIMUM_EXPECTED_AIRGAP_INCREASE_BINARY[i]){
+				airgaps_binary_data_array[i] = prev - MAXIMUM_EXPECTED_AIRGAP_INCREASE_BINARY[i];
+			}
+			airgaps_average_binary_data_array[i].compute(airgaps_binary_data_array[i]);
+			check_binary_value(i);
+		}
+	}
+
+	static inline void check_binary_value(uint8_t index){
+		if(index == 5){
+			return;
+		}
+if constexpr(POD_PROTECTIONS){
+		if(check_flags && airgaps_average_binary_data_array[index].output_value <= MINIMUM_BINARY_VALUE_IN_CONNECTION){
+			send_to_fault(AIRGAP_OUT_OF_RANGE+index);
+		}
+}
 	}
 
 	static inline void update_data(){
@@ -45,9 +79,8 @@ if constexpr(USING_1DOF){
 		}
 }
 if constexpr(USING_5DOF && !IS_HIL){
-		for(int i = 0; i < AIRGAP_COUNT/2; i++){
-			airgaps_data_array[i] = airgaps_average_binary_data_array[i].output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_HEMS_AIRGAP_SLOPE + FLOAT_HEMS_AIRGAP_OFFSET;
-			airgaps_data_array[i+AIRGAP_COUNT/2] = airgaps_average_binary_data_array[i+AIRGAP_COUNT/2].output_value * ADC_BINARY_TO_VOLTAGE * FLOAT_EMS_AIRGAP_SLOPE + FLOAT_EMS_AIRGAP_OFFSET;
+		for(int i = 0; i < AIRGAP_COUNT; i++){
+			airgaps_data_array[i] = airgap_distance_binary_to_float(i, airgaps_average_binary_data_array[i].output_value);
 		}
 }
 if constexpr(IS_HIL){

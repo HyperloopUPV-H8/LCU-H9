@@ -8,3 +8,5 @@
 
 static constexpr uint16_t ETH_REFRESH_DATA_PERIOD_MS = 10;
 static constexpr uint16_t SPI_REFRESH_DATA_PERIOD_MS = 10;
+
+static constexpr uint16_t OBCCU_VOLTAGE_UPDATE_PERIOD_MS = 100;
