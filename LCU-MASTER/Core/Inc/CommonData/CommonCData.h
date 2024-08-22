@@ -10,4 +10,4 @@
 #define LCU_IP_B2 1
 #define LCU_IP_B3 4
 
-#define LCU_MASK_B2 255
+#define LCU_MASK_B2 0
