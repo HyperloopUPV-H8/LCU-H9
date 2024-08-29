@@ -63,19 +63,19 @@ if constexpr(USING_5DOF){
 
 	void DOF5_update(){
 		if(PendingLevitationControl){
-			LevitationControlCount++;
 			levitationControl.airgap_to_pos();
 			if(status_flags.enable_levitation_control){
 				levitationControl.DOF5_control_loop();
 				update_desired_current_control();
 			}
+			LevitationControlCount++;
 			PendingLevitationControl = false;
 		}
 
 		if(PendingCurrentPI && (generalStateMachine.current_state == OPERATIONAL)||
 			(generalStateMachine.current_state == FAULT && active_discharge_in_fault)){
-			CurrentPICount++;
 			run_current_PI();
+			CurrentPICount++;
 			PendingCurrentPI = false;
 		}
 	}

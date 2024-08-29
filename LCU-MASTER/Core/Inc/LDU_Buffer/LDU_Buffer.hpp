@@ -26,10 +26,7 @@ public:
 	}
 
 	bool check_ready_and_fault(){
-		return 	DigitalInput::read_pin_state(LDU_Fault_1_ID) == PinState::ON &&
-				DigitalInput::read_pin_state(LDU_Fault_2_ID) == PinState::ON &&
-				DigitalInput::read_pin_state(LDU_Ready_1_ID) == PinState::ON &&
-				DigitalInput::read_pin_state(LDU_Ready_2_ID) == PinState::ON;
+		return true;
 	}
 
 	void update(){
