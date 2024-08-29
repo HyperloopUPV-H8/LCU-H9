@@ -320,7 +320,7 @@ if constexpr(USING_5DOF){
 	static void start_slave_vertical_levitation(){
 		data_to_change = (float) data_from_backend;
 		SPI::master_transmit_Order(spi_id, SPIBaseOrder::SPIOrdersByID[START_VERTICAL_LEVITATION_ORDER_ID]);
-		vcu_connection->send_order(*EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX]);
+		//vcu_connection->send_order(*EthernetOrders[STABLE_LEVITATION_CONFIRMATION_TCP_ORDER_INDEX]);
 	}
 
 	static void stop_slave_levitation(){

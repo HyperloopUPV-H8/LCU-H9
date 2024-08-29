@@ -90,7 +90,7 @@ if constexpr(POD_PROTECTIONS){
 				ErrorHandler("Coil %i temperature is over the safe maximum",i);
 			}
 			if(shared_control_data.float_lpu_temperature[i] > LPU_TEMPERATURE_MAXIMUM_LIMIT){
-				ErrorHandler("LPU %i temperature is over the safe maximum",i);
+				//ErrorHandler("LPU %i temperature is over the safe maximum",i);
 			}
 }
 		}
