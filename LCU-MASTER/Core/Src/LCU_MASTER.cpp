@@ -57,9 +57,7 @@ void LCU::state_machine_definition(){
 	levitationStateMachine.add_state(VERTICAL_LEVITATION);
 	levitationStateMachine.add_state(COMPLETE_LEVITATION);
 	levitationStateMachine.add_state(BOOSTING);
-#if USING_ACTIVE_DISCHARGE_THROUGH_EMS
 	levitationStateMachine.add_state(DISCHARGING);
-#endif
 	generalStateMachine.add_transition(DEFINING, INITIAL, defining_to_initial_transition);
 	generalStateMachine.add_transition(INITIAL, OPERATIONAL, initial_to_operational_transition);
 	generalStateMachine.add_transition(INITIAL, FAULT, initial_to_fault_transition);
