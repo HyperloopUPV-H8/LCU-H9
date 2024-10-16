@@ -80,7 +80,7 @@ void external_enter_discharging(){
 }
 
 void levitation_enter_discharging(){
-#if USING_ACTIVE_DISCHARGING_THROUGH_EMS
+#if USING_ACTIVE_DISCHARGE_THROUGH_EMS
 	Communication::send_discharge();
 #endif
 	//lcu_instance->set_timer_to_idle(13000);
