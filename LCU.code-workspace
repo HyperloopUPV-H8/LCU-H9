@@ -1,10 +1,20 @@
 {
 	"folders": [
 		{
-			"path": "."
+			"name": "MASTER",
+			"path": "./LCU-MASTER"
 		},
 		{
-			"path": "/opt/ST-LIB"
+			"name": "SLAVE",
+			"path": "./LCU-SLAVE"
+		},
+		{
+			"name": "SHARED",
+			"path": "./LCU-SHARED"
+		},
+		{
+			"name": "ST-LIB",
+			"path": "/home/jmaralo/hyperloop-upv/H10/firmware/ST-LIB"
 		}
 	],
 	"settings": {

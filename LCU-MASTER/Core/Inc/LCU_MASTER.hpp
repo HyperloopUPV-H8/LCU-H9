@@ -39,7 +39,7 @@ public:
 	}
 
 	static bool initial_to_operational_transition(){
-		if(Communication::flags.SPIEstablished && Temperature_Sensors::zeroing_complete){
+		if(Communication::flags.SPIEstablished){
 if constexpr(POD_PROTECTIONS){
 			return Communication::vcu_connection->is_connected();
 }
