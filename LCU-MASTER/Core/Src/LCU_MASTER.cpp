@@ -25,10 +25,12 @@ void LCU::update(){
 	Communication::update();
 	check_communications();
 	LDU_Buffer::update_buffers();
+#if USING_TEMP_READINGS
 	if(commflags.temperature_read){
 		commflags.temperature_read = false;
 		Temperature_Sensors::update();
 	}
+#endif
 	if constexpr(!POD_PROTECTIONS){
 		if(Communication::vcu_connection->is_connected()){
 			//ErrorHandler("VCU connected while LCU is not in POD mode");
@@ -37,8 +39,9 @@ void LCU::update(){
 }
 
 void LCU::sensors_inscribe(){
+#if USING_TEMP_READINGS
 	Temperature_Sensors::inscribe();
-
+#endif
 	LDU_Buffer::ldu_buffers[0] = LDU_Buffer{LCU_BUFFER_RESET_PIN_1, LCU_BUFFER_FAULT_PIN_1, LCU_BUFFER_READY_PIN_1, LCU_BUFFER_FAULT_PIN_2, LCU_BUFFER_READY_PIN_2};
 	LDU_Buffer::ldu_buffers[1] = LDU_Buffer{LCU_BUFFER_RESET_PIN_2, LCU_BUFFER_FAULT_PIN_3, LCU_BUFFER_READY_PIN_3, LCU_BUFFER_FAULT_PIN_4, LCU_BUFFER_READY_PIN_4};
 	LDU_Buffer::ldu_buffers[2] = LDU_Buffer{LCU_BUFFER_RESET_PIN_3, LCU_BUFFER_FAULT_PIN_5, LCU_BUFFER_READY_PIN_5, LCU_BUFFER_FAULT_PIN_6, LCU_BUFFER_READY_PIN_6};
@@ -54,18 +57,21 @@ void LCU::state_machine_definition(){
 	levitationStateMachine.add_state(VERTICAL_LEVITATION);
 	levitationStateMachine.add_state(COMPLETE_LEVITATION);
 	levitationStateMachine.add_state(BOOSTING);
+#if USING_ACTIVE_DISCHARGE_THROUGH_EMS
 	levitationStateMachine.add_state(DISCHARGING);
-
+#endif
 	generalStateMachine.add_transition(DEFINING, INITIAL, defining_to_initial_transition);
 	generalStateMachine.add_transition(INITIAL, OPERATIONAL, initial_to_operational_transition);
 	generalStateMachine.add_transition(INITIAL, FAULT, initial_to_fault_transition);
 	generalStateMachine.add_transition(OPERATIONAL, FAULT, operational_to_fault_transition);
-
+#if USING_ACTIVE_DISCHARGE_THROUGH_EMS
 	levitationStateMachine.add_transition(DISCHARGING, IDLE, discharging_to_idle_transition);
-
+#endif
 
 	//INITIAL CYCLIC ACTIONS
+#if USING_TEMP_READINGS
 	generalStateMachine.add_mid_precision_cyclic_action([&](){if(!Temperature_Sensors::zeroing_complete){Temperature_Sensors::zeroing();}else{Temperature_Sensors::update();}}, std::chrono::microseconds((int) (TEMPERATURE_ZEROING_SAMPLING_PERIOD_SECONDS*1000000)), INITIAL);
+#endif
 	generalStateMachine.add_low_precision_cyclic_action(Communication::lcu_initial_transaction, chrono::milliseconds(SPI_REFRESH_DATA_PERIOD_MS), INITIAL);
 
 	//COMMUNICATION CYCLIC ACTIONS
@@ -80,8 +86,9 @@ void LCU::state_machine_definition(){
 	generalStateMachine.add_low_precision_cyclic_action(Communication::calculate_control_frequencies, chrono::seconds(1), {INITIAL, OPERATIONAL, FAULT});
 
 	//READ AND PROTECTION CYCLIC ACTIONS
+#if USING_TEMP_READINGS
 	generalStateMachine.add_mid_precision_cyclic_action([&](){lcu_instance->commflags.temperature_read = true;}, std::chrono::microseconds((int) (TEMPERATURE_UPDATE_PERIOD_SECONDS*1000000)), {OPERATIONAL, FAULT});
-
+#endif
 	generalStateMachine.add_enter_action(general_enter_operational, OPERATIONAL);
 	generalStateMachine.add_enter_action(general_enter_fault, FAULT);
 
@@ -98,10 +105,12 @@ void LCU::check_communications(){
 		Communication::send_levitation_data_to_backend();
 		commflags.levitation_data_to_send = false;
 	}
+#if VCU_PRESENT
 	if(commflags.voltage_data_OBCCU_to_send){
 		Communication::send_voltage_data_to_OBCCU();
 		commflags.voltage_data_OBCCU_to_send = false;
 	}
+#endif
 }
 
 void LCU::set_timer_to_idle(uint64_t milliseconds_to_idle){

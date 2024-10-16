@@ -17,7 +17,7 @@ public:
 	static uint8_t spi_id;
 	static ServerSocket *gui_connection; //TODO: remove this for good
 	static ServerSocket *vcu_connection;
-	static DatagramSocket *upd_gui;
+	static DatagramSocket *udp_gui;
 	static DatagramSocket *udp_vcu;
 	static DigitalOutput* test_order_received;
 
@@ -58,7 +58,7 @@ public:
 	static void start_ethernet(){
 		gui_connection = new ServerSocket(LCU_IP, TCP_SERVER_PORT);
 		vcu_connection = new ServerSocket(LCU_IP, TCP_VCU_PORT);
-		upd_gui = new DatagramSocket(LCU_IP, UDP_PORT, BACKEND, UDP_PORT);
+		udp_gui = new DatagramSocket(LCU_IP, UDP_PORT, BACKEND, UDP_PORT);
 		udp_vcu = new DatagramSocket(LCU_IP, UDP_VCU_PORT, VCU_IP, UDP_VCU_PORT);
 
 		//PACKETS
@@ -224,7 +224,7 @@ public:
 
 
 	static void update(){
-if constexpr(USING_1DOF){
+#if USING_1DOF
 		for(int i = 0; i < AIRGAP_COUNT; i++){
 			*shared_control_data.float_airgap_distance[i] = DOF1_airgap_distance_binary_to_float(*shared_control_data.fixed_airgap_distance[i])*1000;
 		}
@@ -232,8 +232,8 @@ if constexpr(USING_1DOF){
 			*shared_control_data.float_coil_current[i] = coil_current_binary_to_real(i,*shared_control_data.fixed_coil_current[i]);
 			*shared_control_data.float_battery_voltage[i] = battery_voltage_binary_to_real(*shared_control_data.fixed_battery_voltage[i]);
 		}
-}
-if constexpr(USING_5DOF){
+#elif USING_5DOF
+
 		shared_pod_data.average_integer_lpu_voltage = 0;
 		for(int i = 0; i < AIRGAP_COUNT; i++){
 			*shared_control_data.float_airgap_distance[i] = airgap_distance_binary_to_float(i, *shared_control_data.fixed_airgap_distance[i])*1000;
@@ -245,7 +245,8 @@ if constexpr(USING_5DOF){
 			shared_pod_data.average_integer_lpu_voltage += shared_pod_data.integer_lpu_voltage[i];
 		}
 		shared_pod_data.average_integer_lpu_voltage /= LDU_COUNT;
-}
+
+#endif
 	}
 
 	//###################  PERIODIC FUNCTIONS  #########################
@@ -258,11 +259,11 @@ if constexpr(USING_5DOF){
 	}
 
 	static void send_lcu_data_to_backend(){
-		upd_gui->send_packet(*EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX]);
+		udp_gui->send_packet(*EthernetPackets[SEND_LCU_DATA_TCP_PACKET_INDEX]);
 	}
 
 	static void send_levitation_data_to_backend(){
-		upd_gui->send_packet(*EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX]);
+		udp_gui->send_packet(*EthernetPackets[SEND_LEVITATION_DATA_TCP_PACKET_INDEX]);
 	}
 
 	static void send_voltage_data_to_OBCCU(){

@@ -52,7 +52,7 @@ void general_enter_fault(){
 	if(ProtectionManager::external_trigger){
 		Communication::lcu_data_transaction();
 		// ONLY SENT DISCHARGE ORDER IF SOME VOLTAGE PRESENT IN THE BUS
-
+#if USING_ACTIVE_DISCHARGE_THROUGH_EMS
 		//if(shared_pod_data.average_integer_lpu_voltage > 133){
 			for(int i = 0; i < 5; i++){
 				LDU_Buffer::ldu_buffers[i].fixed_reset = true;
@@ -62,6 +62,7 @@ void general_enter_fault(){
 				lcu_instance->levitationStateMachine.force_change_state(DISCHARGING);
 			});
 		//}
+#endif
 	}else{
 		LDU_Buffer::shutdown_buffers();
 		lcu_instance->levitationStateMachine.force_change_state(IDLE);
@@ -79,7 +80,9 @@ void external_enter_discharging(){
 }
 
 void levitation_enter_discharging(){
+#if USING_ACTIVE_DISCHARGING_THROUGH_EMS
 	Communication::send_discharge();
+#endif
 	//lcu_instance->set_timer_to_idle(13000);
 }
 
