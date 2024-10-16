@@ -5,6 +5,7 @@
 #include "Control/Control.hpp"
 #include "Tools/Tools.hpp"
 #include "Communication/Communication.hpp"
+#include "CConfig.hpp"
 
 
 #define ARITHMETIC_MODE float
