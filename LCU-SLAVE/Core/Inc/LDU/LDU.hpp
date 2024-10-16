@@ -151,17 +151,21 @@ else{
 
 
 if constexpr(!IS_HIL){
-		/*if(current_shunt > MAXIMUM_PEAK_CURRENT || current_shunt < -MAXIMUM_PEAK_CURRENT){
+#if USING_PEAK_CURRENT_PROTECTION
+		if(current_shunt > MAXIMUM_PEAK_CURRENT || current_shunt < -MAXIMUM_PEAK_CURRENT){
 			send_to_fault(index + LDU_CURRENT_LIMIT);
-		}*/
+		}
+#endif
 		ExtendedCurrentDataCompressor.compute(current_shunt);
 		ExtendedCurrentCompressedDataCounter++;
 		if(ExtendedCurrentCompressedDataCounter >= MAXIMUM_EXTENDED_CURRENT_COMPRESSOR_SPAN){
 			ExtendedCurrentCompressedDataCounter = 0;
 			ExtendedCurrentAdder.compute(abs(ExtendedCurrentDataCompressor.output_value));
-			/*if(ExtendedCurrentAdder.output_value > MAXIMUM_EXTENDED_CURRENT){
+#if USING_EXTENDED_CURRENT_PROTECTION
+			if(ExtendedCurrentAdder.output_value > MAXIMUM_EXTENDED_CURRENT){
 				send_to_fault(index + LDU_EXTENDED_CURRENT_LIMIT);
-			}*/
+			}
+#endif
 		}
 
 }

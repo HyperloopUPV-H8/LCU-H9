@@ -1,14 +1,14 @@
 #include "LCU_SLAVE.hpp"
 
 void LDUs_zeroing(){
-if constexpr(IS_HIL){
+#if USING_HIL
 		for(int i = 0; i < LDU_COUNT; i++){
 			lcu_instance->ldu_array[i].shunt_zeroing_offset = 0.0;
 		}
 		lcu_instance->CalibrationCompleted = true;
 		*shared_control_data.slave_secondary_status |= 1;
 		return;
-}
+#endif
 	if(lcu_instance->CalibrationCompleted){return;}
 	bool zeroing_complete = true;
 	for(int i = 0; i < LDU_COUNT; i++){
@@ -20,11 +20,11 @@ if constexpr(IS_HIL){
 		Airgaps::check_flags = true;
 		for(int i = 0; i < LDU_COUNT; i++){
 
-if constexpr(POD_PROTECTIONS){ 	//POD_PROTECTIONS
+#if USING_CURRENT_ZEROING_LIMIT
 			if(abs(lcu_instance->ldu_array[i].average_current_for_zeroing.output_value) > CURRENT_ZEROING_MAXIMUM_LIMIT){
 				send_to_fault(LDU_ZEROING_FAILED + i);
 			}
-}								//end of POD_PROTECTIONS
+#endif
 
 			lcu_instance->ldu_array[i].shunt_zeroing_offset = lcu_instance->ldu_array[i].average_current_for_zeroing.output_value;
 		}

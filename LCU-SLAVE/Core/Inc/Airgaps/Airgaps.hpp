@@ -65,11 +65,11 @@ public:
 		if(index == 5){
 			return;
 		}
-if constexpr(POD_PROTECTIONS){
+#if USING_AIRGAPS_LIMIT
 		if(check_flags && airgaps_average_binary_data_array[index].output_value <= MINIMUM_BINARY_VALUE_IN_CONNECTION){
 			send_to_fault(AIRGAP_OUT_OF_RANGE+index);
 		}
-}
+#endif
 	}
 
 	static inline void update_data(){
