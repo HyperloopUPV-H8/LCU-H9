@@ -13,7 +13,7 @@ void LDUs_zeroing(){
 	bool zeroing_complete = true;
 	for(int i = 0; i < LDU_COUNT; i++){
 		lcu_instance->ldu_array[i].ldu_zeroing();
-		zeroing_complete &= lcu_instance->ldu_array[i].flags.finished_zeroing;
+		zeroing_complete = zeroing_complete && lcu_instance->ldu_array[i].flags.finished_zeroing;
 	}
 
 	if(zeroing_complete){
