@@ -12,7 +12,7 @@ public:
 	PWM *pwm2 = nullptr;
 	uint8_t vbat_id = 0;
 	uint8_t shunt_id = 0;
-
+	uint32_t current_control_execution_count = 0;
 
 	float desired_current = 0;
 	float LDU_duty_cycle = 0;
@@ -185,6 +185,7 @@ if constexpr(!IS_HIL){
 			voltage = -200.0;
 		}
 		change_pwms_duty(calculate_duty_by_voltage(voltage));
+		current_control_execution_count++;
 	}
 
 	float calculate_duty_by_voltage(float voltage){

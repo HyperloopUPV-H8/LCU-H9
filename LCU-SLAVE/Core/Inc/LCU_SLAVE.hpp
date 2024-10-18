@@ -75,7 +75,7 @@ if constexpr(USING_5DOF){
 		if(PendingCurrentPI && (generalStateMachine.current_state == OPERATIONAL)||
 			(generalStateMachine.current_state == FAULT && active_discharge_in_fault)){
 			run_current_PI();
-			CurrentPICount++;
+			CurrentPICount = lcu_instance->ldu_array[0].current_control_execution_count;
 			PendingCurrentPI = false;
 		}
 	}
