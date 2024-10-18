@@ -8,11 +8,12 @@
  *  #############################################################
  */
 
+#define LDU_COUNT 4
+
 #define USING_1DOF (false)
 #define USING_5DOF (true)
-#define IS_HIL (RUNNING_MODE == DOF5_HIL)
-#define POD_PROTECTIONS (RUNNING_MODE == POD)
-
+#define IS_HIL (false)
+#define POD_PROTECTIONS (false)
 #define DOF1_USED_LDU_INDEX 9
 #define DOF1_USED_AIRGAP_INDEX 0
 
