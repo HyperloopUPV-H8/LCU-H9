@@ -9,8 +9,9 @@
  *  #############################################################
  */
 
-#define USING_1DOF (RUNNING_MODE == DOF1)
-#define USING_5DOF (RUNNING_MODE != DOF1)
+#define VCU_PRESENT 1
+#define USING_1DOF 0
+#define USING_5DOF 1
 #define IS_HIL (RUNNING_MODE == DOF5_HIL)
 #define POD_PROTECTIONS (RUNNING_MODE == POD)
 
