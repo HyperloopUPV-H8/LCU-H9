@@ -48,9 +48,12 @@ void DOF5_update_vbat_data(){
 		if(i == 0 || i == 5)continue;
 		lcu_instance->ldu_array[i].update_vbat_value();
 	}
+#if LDU_COUNT >= 3
 	lcu_instance->ldu_array[0].binary_average_battery_voltage.output_value = (lcu_instance->ldu_array[1].binary_average_battery_voltage.output_value + lcu_instance->ldu_array[2].binary_average_battery_voltage.output_value)/2;
+#endif
+#if LDU_COUNT >= 8
 	lcu_instance->ldu_array[5].binary_average_battery_voltage.output_value = (lcu_instance->ldu_array[6].binary_average_battery_voltage.output_value  + lcu_instance->ldu_array[7].binary_average_battery_voltage.output_value)/2;
-
+#endif
 }
 
 void DOF1_update_airgap_data(){

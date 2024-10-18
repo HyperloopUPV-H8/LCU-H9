@@ -32,7 +32,7 @@ public:
 	MovingAverage<LEVITATION_CONTROL_DOF5_DERIVATIVE_MOVING_AVERAGE_SIZE> derivative_moving_average[5]{};
 	float levitation_data_vector[15];
 	float desired_current_vector[LDU_COUNT];
-	MatrixMultiplier<10,15,1> KID_calculator;
+	MatrixMultiplier<LDU_COUNT,15,1> KID_calculator;
 
 
 	Control() : Levitation_control_PID{KP_DOF1_AIRGAP_TO_CURRENT, KI_DOF1_AIRGAP_TO_CURRENT, KD_DOF1_AIRGAP_TO_CURRENT, LEVITATION_CONTROL_PERIOD_SECONDS},

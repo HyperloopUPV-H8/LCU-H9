@@ -100,28 +100,68 @@ if constexpr(USING_5DOF){
 	void setup_configuration(){
 		//index is n but uses the n+1 hardware data, as hardware starts with 1 instead of 0.
 if constexpr(USING_1DOF){
+#if LDU_COUNT > 0
 		ldu_array[0] = LDU<running_mode, arithmetic_number_type>(0, PWM_PIN_1_1, PWM_PIN_1_2, VBAT_PIN_1, SHUNT_PIN_1, KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 1
 		ldu_array[1] = LDU<running_mode, arithmetic_number_type>(1, PWM_PIN_2_1, PWM_PIN_2_2, VBAT_PIN_2, SHUNT_PIN_2, KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 2
 		ldu_array[2] = LDU<running_mode, arithmetic_number_type>(2, PWM_PIN_3_1, PWM_PIN_3_2, VBAT_PIN_3, SHUNT_PIN_3, KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 3
 		ldu_array[3] = LDU<running_mode, arithmetic_number_type>(3, PWM_PIN_4_1, PWM_PIN_4_2, VBAT_PIN_4, SHUNT_PIN_4, KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 4
 		ldu_array[4] = LDU<running_mode, arithmetic_number_type>(4, PWM_PIN_5_1, PWM_PIN_5_2, VBAT_PIN_5, SHUNT_PIN_5, KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 5
 		ldu_array[5] = LDU<running_mode, arithmetic_number_type>(5, PWM_PIN_6_1, PWM_PIN_6_2, VBAT_PIN_6, SHUNT_PIN_6, KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 6
 		ldu_array[6] = LDU<running_mode, arithmetic_number_type>(6, PWM_PIN_7_1, PWM_PIN_7_2, VBAT_PIN_7, SHUNT_PIN_7, KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 7
 		ldu_array[7] = LDU<running_mode, arithmetic_number_type>(7, PWM_PIN_8_1, PWM_PIN_8_2, VBAT_PIN_8, SHUNT_PIN_8, KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 8
 		ldu_array[8] = LDU<running_mode, arithmetic_number_type>(8, PWM_PIN_9_1, PWM_PIN_9_2, VBAT_PIN_9, SHUNT_PIN_9, KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 9
 		ldu_array[9] = LDU<running_mode, arithmetic_number_type>(9, PWM_PIN_10_1, PWM_PIN_10_2, VBAT_PIN_10, SHUNT_PIN_10, KP_CURRENT_TO_DUTY, KI_CURRENT_TO_DUTY);
+#endif
 }
 if constexpr(USING_5DOF){
+#if LDU_COUNT > 0
 		ldu_array[0] = LDU<running_mode, arithmetic_number_type>(0, PWM_PIN_1_1, PWM_PIN_1_2, VBAT_PIN_1, SHUNT_PIN_1, KP_HEMS_CURRENT_TO_DUTY, KI_HEMS_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 1
 		ldu_array[1] = LDU<running_mode, arithmetic_number_type>(1, PWM_PIN_2_1, PWM_PIN_2_2, VBAT_PIN_2, SHUNT_PIN_2, KP_HEMS_CURRENT_TO_DUTY, KI_HEMS_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 2
 		ldu_array[2] = LDU<running_mode, arithmetic_number_type>(2, PWM_PIN_3_1, PWM_PIN_3_2, VBAT_PIN_3, SHUNT_PIN_3, KP_HEMS_CURRENT_TO_DUTY, KI_HEMS_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 3
 		ldu_array[3] = LDU<running_mode, arithmetic_number_type>(3, PWM_PIN_4_1, PWM_PIN_4_2, VBAT_PIN_4, SHUNT_PIN_4, KP_HEMS_CURRENT_TO_DUTY, KI_HEMS_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 4
 		ldu_array[4] = LDU<running_mode, arithmetic_number_type>(4, PWM_PIN_5_1, PWM_PIN_5_2, VBAT_PIN_5, SHUNT_PIN_5, KP_EMS_CURRENT_TO_DUTY, KI_EMS_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 5
 		ldu_array[5] = LDU<running_mode, arithmetic_number_type>(5, PWM_PIN_6_1, PWM_PIN_6_2, VBAT_PIN_6, SHUNT_PIN_6, KP_EMS_CURRENT_TO_DUTY, KI_EMS_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 6
 		ldu_array[6] = LDU<running_mode, arithmetic_number_type>(6, PWM_PIN_7_1, PWM_PIN_7_2, VBAT_PIN_7, SHUNT_PIN_7, KP_EMS_CURRENT_TO_DUTY, KI_EMS_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 7
 		ldu_array[7] = LDU<running_mode, arithmetic_number_type>(7, PWM_PIN_8_1, PWM_PIN_8_2, VBAT_PIN_8, SHUNT_PIN_8, KP_EMS_CURRENT_TO_DUTY, KI_EMS_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 8
 		ldu_array[8] = LDU<running_mode, arithmetic_number_type>(8, PWM_PIN_9_1, PWM_PIN_9_2, VBAT_PIN_9, SHUNT_PIN_9, KP_EMS_CURRENT_TO_DUTY, KI_EMS_CURRENT_TO_DUTY);
+#endif
+#if LDU_COUNT > 9
 		ldu_array[9] = LDU<running_mode, arithmetic_number_type>(9, PWM_PIN_10_1, PWM_PIN_10_2, VBAT_PIN_10, SHUNT_PIN_10, KP_EMS_CURRENT_TO_DUTY, KI_EMS_CURRENT_TO_DUTY);
+#endif
 }
 		state_machine_initialization();
 		Airgaps::inscribe();
