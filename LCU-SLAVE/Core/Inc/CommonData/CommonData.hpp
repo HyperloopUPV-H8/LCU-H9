@@ -8,8 +8,8 @@
  *  #############################################################
  */
 
-#define USING_1DOF (RUNNING_MODE == DOF1)
-#define USING_5DOF (RUNNING_MODE != DOF1)
+#define USING_1DOF (false)
+#define USING_5DOF (true)
 #define IS_HIL (RUNNING_MODE == DOF5_HIL)
 #define POD_PROTECTIONS (RUNNING_MODE == POD)
 
